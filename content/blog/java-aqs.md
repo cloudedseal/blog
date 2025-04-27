@@ -74,7 +74,7 @@ draft: false
 
 ### tryAcquire 分析
 
-```java
+```java {hl_lines=[17,19],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
 
         /**
          * Fair version of tryAcquire.  Don't grant access unless
@@ -144,7 +144,7 @@ draft: false
 
 ### acquireQueued 分析
 
-```java
+```java{hl_lines=[11,16,19],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
 
     /**
      * Acquires in exclusive uninterruptible mode for thread already in
@@ -309,7 +309,7 @@ if (pred != head &&
 
 > 线程状态进入 waiting 的重要逻辑
 
-```java
+```java {hl_lines=[8],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
 
     /**
      * Convenience method to park and then check if interrupted
@@ -353,7 +353,7 @@ if (pred != head &&
 
 1. 该方法可能抛出异常
 
-```java
+```java {hl_lines=[3],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
       protected final boolean tryRelease(int releases) {
             int c = getState() - releases;
             if (Thread.currentThread() != getExclusiveOwnerThread()) // 是不是持有该锁的线程在 release
