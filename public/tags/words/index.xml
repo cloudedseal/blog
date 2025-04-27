@@ -1,0 +1,671 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Words</title>
+    <link>http://localhost:1313/tags/words/</link>
+    <description>Recent content in Words on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 28 Dec 2020 15:11:28 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/words/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>cs-english-words</title>
+      <link>http://localhost:1313/blog/cs-english-words/</link>
+      <pubDate>Mon, 28 Dec 2020 15:11:28 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/cs-english-words/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;a&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;a&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#a&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;association
+&lt;blockquote&gt;
+  &lt;p&gt;a connection or cooperative link between people or organizations&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;allot
+&lt;blockquote&gt;
+  &lt;p&gt;to assign as a share or portion&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;ad-hoc
+&lt;blockquote&gt;
+  &lt;p&gt;An ad hoc activity or organization is done or formed only because a situation has made it necessary and is &lt;code&gt;not planned in advance&lt;/code&gt;.Ad hoc is a word that originally comes from Latin and means &lt;code&gt;“for this” or &amp;quot;for this situation.&amp;quot;&lt;/code&gt; In current American English it is used to describe something that has been formed or used for a special and immediate purpose, without previous planning.
+比如 shell 可以直接执行一次性的命令，这就是 ad-hoc，也可以提前写好 bash 脚本可以反复多次执行，这就是提前计划好的。Ad hoc can be used as an adjective or an adverb.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;at the discretion of
+&lt;blockquote&gt;
+  &lt;p&gt;由 &amp;hellip; 决定，由 &amp;hellip; 自行处理。自由裁量权。哈哈哈。比如 object 怎样回收由 gc 具体实现决定。向线程池 submit 的 command 怎么执行, 由具体的 executor 实现来决定。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;ASAP
+&lt;blockquote&gt;
+  &lt;p&gt;as soon as possible 尽快&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;authoritative
+&lt;blockquote&gt;
+  &lt;p&gt;Someone or something that is authoritative has &lt;code&gt;a lot of knowledge&lt;/code&gt; of a particular subject.
+比如 authoritative DNS server 是知道相关 domain 的 resource record 的。给你的信息是可以无脑相信的。😄&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;archive
+&lt;blockquote&gt;
+  &lt;p&gt;The archive or archives are a collection of documents and records that contain &lt;code&gt;historical information&lt;/code&gt;. You can also use archives to refer to the place where archives are stored. 包含历史信息，如 oracle 的 archived redo log.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;abstraction
+&lt;blockquote&gt;
+  &lt;p&gt;An abstraction is a &lt;code&gt;general idea&lt;/code&gt; rather than one &lt;code&gt;relating to a particular object, person, or situation&lt;/code&gt;. 通用的概念，和特定的物体、人、情况无关。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;agent
+&lt;blockquote&gt;
+  &lt;p&gt;An agent acts on your behalf,&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;abundant
+&lt;blockquote&gt;
+  &lt;p&gt;Something that is abundant is present in &lt;code&gt;large quantities&lt;/code&gt;. 大量的&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;approximation
+&lt;blockquote&gt;
+  &lt;p&gt;An approximation is a fact, object, or description which is &lt;code&gt;similar to&lt;/code&gt; something else, but which is &lt;code&gt;not exactly&lt;/code&gt; the same. 近似&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;acquire
+&lt;blockquote&gt;
+  &lt;p&gt;If you acquire something, you &lt;code&gt;buy or obtain&lt;/code&gt; it &lt;code&gt;for yourself&lt;/code&gt;, or someone gives it to you.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;await
+&lt;blockquote&gt;
+  &lt;p&gt;及物动词，后跟无生命的事物，消息，等待特定的东西。conditionObject 的 await 等待满足特定的条件
+They are awaiting the outcome of the investigation.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;b&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;b&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#b&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;bypass&lt;/li&gt;
+&lt;li&gt;bound
+&lt;blockquote&gt;
+  &lt;p&gt;Bounds are limits which normally restrict what can happen or what people can do.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;base
+&lt;blockquote&gt;
+  &lt;p&gt;The base of something is its lowest edge or part. same as bottom&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;backlog
+&lt;blockquote&gt;
+  &lt;p&gt;A backlog is a number of things which have not yet been done but which need to be done. 积压的工作量&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;backup
+&lt;blockquote&gt;
+  &lt;p&gt;If you have something such as &lt;code&gt;a second piece of equipment or set of plans as backup&lt;/code&gt;, you have arranged for them to be available for use in case the first one does not work. 一个完蛋后，另一个可以无缝顶上。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;broker
+&lt;blockquote&gt;
+  &lt;p&gt;A broker is a person whose job is to &lt;code&gt;buy and sell&lt;/code&gt; shares, foreign money, or goods for other people. 对于消息中间件就是从 producer 买消息，卖给 consumer。🐶&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;barge
+&lt;blockquote&gt;
+  &lt;p&gt;If you barge into a place or barge through it, you rush or push into it in a rough and rude way. 横冲直撞，非公平锁，获取时上来就 casState&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;c&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;c&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#c&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;context
+&lt;blockquote&gt;
+  &lt;p&gt;the circumstances that form the setting for an event, statement, or idea, and in terms of which it can be fully understood and asserted.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;cardinality
+&lt;blockquote&gt;
+  &lt;p&gt;the number of elements in a given mathematical set 给定集合的元素数量&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;compound
+&lt;blockquote&gt;
+  &lt;p&gt;Compound is used to indicate that something consists of two or more parts or things.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;consensus
+&lt;blockquote&gt;
+  &lt;p&gt;A consensus is general agreement among a group of people. 一群人达成的协议。共识。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;coalesce
+&lt;blockquote&gt;
+  &lt;p&gt;If two or more things coalesce, they come together and form a larger group or system. 合并&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;counterbalance
+&lt;blockquote&gt;
+  &lt;p&gt;To counterbalance something means to balance or correct it with something that has &lt;code&gt;an equal but opposite effect&lt;/code&gt; 相等但是有相反作用的&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;compulsory
+&lt;blockquote&gt;
+  &lt;p&gt;If something is compulsory, you &lt;code&gt;must&lt;/code&gt; do it or accept it, because it is the law or because someone in a position of authority says you must.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;d&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;d&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#d&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;domain
+&lt;blockquote&gt;
+  &lt;p&gt;an area of territory owned or controlled by a ruler or government.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;durable
+&lt;blockquote&gt;
+  &lt;p&gt;Something that is durable is strong and lasts a &lt;code&gt;long time without breaking&lt;/code&gt; or becoming weaker&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;discretion
+&lt;blockquote&gt;
+  &lt;p&gt;If someone in &lt;code&gt;a position of authority&lt;/code&gt; uses their discretion or has the discretion to do something in a particular situation, they have the freedom and authority to decide what to do. 自由裁量权。没有规范的情况下，由有权威的人进行&amp;quot;圣裁&amp;quot;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;delegation
+&lt;blockquote&gt;
+  &lt;p&gt;A delegation is a group of people who have been sent somewhere to have talks with other people on behalf of a larger group of people.
+代表更大集团的一个和其他人交流的小集团&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;defer
+&lt;blockquote&gt;
+  &lt;p&gt;If you defer an event or action, you arrange for it to happen &lt;code&gt;at a later date&lt;/code&gt;, rather than immediately or at the previously planned time. 延迟到将来发生的事情&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;dedicated
+&lt;blockquote&gt;
+  &lt;p&gt;You use dedicated to describe something that is &lt;code&gt;made&lt;/code&gt;, &lt;code&gt;built&lt;/code&gt;, or &lt;code&gt;designed&lt;/code&gt; for one &lt;code&gt;particular purpose or thing&lt;/code&gt;. 专用&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;e&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;e&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#e&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;eligible
+&lt;blockquote&gt;
+  &lt;p&gt;qualified to participate or be chosen&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;exception
+&lt;blockquote&gt;
+  &lt;p&gt;An exception is a &lt;code&gt;particular&lt;/code&gt; thing, person, or situation that is &lt;code&gt;not included in a general&lt;/code&gt; statement, judgment, or rule.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;entity
+&lt;blockquote&gt;
+  &lt;p&gt;An entity is something that exists &lt;code&gt;separately&lt;/code&gt; from other things and has a &lt;code&gt;clear identity&lt;/code&gt; of its own. 独立有清晰标识的东西&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;ephemeral
+&lt;blockquote&gt;
+  &lt;p&gt;If you describe something as ephemeral, you mean that it lasts only for a very short time. 只持续较短时间的东西。短暂的。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;exclusive
+&lt;blockquote&gt;
+  &lt;p&gt;If two things are &lt;code&gt;mutually exclusive&lt;/code&gt;, they are separate and very different from each other, so that it is &lt;code&gt;impossible for them to exist or happen together&lt;/code&gt;. 不可共存&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;efficiency
+&lt;blockquote&gt;
+  &lt;p&gt;Efficiency is the quality of being able to do a task successfully, &lt;code&gt;without wasting time or energy&lt;/code&gt;. 何谓效率？不浪费时间或能量。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;entry
+&lt;blockquote&gt;
+  &lt;p&gt;An entry in a diary, account book, computer file, or reference book is &lt;code&gt;a short piece&lt;/code&gt; of writing in it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;evict
+&lt;blockquote&gt;
+  &lt;p&gt;If someone is evicted from the place where they are living, they are &lt;code&gt;forced&lt;/code&gt; to leave it, usually because they have broken a law or contract. 驱逐&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;f&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;f&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#f&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;failover
+&lt;blockquote&gt;
+  &lt;p&gt;The designed ability of a server, network or other computer system to &lt;code&gt;switch over automatically&lt;/code&gt; to a r&lt;code&gt;edundant or standby&lt;/code&gt; system in order to avoid loss of access in the event of a &lt;code&gt;failure of the primary system&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;fallback
+&lt;blockquote&gt;
+  &lt;p&gt;Someone&amp;rsquo;s fallback position is what they will do &lt;code&gt;if their plans do not succeed, or if something unexpected happens&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;field
+&lt;blockquote&gt;
+  &lt;p&gt;A field is &lt;code&gt;an area of a computer&#39;s memory or a program&lt;/code&gt; where data can be entered, edited, or stored.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;factor out
+&lt;blockquote&gt;
+  &lt;p&gt;分解&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;fragemented
+&lt;blockquote&gt;
+  &lt;p&gt;If something fragments or is fragmented, it &lt;code&gt;breaks&lt;/code&gt; or &lt;code&gt;separates&lt;/code&gt; into small &lt;code&gt;pieces&lt;/code&gt; or &lt;code&gt;parts&lt;/code&gt;. 碎片化&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;flexible
+&lt;blockquote&gt;
+  &lt;p&gt;Something or someone that is flexible is able to &lt;code&gt;change easily&lt;/code&gt; and &lt;code&gt;adapt to different conditions and circumstances&lt;/code&gt; as they occur.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;g&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;g&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#g&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;gateway
+&lt;blockquote&gt;
+  &lt;p&gt;a gateway converts between protocols&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;h&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;h&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#h&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;handle
+&lt;blockquote&gt;
+  &lt;p&gt;A handle is the part of an object such as a tool, bag, or cup that you hold in order to be able to &lt;code&gt;pick up and use&lt;/code&gt; the object.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;heap
+&lt;blockquote&gt;
+  &lt;p&gt;A heap of things is a pile of them, especially a pile arranged in a rather &lt;code&gt;untidy&lt;/code&gt; way. 不规整放置的东西&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;i&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;i&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#i&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;independent
+&lt;blockquote&gt;
+  &lt;p&gt;not connected with another or with each other; separate 互不关联，分离的
+If one thing or person is independent of another, they are &lt;code&gt;separate and not connected&lt;/code&gt;, so the first one is &lt;code&gt;not affected or influenced&lt;/code&gt; by the second.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;integrity
+&lt;blockquote&gt;
+  &lt;p&gt;The integrity of something such as a group of people or a text is its &lt;code&gt;state of being a united whole&lt;/code&gt;. 完整性&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;interpose
+&lt;blockquote&gt;
+  &lt;p&gt;If you interpose something between &lt;code&gt;two&lt;/code&gt; people or things, you place it &lt;code&gt;between&lt;/code&gt; them. 将 &amp;hellip; 置于两者之间，中间层。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;inherent
+&lt;blockquote&gt;
+  &lt;p&gt;The inherent qualities of something are the necessary and natural parts of it. 天生就有的。资本一出生就带着&amp;hellip;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;i.e.
+&lt;blockquote&gt;
+  &lt;p&gt;i.e .is used to introduce a word or sentence which makes what you have just said &lt;code&gt;clearer&lt;/code&gt; or &lt;code&gt;gives details&lt;/code&gt;. 即是,进一步解释清楚&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;interface
+&lt;blockquote&gt;
+  &lt;p&gt;The interface between two subjects or systems is the area in which they &lt;code&gt;affect each other&lt;/code&gt; or &lt;code&gt;have links with each other&lt;/code&gt;.  两个之间的东西，那可不就是中间层么？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;immense
+&lt;blockquote&gt;
+  &lt;p&gt;If you describe something as immense, you mean that it is extremely large or great.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;interfere
+&lt;blockquote&gt;
+  &lt;p&gt;If you say that someone interferes in a situation, you mean they &lt;code&gt;get involved in&lt;/code&gt; it although it does not concern them and their involvement is not wanted. 干涉&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;j&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;j&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#j&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;k&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;k&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#k&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;l&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;l&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#l&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;lifetime
+&lt;blockquote&gt;
+  &lt;p&gt;A lifetime is the length of time that someone is alive. 某人活着的时间，也就是享年多久。
+The lifetime of a particular thing is the period of time that it lasts. 某事物存在的时长。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;leave options open 暂不决定&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;m&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;m&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#m&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;majority
+&lt;blockquote&gt;
+  &lt;p&gt;The majority of people or things in a group is more than half of them. 什么是 majority。超过一半的人/事物才叫 majority。zookeeper cluster 推荐 server 数量奇数。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;mediator
+&lt;blockquote&gt;
+  &lt;p&gt;a person or an organization that tries to get agreement &lt;code&gt;between people or groups&lt;/code&gt; who disagree with each other 多方势力之间的调停者&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;n&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;n&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#n&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;o&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;o&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#o&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;overhead&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;额外的费用、消耗&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;on the fly&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;If you do something on the fly, you do it quickly &lt;code&gt;without&lt;/code&gt; thinking about it &lt;code&gt;or&lt;/code&gt; planning it in advance, especially while something else is happening. 没有提前计划做事情或者不假思索做事情&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;overlap&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;If one thing overlaps another, or if you overlap them, a part of the first thing &lt;code&gt;occupies the same area&lt;/code&gt; as a part of the other thing. You can also say that two things overlap. 空间上重叠&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;outstanding&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Outstanding issues or problems have not yet been resolved. 还没完成的、还没解决的。若用 tcp 确认机制，就是 unacknowledged 的包。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;offset
+&lt;blockquote&gt;
+  &lt;p&gt;If one thing is offset by another, the effect of the first thing is reduced by the second, so that any advantage or disadvantage is cancelled out. 抵消
+Refers to the distance between a base address (starting memory location) and a specific address&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;p&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;p&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#p&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;precedence
+&lt;blockquote&gt;
+  &lt;p&gt;the condition of being considered more important than someone or something else; priority in importance, order, or rank. 优先级&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;parenthesis
+&lt;blockquote&gt;
+  &lt;p&gt;括号&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;preemptive
+&lt;blockquote&gt;
+  &lt;p&gt;serving or intended to preempt or forestall something, especially to prevent attack by disabling the enemy.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;populate
+&lt;blockquote&gt;
+  &lt;p&gt;to provide with members 对象填充成员属性&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;parameter
+&lt;blockquote&gt;
+  &lt;p&gt;Parameters are factors or limits which &lt;code&gt;affect&lt;/code&gt; the way that something can be done or made.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;proxy
+&lt;blockquote&gt;
+  &lt;p&gt;A proxy is a person or thing that is acting or being used in the place of someone or something else.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;payload
+&lt;blockquote&gt;
+  &lt;p&gt;The payload of an aircraft or spacecraft is the &lt;code&gt;amount or weight&lt;/code&gt; of things or people that &lt;code&gt;it is carrying&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;proceed
+&lt;blockquote&gt;
+  &lt;p&gt;If you proceed to do something, you do it, often after doing something else first. 先做完一件事，接着做另一件事。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;pending
+&lt;blockquote&gt;
+  &lt;p&gt;If something is done &lt;code&gt;pending a future event&lt;/code&gt;, it is done until that event happens.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;post-
+&lt;blockquote&gt;
+  &lt;p&gt;Post- is used to form words that indicate that something takes place after a particular date, period, or event.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;pre-
+&lt;blockquote&gt;
+  &lt;p&gt;Pre- is used to form words that indicate that something takes place before a particular date, period, or event.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;per se
+&lt;blockquote&gt;
+  &lt;p&gt;Per se means &amp;lsquo;by itself&amp;rsquo; or &amp;lsquo;in itself&amp;rsquo;, and is used when you are talking about the qualities of one thing &lt;code&gt;considered on its own&lt;/code&gt;, rather than in connection with other things. 本身，本质上&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;permissible
+&lt;blockquote&gt;
+  &lt;p&gt;If something is permissible, it is considered to be acceptable because it does not break any laws or rules. 不违反法律和规则即为允许的&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;proxy
+&lt;blockquote&gt;
+  &lt;p&gt;a proxy emulates a service provided by a server that is &lt;code&gt;not contacted directly&lt;/code&gt; by the client itself&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;respectively
+&lt;blockquote&gt;
+  &lt;p&gt;Respectively means in the &lt;code&gt;same order&lt;/code&gt; as the items that you have &lt;code&gt;just mentioned&lt;/code&gt;. 和刚刚提到过的保持一致的顺序。相应地&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;premise
+&lt;blockquote&gt;
+  &lt;p&gt;a premise is something that &lt;code&gt;you suppose is true&lt;/code&gt; and that you use as a basis for developing an idea. 前提&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;privileged
+&lt;blockquote&gt;
+  &lt;p&gt;Someone who is privileged has an &lt;code&gt;advantage or opportunity&lt;/code&gt; that most other people do not have, often because of their wealth or high social class. 特权&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;pile
+&lt;blockquote&gt;
+  &lt;p&gt;A pile of things is a quantity of things that have been put &lt;code&gt;neatly&lt;/code&gt; somewhere so that each thing is &lt;code&gt;on top of the one below&lt;/code&gt;. 一个摞一个 stack&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;portion
+&lt;blockquote&gt;
+  &lt;p&gt;A portion of something is &lt;code&gt;a part of&lt;/code&gt; it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;possession
+&lt;blockquote&gt;
+  &lt;p&gt;If you are in possession of something, you have it, because you &lt;code&gt;have obtained&lt;/code&gt; it or because it &lt;code&gt;belongs to&lt;/code&gt; you. 占有&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;q&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;q&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#q&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;r&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;r&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#r&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;relinquish
+&lt;blockquote&gt;
+  &lt;p&gt;to stop having sth, especially when this happens unwillingly 抢占式调度，timer 定时中断，time slice 用完，必须让出 CPU。
+voluntarily cease to keep or claim; give up. 自愿放弃
+to give over possession or control of : YIELD 放弃控制&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;reference
+&lt;blockquote&gt;
+  &lt;p&gt;A reference is something such as a number or a name that tells you where you can obtain the information you want. 能从中获取信息的东西，隔一层。you-&amp;gt;reference-&amp;gt;info&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;routine
+&lt;blockquote&gt;
+  &lt;p&gt;A routine is a computer program, or part of a program, that performs a specific function.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;s&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;s&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#s&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;sparse
+&lt;blockquote&gt;
+  &lt;p&gt;thinly dispersed or scattered, 稀疏的
+Something that is sparse is &lt;code&gt;small in number or amount&lt;/code&gt; and &lt;code&gt;spread out over&lt;/code&gt; an area.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;slot
+&lt;blockquote&gt;
+  &lt;p&gt;a long, narrow aperture or slit in a machine for something to be inserted
+an allotted place in a arrangement or plan such as a broadcasting schedule.(安排或计划中分配的位置)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;sandbox
+&lt;blockquote&gt;
+  &lt;p&gt;A sandbox is a place on a computer system where an &lt;code&gt;untrusted program&lt;/code&gt; can be run without affecting other parts of the system.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;suspend
+&lt;blockquote&gt;
+  &lt;p&gt;If you suspend something, you delay it or stop it from happening for a while or until a decision is made about it. 最著名的例子就是进程 suspend，之后 scheduler 再 decide 是不是再次运行。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;shard
+&lt;blockquote&gt;
+  &lt;p&gt;Shards are pieces of broken glass, pottery, or metal. fragement,piece 一片，想象一下把一整块玻璃打碎，分成多个碎片，scale out..&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;standby
+&lt;blockquote&gt;
+  &lt;p&gt;A standby is something or someone that is &lt;code&gt;always ready to be used&lt;/code&gt; if they are needed.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;segment
+&lt;blockquote&gt;
+  &lt;p&gt;A segment of something is &lt;code&gt;one part of&lt;/code&gt; it, considered separately from the rest. 整体的一部分，分段，和余下的部分分开的。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;split
+&lt;blockquote&gt;
+  &lt;p&gt;If something splits or if you split it, it is &lt;code&gt;divided&lt;/code&gt; into two or more parts.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;segregate
+&lt;blockquote&gt;
+  &lt;p&gt;To segregate two groups of people or things means to keep them &lt;code&gt;physically apart from&lt;/code&gt; each other.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;surrogate&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;You use surrogate to describe a person or thing that is given a particular role &lt;code&gt;because the person or thing that should have the role is not available&lt;/code&gt;. 代理&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;11&#34;&gt;
+&lt;li&gt;sweep&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;If someone makes a sweep of a place, they &lt;code&gt;search&lt;/code&gt; it, usually because they are &lt;code&gt;looking for&lt;/code&gt; people who are hiding or for an illegal activity. 搜寻，扫荡
+If lights or someone&amp;rsquo;s eyes sweep an area, they move &lt;code&gt;across&lt;/code&gt; the area from side to side.
+磁盘的调度算法之 elevator(SCAN/C-SCAN) 从最内部向最外部(反之亦可)的磁道扫描&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;12&#34;&gt;
+&lt;li&gt;scatter
+&lt;blockquote&gt;
+  &lt;p&gt;If you scatter things over an area, you throw or drop them so that they spread all over the area.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;t&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;t&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#t&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;ternary&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;composed of three parts 三元&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;trade-off&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;balance achieved between two desirable but incompatible features;
+balancing of factors all of which are not attainable at the same time
+平衡两个&lt;code&gt;互不兼容的特性&lt;/code&gt;，妥协&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;trade off&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;If you trade off one thing against another, you exchange all or part of one thing for another, as part of a negotiation or compromise. 以 &amp;hellip; 换取&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;traid / triplet&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ticket&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;a certificate or token showing that a fare or admission fee has been paid  票&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;tuple&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;computing a row of values in a &lt;code&gt;relational database&lt;/code&gt; 关系型数据库中的一行就是 tuple&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;6&#34;&gt;
+&lt;li&gt;transient&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Transient is used to describe a situation that &lt;code&gt;lasts only a short time&lt;/code&gt; or is &lt;code&gt;constantly changing&lt;/code&gt;. 持续时间很短或者一直在变化的情况，和 persistent 相反&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol start=&#34;7&#34;&gt;
+&lt;li&gt;transition
+&lt;blockquote&gt;
+  &lt;p&gt;Transition is the process in which something changes &lt;code&gt;from one state to another&lt;/code&gt;. 一个状态变成另一个状态, 这是什么? 这就是状态机。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;trap
+&lt;blockquote&gt;
+  &lt;p&gt;A trap is a &lt;code&gt;device&lt;/code&gt; which is placed somewhere or a hole which is dug somewhere in order to &lt;code&gt;catch&lt;/code&gt; animals or birds.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;u&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;u&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#u&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;v&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;v&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#v&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;virtualize
+&lt;blockquote&gt;
+  &lt;p&gt;To virtualize means to take something of &lt;code&gt;one form&lt;/code&gt; and make it appear to be &lt;code&gt;another form&lt;/code&gt;. 这不就是 transformer 🤣&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;w&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;w&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#w&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;x&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;x&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#x&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;y&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;y&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#y&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;z&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;z&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#z&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;
+      </description>
+    </item>
+    
+  </channel>
+</rss>

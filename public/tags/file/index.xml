@@ -1,0 +1,193 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – File</title>
+    <link>http://localhost:1313/tags/file/</link>
+    <description>Recent content in File on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 16 Apr 2022 17:33:29 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/file/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>Linux File Permissions</title>
+      <link>http://localhost:1313/blog/linux-file-permissions/</link>
+      <pubDate>Sat, 16 Apr 2022 17:33:29 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/linux-file-permissions/</guid>
+      <description>
+        
+        
+        &lt;blockquote&gt;
+  &lt;p&gt;最近在使用 k8s 过程中，需要给 mount 的文件配置权限。
+提起 file 的权限只想到 rwx，是不全面的,完整的权限是 rwxsStT。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1&gt;权限列表&lt;/h1&gt;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/file-permission.jpg&#34; alt=&#34;file-permission&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h1&gt;权限导图&lt;/h1&gt;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/Linux-File-Permission-Map.png&#34; alt=&#34;file-permission-map&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h1&gt;特殊权限&lt;/h1&gt;&lt;h2&gt;setuid&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;setuid&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#setuid&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;blockquote&gt;
+  &lt;p&gt;&lt;code&gt;Setuid&lt;/code&gt; is a Linux file permission setting that allows a user to &lt;code&gt;execute&lt;/code&gt; that file or program with the permission of the &lt;code&gt;owner&lt;/code&gt; of that file.
+很明显，setuid 这个权限要和 execute 权限一起使用，作用于可执行文件。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;以 &lt;code&gt;passwd&lt;/code&gt; 这个命令为例：&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:bin$ ls -l /usr/bin/passwd 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-rwsr-xr-x &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; root root &lt;span class=&#34;m&#34;&gt;68208&lt;/span&gt; Jul &lt;span class=&#34;m&#34;&gt;15&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;2021&lt;/span&gt; /usr/bin/passwd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:bin$ stat &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;which passwd&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  File: /usr/bin/passwd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  Size: &lt;span class=&#34;m&#34;&gt;68208&lt;/span&gt;           Blocks: &lt;span class=&#34;m&#34;&gt;136&lt;/span&gt;        IO Block: &lt;span class=&#34;m&#34;&gt;4096&lt;/span&gt;   regular file
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Device: 812h/2066d      Inode: &lt;span class=&#34;m&#34;&gt;659228&lt;/span&gt;      Links: &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Access: &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;4755/-rwsr-xr-x&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;  Uid: &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;    0/    root&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;   Gid: &lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;    0/    root&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Access: 2022-04-16 20:28:18.403355543 +0800
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Modify: 2021-07-15 06:08:18.000000000 +0800
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Change: 2021-10-30 22:33:09.394547633 +0800
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; Birth: -&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;可以看到 &lt;code&gt;passwd&lt;/code&gt; 这个可执行文件的权限是 rwsr-xr-x 也就是 4755，这才是完整的权限。
+rws 中 &lt;code&gt;s&lt;/code&gt; 表明 user 组的权限中启用了 &lt;code&gt;setuid&lt;/code&gt;。s 表明 execute + setuid。
+查看 man passwd 得知 user 的密码以及密码相关信息保存在 &lt;a href=&#34;https://linuxize.com/post/etc-shadow-file/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;/etc/shadow&lt;/a&gt; 中，但是 /etc/shadow 的权限是:&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:~$ ls -l /etc/shadow
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-rw-r----- &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; root shadow &lt;span class=&#34;m&#34;&gt;1669&lt;/span&gt; Mar &lt;span class=&#34;m&#34;&gt;31&lt;/span&gt; 23:08 /etc/shadow&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;可以看到 &lt;code&gt;/etc/shadow&lt;/code&gt; 只允许 &lt;code&gt;root&lt;/code&gt; 用户进行修改。但是执行 &lt;code&gt;passwd&lt;/code&gt; 却可以修改这个文件，这是为什么呢？
+因为 &lt;code&gt;passwd&lt;/code&gt; user 权限启用了 setuid，并且 &lt;code&gt;passwd&lt;/code&gt; 这个可执行文件的 &lt;code&gt;owner&lt;/code&gt; 是 &lt;code&gt;root&lt;/code&gt;，这就是 &lt;code&gt;setuid&lt;/code&gt; 的作用了。
+由于 &lt;code&gt;passwd&lt;/code&gt; 启用了 &lt;code&gt;setuid&lt;/code&gt;，普通用户，如 &lt;code&gt;stardust&lt;/code&gt; 这个用户在执行 &lt;code&gt;passwd&lt;/code&gt; 这个程序时，会以 &lt;code&gt;root&lt;/code&gt; 用户, 而不是以 &lt;code&gt;stardust&lt;/code&gt; 这个用户运行程序，所以 &lt;code&gt;stardust&lt;/code&gt; 执行 &lt;code&gt;passwd&lt;/code&gt; 是可以修改 &lt;code&gt;/etc/shadow&lt;/code&gt; 这个文件的。&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 1. 查看 passwd 启用了 setuid&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:~$ ls -l /usr/bin/passwd 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-rwsr-xr-x &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; root root &lt;span class=&#34;m&#34;&gt;68208&lt;/span&gt; Jul &lt;span class=&#34;m&#34;&gt;15&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;2021&lt;/span&gt; /usr/bin/passwd 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 2. 修改 stardust 密码&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:~$ passwd stardust
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Changing password &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; stardust.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Current password: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 另外一个终端查看&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:Namespaces$ ps -ef &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep passwd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;root      &lt;span class=&#34;m&#34;&gt;299906&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;299450&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 12:03 pts/5    00:00:00 passwd stardust &lt;span class=&#34;c1&#34;&gt;# 3. 可以看出 passwd stardust 是以 root 用户执行的&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust  &lt;span class=&#34;m&#34;&gt;300029&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;299940&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; 12:03 pts/6    00:00:00 grep --color&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;auto passwd&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;p&gt;开启 setuid 权限经常使用的命令还有 &lt;code&gt;sudo&lt;/code&gt;。&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:~$ ls -al /usr/bin/sudo
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;-rwsr-xr-x &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; root root &lt;span class=&#34;m&#34;&gt;166056&lt;/span&gt; Jan &lt;span class=&#34;m&#34;&gt;19&lt;/span&gt;  &lt;span class=&#34;m&#34;&gt;2021&lt;/span&gt; /usr/bin/sudo&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;setgid&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;setgid&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#setgid&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;作用于 file&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;作用于-file&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e4%bd%9c%e7%94%a8%e4%ba%8e-file&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;setgid 作用于文件和 setuid 所起作用类似。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;作用于 directory&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;作用于-directory&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e4%bd%9c%e7%94%a8%e4%ba%8e-directory&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;在该目录下创建的文件或者目录继承该目录的 group。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;sticky-bit&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;sticky-bit&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#sticky-bit&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;blockquote&gt;
+  &lt;p&gt;When &lt;code&gt;sticky bit&lt;/code&gt; is set on a directory, the files in that directory can &lt;code&gt;only&lt;/code&gt; be removed by the owner.
+A typical use of this is &lt;code&gt;/tmp/&lt;/code&gt;
+The /tmp directory can be written to by any user, but other users cannot delete the files of others.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;/tmp 默认开启了 &lt;code&gt;sticky bit&lt;/code&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;tmp-默认开启了-sticky-bit&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tmp-%e9%bb%98%e8%ae%a4%e5%bc%80%e5%90%af%e4%ba%86-sticky-bit&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ ls -ld /tmp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;drwxrwxrwt &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; root root &lt;span class=&#34;m&#34;&gt;4096&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;17&lt;/span&gt; 18:22 /tmp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ mkdir -v stardust-sticky
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mkdir: created directory &lt;span class=&#34;s1&#34;&gt;&amp;#39;stardust-sticky&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ ls -ld stardust-sticky/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;drwxrwxr-x &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; stardust stardust &lt;span class=&#34;m&#34;&gt;4096&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;17&lt;/span&gt; 18:22 stardust-sticky/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ su &lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Password: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ id
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;uid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1002&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;gid&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1002&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;groups&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;1002&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;,1000&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;stardust&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ rm -rf /tmp/stardust-sticky
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rm: cannot remove &lt;span class=&#34;s1&#34;&gt;&amp;#39;/tmp/stardust-sticky&amp;#39;&lt;/span&gt;: Operation not permitted &lt;span class=&#34;c1&#34;&gt;# test 这个 user 无法删除 /tmp/stardust-sticky 这个 directory 的。&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h3&gt;/tmp 关闭 &lt;code&gt;sticky-bit&lt;/code&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;tmp-关闭-sticky-bit&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tmp-%e5%85%b3%e9%97%ad-sticky-bit&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ sudo chmod o-t /tmp &lt;span class=&#34;c1&#34;&gt;# 关闭 /tmp 这个目录的 sticky bit&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ ls -ld /tmp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;drwxrwxrwx &lt;span class=&#34;m&#34;&gt;25&lt;/span&gt; root root &lt;span class=&#34;m&#34;&gt;4096&lt;/span&gt; Apr &lt;span class=&#34;m&#34;&gt;17&lt;/span&gt; 18:22 /tmp
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ su &lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Password: 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ rm -rf /tmp/stardust-sticky &lt;span class=&#34;c1&#34;&gt;# test 这个 user 可以成功删除 stardust 这个用户的 /tmp/stardust-sticky 目录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ &lt;span class=&#34;nb&#34;&gt;exit&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;stardust@os:tmp$ ls -ld stardust-sticky
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ls: cannot access &lt;span class=&#34;s1&#34;&gt;&amp;#39;stardust-sticky&amp;#39;&lt;/span&gt;: No such file or directory&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h1&gt;References&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.liquidweb.com/kb/how-do-i-set-up-setuid-setgid-and-sticky-bits-on-linux/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;how-do-i-set-up-setuid-setgid-and-sticky-bits-on-linux/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://linuxize.com/post/understanding-linux-file-permissions/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;understanding-linux-file-permissions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://trendoceans.com/what-is-sticky-bit-permission-and-how-to-use-it&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;what-is-sticky-bit-permission-and-how-to-use-it&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.liquidweb.com/kb/new-user-tutorial-basic-file-permissions/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;basic-file-permissions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://wiki.archlinux.org/title/File_permissions_and_attributes&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://wiki.archlinux.org/title/File_permissions_and_attributes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://linuxize.com/post/etc-shadow-file/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;etc-shadow-file&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.man7.org/linux/man-pages/man1/crontab.1.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;crontab&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://linuxize.com/post/how-to-create-users-in-linux-using-the-useradd-command/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;useradd&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

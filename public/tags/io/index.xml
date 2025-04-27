@@ -1,0 +1,157 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Io</title>
+    <link>http://localhost:1313/tags/io/</link>
+    <description>Recent content in Io on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 19 Sep 2019 14:43:18 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>select_poll_epoll</title>
+      <link>http://localhost:1313/blog/select-poll-epoll/</link>
+      <pubDate>Thu, 19 Sep 2019 14:43:18 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/select-poll-epoll/</guid>
+      <description>
+        
+        
+        &lt;blockquote&gt;
+  &lt;p&gt;弄清楚 I/O Multiplexing 和 Linux 中 select, poll, epoll 之间的关系.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;multiplexer&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;multiplexer&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#multiplexer&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;blockquote&gt;
+  &lt;p&gt;&lt;code&gt;Multiplexer&lt;/code&gt; is a combinational circuit that has maximum of 2^n data inputs, &lt;code&gt;n&lt;/code&gt; &lt;code&gt;selection lines&lt;/code&gt; and &lt;code&gt;single output line&lt;/code&gt;. One of these data inputs will be connected to the output based on the values of selection lines.
+Since there are &lt;code&gt;n&lt;/code&gt; selection lines, there will be 2^n possible combinations of zeros and ones. So, each combination will select only one data input. Multiplexer is also called as Mux.
+聚合多个输入, 通过 selection lines 来选择一个输出.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;4x1 Multiplexer 分析&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;4x1-multiplexer-分析&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#4x1-multiplexer-%e5%88%86%e6%9e%90&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;聚合 I&lt;sub&gt;0&lt;/sub&gt;, I&lt;sub&gt;1&lt;/sub&gt;, I&lt;sub&gt;2&lt;/sub&gt;, I&lt;sub&gt;3&lt;/sub&gt; 这 4 个输入, 通过 S1 和 S0 来选择一个输出.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;Block diagram of 4x1 Multiplexer&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;block-diagram-of-4x1-multiplexer&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#block-diagram-of-4x1-multiplexer&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/4x1_Multiplexer.png&#34; alt=&#34;4x1_Multiplexer&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h3&gt;Y&lt;sub&gt;(output)&lt;/sub&gt; 输出值的分析&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;youtput-输出值的分析&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#youtput-%e8%be%93%e5%87%ba%e5%80%bc%e7%9a%84%e5%88%86%e6%9e%90&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;h4&gt;S&lt;sub&gt;1&lt;/sub&gt; = 0, S&lt;sub&gt;0&lt;/sub&gt; = 0 时 Y 的值由 I&lt;sub&gt;0&lt;/sub&gt; 决定&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;s1--0-s0--0-时-y-的值由-i0-决定&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#s1--0-s0--0-%e6%97%b6-y-%e7%9a%84%e5%80%bc%e7%94%b1-i0-%e5%86%b3%e5%ae%9a&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/multiplexers_S1_S0_I0.png&#34; alt=&#34;multiplexers_S1_S0_I0&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;S1 = 0, S0 = 0. 此时的 I1, I2, I3, 无论是 0 还是 1, 对应的 &lt;code&gt;and gate&lt;/code&gt; 输出都是 0, 对最终输出 &lt;code&gt;Y&lt;/code&gt; 没有影响. 此时 I0 的输入决定 &lt;code&gt;Y&lt;/code&gt; 的值. 也就是 &lt;code&gt;Y&lt;/code&gt; = I0.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;S&lt;sub&gt;1&lt;/sub&gt; = 0, S&lt;sub&gt;0&lt;/sub&gt; = 1 时 Y 的值由 I&lt;sub&gt;1&lt;/sub&gt; 决定&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;s1--0-s0--1-时-y-的值由-i1-决定&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#s1--0-s0--1-%e6%97%b6-y-%e7%9a%84%e5%80%bc%e7%94%b1-i1-%e5%86%b3%e5%ae%9a&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/multiplexers_S1_S0_I1.png&#34; alt=&#34;multiplexers_S1_S0_I1&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;S1 = 0, S0 = 1. 此时的 I0, I2, I3, 无论是 0 还是 1, 对应的 &lt;code&gt;and gate&lt;/code&gt; 输出都是 0, 对最终输出 &lt;code&gt;Y&lt;/code&gt; 没有影响. 此时 I1 的输入决定 &lt;code&gt;Y&lt;/code&gt; 的值. 也就是 &lt;code&gt;Y&lt;/code&gt; = I1.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;S&lt;sub&gt;1&lt;/sub&gt; = 1, S&lt;sub&gt;0&lt;/sub&gt; = 0 时 Y 的值由 I&lt;sub&gt;2&lt;/sub&gt; 决定&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;s1--1-s0--0-时-y-的值由-i2-决定&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#s1--1-s0--0-%e6%97%b6-y-%e7%9a%84%e5%80%bc%e7%94%b1-i2-%e5%86%b3%e5%ae%9a&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/multiplexers_S1_S0_I2.png&#34; alt=&#34;multiplexers_S1_S0_I2&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;S1 = 1, S0 = 0. 此时的 I0, I1, I3, 无论是 0 还是 1, 对应的 &lt;code&gt;and gate&lt;/code&gt; 输出都是 0, 对最终输出 &lt;code&gt;Y&lt;/code&gt; 没有影响. 此时 I2 的输入决定 &lt;code&gt;Y&lt;/code&gt; 的值. 也就是 &lt;code&gt;Y&lt;/code&gt; = I2.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;S&lt;sub&gt;1&lt;/sub&gt; = 1, S&lt;sub&gt;1&lt;/sub&gt; = 0 时 Y 的值由 I&lt;sub&gt;3&lt;/sub&gt; 决定&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;s1--1-s1--0-时-y-的值由-i3-决定&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#s1--1-s1--0-%e6%97%b6-y-%e7%9a%84%e5%80%bc%e7%94%b1-i3-%e5%86%b3%e5%ae%9a&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/multiplexers_S1_S0_I3.png&#34; alt=&#34;multiplexers_S1_S0_I3&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;S1 = 1, S0 = 1. 此时的 I0, I1, I2, 无论是 0 还是 1, 对应的 &lt;code&gt;and gate&lt;/code&gt; 输出都是 0, 对最终输出 &lt;code&gt;Y&lt;/code&gt; 没有影响. 此时 I3 的输入决定 &lt;code&gt;Y&lt;/code&gt; 的值. 也就是 &lt;code&gt;Y&lt;/code&gt; = I3.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;Truth table of 4x1 Multiplexer&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;truth-table-of-4x1-multiplexer&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#truth-table-of-4x1-multiplexer&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;S1(高位)&lt;/th&gt;
+          &lt;th&gt;S0(低位)&lt;/th&gt;
+          &lt;th&gt;S1S0(值)&lt;/th&gt;
+          &lt;th&gt;Y&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;0&lt;/td&gt;
+          &lt;td&gt;0&lt;/td&gt;
+          &lt;td&gt;0&lt;/td&gt;
+          &lt;td&gt;I&lt;sub&gt;0&lt;/sub&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;0&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;I&lt;sub&gt;1&lt;/sub&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;0&lt;/td&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;I&lt;sub&gt;2&lt;/sub&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;I&lt;sub&gt;3&lt;/sub&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3&gt;Multiplexer (Mux)&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;multiplexer-mux&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#multiplexer-mux&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;4x1 Multiplexer 相当于提供了一种映射, Y = I&lt;sub&gt;(S1S0)&lt;/sub&gt;.
+通过组合S&lt;sub&gt;1&lt;/sub&gt; 和 S&lt;sub&gt;0&lt;/sub&gt; 的值, 可以直接得到 I&lt;sub&gt;S1S0&lt;/sub&gt; 的值.也就是通过 4x1 Multiplexer 输出的 Y 值是 I&lt;sub&gt;0&lt;/sub&gt;, I&lt;sub&gt;1&lt;/sub&gt;, I&lt;sub&gt;2&lt;/sub&gt;, I&lt;sub&gt;3&lt;/sub&gt; 之一.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;I/O Multiplexing&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;io-multiplexing&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#io-multiplexing&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;blockquote&gt;
+  &lt;p&gt;I/O multiplexing 这里面的 multiplexing 指的其实是在单个线程通过记录跟踪每一个 Sock(I/O 流)的状态.
+select, poll, epoll 都是 I/O multiplexing的具体的实现, 之所以有这三个存在，其实是他们出现是有先后顺序的.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;I/O Multiplexing 和 Multiplexer&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;io-multiplexing-和-multiplexer&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#io-multiplexing-%e5%92%8c-multiplexer&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;blockquote&gt;
+  &lt;p&gt;I&lt;sub&gt;0&lt;/sub&gt;, I&lt;sub&gt;1&lt;/sub&gt;, I&lt;sub&gt;2&lt;/sub&gt;, I&lt;sub&gt;3&lt;/sub&gt; 视为 4 个 I/O 流. 值为 1 时, 视为一个 I/O 流. 4x1 Multiplexer 作为硬件实现的 I/O multiplexing. 可以周期性的设置S&lt;sub&gt;1&lt;/sub&gt; 和 S&lt;sub&gt;0&lt;/sub&gt; 的值, 通过监测 Y 的输出, 得到 I&lt;sub&gt;0&lt;/sub&gt;, I&lt;sub&gt;1&lt;/sub&gt;, I&lt;sub&gt;2&lt;/sub&gt;, I&lt;sub&gt;3&lt;/sub&gt; 的输入.
+{% asset_img multiplexers_S1_S0_I0.png multiplexers_S1_S0_I0 %}&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;select&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;select&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#select&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;select 被实现以后, 很快就暴露出了很多问题.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;select 会修改传入的参数数组, 这个对于一个需要调用很多次的函数, 是非常不友好的.&lt;/li&gt;
+&lt;li&gt;select 如果任何一个 sock(I/O stream) 出现了数据, select 仅仅会返回, 但是并不会告诉你是那个 sock 上有数,于是你只能自己一个一个的找.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;相当于监测到 &lt;code&gt;Mutiplexer&lt;/code&gt; 的 Y = 1, 但是不知道 I&lt;sub&gt;0&lt;/sub&gt;, I&lt;sub&gt;1&lt;/sub&gt;, I&lt;sub&gt;2&lt;/sub&gt;, I&lt;sub&gt;3&lt;/sub&gt;哪一个的输入是 1. 也就是不告诉 S&lt;sub&gt;1&lt;/sub&gt; 和 S&lt;sub&gt;0&lt;/sub&gt;的值, 那就只好再去具体查看一次.
+I&lt;sub&gt;0&lt;/sub&gt;, I&lt;sub&gt;1&lt;/sub&gt;, I&lt;sub&gt;2&lt;/sub&gt;, I&lt;sub&gt;3&lt;/sub&gt;的值.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;select 只能监视 1024 个链接. 相当于实现了一个 1024x1 的 Mutiplexer. 只能有1024 个输入.&lt;/li&gt;
+&lt;li&gt;select 不是线程安全的.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;poll&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;poll&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#poll&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;修复版的 select&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;poll 去掉了 1024 个链接的限制&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;epoll&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;epoll&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#epoll&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;epoll 可以说是 I/O 多路复用最新的一个实现, epoll 修复了 poll 和 select 绝大部分问题, 比如:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;epoll 现在是线程安全的。&lt;/li&gt;
+&lt;li&gt;epoll 现在不仅告诉你 sock 组里面数据，还会告诉你具体哪个 sock 有数据, 你不用自己去找了.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;相当于监测到  &lt;code&gt;Mutiplexer&lt;/code&gt; 的 Y = 1, 且告知了此时的 S&lt;sub&gt;1&lt;/sub&gt; 和 S&lt;sub&gt;0&lt;/sub&gt; 的值, 通过组合就可以知道是哪一个具体的输入是 1 了.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;References&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;references&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#references&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.tutorialspoint.com/digital_circuits/digital_circuits_multiplexers.htm&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;circuits_multiplexers&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.tutorialspoint.com/digital_circuits/digital_circuits_demultiplexers.htm&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;circuits_demultiplexers&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/64138532&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;epoll的本质&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.zhihu.com/question/32163005&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;I/O multiplexing&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

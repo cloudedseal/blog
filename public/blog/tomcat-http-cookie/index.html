@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>tomcat-http-cookie – Hextra</title>
+  <meta name="description" content=" package javax.servlet.http; import java.io.Serializable; import java.security.AccessController; import java.security.PrivilegedAction; import java.text.MessageFormat; import java.util.BitSet; import java.util.Locale; import java.util.ResourceBundle; /** * Creates a cookie, a small amount of information sent by a servlet to a Web * browser, saved by the browser, and later sent back to the server. * 创建一个 cookie， servlet 发给浏览器的一个小信息，被浏览器保存。之后再发送给服务器。 * * A cookie&#39;s value can uniquely identify a client, so cookies are commonly used for * session management. * 一个 cookie 的值可以单独的标记出一个客户端，所以 cookies 一般被用来 session 管理。因为 * http 是一个 stateless 的协议。 * * &lt;p&gt; * A cookie has a name, a single value, and optional attributes such as a * comment, path and domain qualifiers, a maximum age, and a version number. * 一个 cookie 有一个 name，一个单独的 value，还有一些可选的属性，比如 注释，路径，域标记 * 最大存活时间和一个版本号。 * document.cookie 可以得到 httponly = false 的 cookie * * * Some Web browsers have bugs in how they handle the optional attributes, so * use them sparingly to improve the interoperability of your servlets. * 一些 web browsers 在处怎样处理可选的属性有 bugs。提高 servlets 的互操作性，请慎用。 * &lt;p&gt; * The servlet sends cookies to the browser by using the * {@link HttpServletResponse#addCookie} method, which adds fields to HTTP * response headers to send cookies to the browser, one at a time. The browser * is expected to support 20 cookies for each Web server, 300 cookies total, and * may limit cookie size to 4 KB each. * servlet 用 HttpServletResponse#addCookie 向 http 的相应头添加 field, 之后发送给浏览器. * 浏览器支持每一个 web server 保存 20 个 cookie. 每一个 cookie 的 size 可能被限制为 4 * * &lt;p&gt; * The browser returns cookies to the servlet by adding fields to HTTP request * headers. * 浏览器通过向 http 请求头添加 cookies 的方式返回给服务器. * * Cookies can be retrieved from a request by using the * {@link HttpServletRequest#getCookies} method. Several cookies might have the * same name but different path attributes. * 服务器通过 HttpServletRequest#getCookies 从请求中提取 cookies. * 一些 cookie 可能有相同的 name 但是有不同的 path attribute. * * &lt;p&gt; * Cookies affect the caching of the Web pages that use them. HTTP 1.0 does not * cache pages that use cookies created with this class. This class does not * support the cache control defined with HTTP 1.1. * &lt;p&gt; * This class supports both the RFC 2109 and the RFC 6265 specifications. * * By default, cookies are created using RFC 6265. * 默认的, cookie 生成方式采用 RFC 6265. 本质所有的 Cookie 都是按规范生成的. */ public class Cookie implements Cloneable, Serializable { // 校验 Cookie name private static final CookieNameValidator validation; static { boolean strictServletCompliance; // 严格的 servlet boolean strictNaming; boolean allowSlash; String propStrictNaming; String propFwdSlashIsSeparator; if (System.getSecurityManager() == null) { strictServletCompliance = Boolean.getBoolean( &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;); propStrictNaming = System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;); propFwdSlashIsSeparator = System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;); } else { strictServletCompliance = AccessController.doPrivileged( new PrivilegedAction&lt;Boolean&gt;() { @Override public Boolean run() { return Boolean.valueOf(System.getProperty( &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;)); } } ).booleanValue(); propStrictNaming = AccessController.doPrivileged( new PrivilegedAction&lt;String&gt;() { @Override public String run() { return System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;); } } ); propFwdSlashIsSeparator = AccessController.doPrivileged( new PrivilegedAction&lt;String&gt;() { @Override public String run() { return System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;); } } ); } if (propStrictNaming == null) { strictNaming = strictServletCompliance; } else { strictNaming = Boolean.parseBoolean(propStrictNaming); } if (propFwdSlashIsSeparator == null) { allowSlash = !strictServletCompliance; } else { allowSlash = !Boolean.parseBoolean(propFwdSlashIsSeparator); } if (strictNaming) { validation = new RFC2109Validator(allowSlash); } else { validation = new RFC6265Validator(); } } private static final long serialVersionUID = 1L; private final String name; // cookie name 一旦创建不能被修改 private String value; // cookie value private int version = 0; // ;Version=1 ... means RFC 2109 style // 默认的是 RFC 6265 // // Attributes encoded in the header&#39;s cookie fields. // private String comment; // ;Comment=VALUE ... describes cookie&#39;s use private String domain; // ;Domain=VALUE ... domain that sees cookie 可以看到 cookie 的 domain private int maxAge = -1; // ;Max-Age=VALUE ... cookies auto-expire private String path; // ;Path=VALUE ... URLs that see the cookie 可以看到 cookie 的 urls private boolean secure; // ;Secure ... e.g. use SSL 启用 ssl private boolean httpOnly; // Not in cookie specs, but supported by browsers 不在 cookie 规范里, 但是被浏览器支持 /** * Constructs a cookie with a specified name and value. * &lt;p&gt; * The name must conform to RFC 2109. cookie name 必须遵循 RFC 2109. 没办法,规范就是牛啊 * That means it can contain only ASCII * alphanumeric characters and cannot contain commas, semicolons, or white * space or begin with a $ character. The cookie&#39;s name cannot be changed * after creation. * 这意味着 cookie name 只能包含 ASCII 的字母, 数字, 不能包括逗号, 分号, 空格, 或者以 * $ 开头. cookie name 一旦创建不能被修改. * * &lt;p&gt; * The value can be anything the server chooses to send. Its value is * probably of interest only to the server. The cookie&#39;s value can be * changed after creation with the &lt;code&gt;setValue&lt;/code&gt; method. * server 可以通过 cookie value 发送任何东西. * &lt;p&gt; * By default, cookies are created according to the Netscape cookie * specification. The version can be changed with the * &lt;code&gt;setVersion&lt;/code&gt; method. * * @param name * a &lt;code&gt;String&lt;/code&gt; specifying the name of the cookie * @param value * a &lt;code&gt;String&lt;/code&gt; specifying the value of the cookie * @throws IllegalArgumentException * if the cookie name contains illegal characters (for example, * a comma, space, or semicolon) or it is one of the tokens * reserved for use by the cookie protocol * @see #setValue * @see #setVersion */ public Cookie(String name, String value) { // 首先进行 cookie name 的校验 validation.validate(name); this.name = name; this.value = value; } /** * Specifies a comment that describes a cookie&#39;s purpose. * 描述这个 cookie 的目的 * The comment is useful if the browser presents the cookie to the user. Comments are not * supported by Netscape Version 0 cookies. * * @param purpose * a &lt;code&gt;String&lt;/code&gt; specifying the comment to display to the * user * @see #getComment */ public void setComment(String purpose) { comment = purpose; } /** * Returns the comment describing the purpose of this cookie, or * &lt;code&gt;null&lt;/code&gt; if the cookie has no comment. * * @return a &lt;code&gt;String&lt;/code&gt; containing the comment, or * &lt;code&gt;null&lt;/code&gt; if none * @see #setComment */ public String getComment() { return comment; } /** * Specifies the domain within which this cookie should be presented. * 指定这个 cookie 可以出现在那个 domain * &lt;p&gt; * The form of the domain name is specified by RFC 2109. A domain name * begins with a dot (&lt;code&gt;.foo.com&lt;/code&gt;) and means that the cookie is * visible to servers in a specified Domain Name System (DNS) zone (for * example, &lt;code&gt;www.foo.com&lt;/code&gt;, but not &lt;code&gt;a.b.foo.com&lt;/code&gt;). By * default, cookies are only returned to the server that sent them. * * domain name 的形式说明在 RFC 2109. domain name 以 dot 开头, 这意味着在一个特定的 * DNS 这个 cookie 是可见的. 默认的, 那个服务器发送的 cookie 返回给哪个服务器. * * @param pattern * a &lt;code&gt;String&lt;/code&gt; containing the domain name within which * this cookie is visible; form is according to RFC 2109 * @see #getDomain */ public void setDomain(String pattern) { domain = pattern.toLowerCase(Locale.ENGLISH); // IE allegedly needs this } /** * Returns the domain name set for this cookie. The form of the domain name * is set by RFC 2109. * * @return a &lt;code&gt;String&lt;/code&gt; containing the domain name * @see #setDomain */ public String getDomain() { return domain; } /** * Sets the maximum age of the cookie in seconds. * cookie 最大存活的秒数 * &lt;p&gt; * A positive value indicates that the cookie will expire after that many * seconds have passed. Note that the value is the &lt;i&gt;maximum&lt;/i&gt; age when * the cookie will expire, not the cookie&#39;s current age. * 一个正数表明 cookie 将在 maximun age 秒数后过期. * &lt;p&gt; * A negative value means that the cookie is not stored persistently and * will be deleted when the Web browser exits. A zero value causes the * cookie to be deleted. * * 一个负数表示 cookie 不会被永久存储, 浏览器退出时将被删除. * 0 删除这个 cookie * * @param expiry * an integer specifying the maximum age of the cookie in * seconds; if negative, means the cookie is not stored; if zero, * deletes the cookie * @see #getMaxAge */ public void setMaxAge(int expiry) { maxAge = expiry; } /** * Returns the maximum age of the cookie, specified in seconds, By default, * &lt;code&gt;-1&lt;/code&gt; indicating the cookie will persist until browser * shutdown. * * @return an integer specifying the maximum age of the cookie in seconds; if * negative, means the cookie persists until browser shutdown * @see #setMaxAge */ public int getMaxAge() { return maxAge; } /** * Specifies a path for the cookie to which the client should return the * cookie. * 指定一个 path, 表示哪一个 client 应该把这个 cookie 返还给服务器. * * &lt;p&gt; * The cookie is visible to all the pages in the directory you specify, and * all the pages in that directory&#39;s subdirectories. A cookie&#39;s path must * include the servlet that set the cookie, for example, &lt;i&gt;/catalog&lt;/i&gt;, * which makes the cookie visible to all directories on the server under * &lt;i&gt;/catalog&lt;/i&gt;. * &lt;p&gt; * Consult RFC 2109 (available on the Internet) for more information on * setting path names for cookies. * * @param uri * a &lt;code&gt;String&lt;/code&gt; specifying a path * @see #getPath */ public void setPath(String uri) { path = uri; } /** * Returns the path on the server to which the browser returns this cookie. * The cookie is visible to all subpaths on the server. * * @return a &lt;code&gt;String&lt;/code&gt; specifying a path that contains a servlet * name, for example, &lt;i&gt;/catalog&lt;/i&gt; * @see #setPath */ public String getPath() { return path; } /** * Indicates to the browser whether the cookie should only be sent using a * secure protocol, such as HTTPS or SSL. * &lt;p&gt; * The default value is &lt;code&gt;false&lt;/code&gt;. * * @param flag * if &lt;code&gt;true&lt;/code&gt;, sends the cookie from the browser to the * server only when using a secure protocol; if * &lt;code&gt;false&lt;/code&gt;, sent on any protocol * @see #getSecure */ public void setSecure(boolean flag) { secure = flag; } /** * Returns &lt;code&gt;true&lt;/code&gt; if the browser is sending cookies only over a * secure protocol, or &lt;code&gt;false&lt;/code&gt; if the browser can send cookies * using any protocol. * * @return &lt;code&gt;true&lt;/code&gt; if the browser uses a secure protocol; * otherwise, &lt;code&gt;true&lt;/code&gt; * @see #setSecure */ public boolean getSecure() { return secure; } /** * Returns the name of the cookie. The name cannot be changed after * creation. * * @return a &lt;code&gt;String&lt;/code&gt; specifying the cookie&#39;s name */ public String getName() { return name; } /** * Assigns a new value to a cookie after the cookie is created. If you use a * binary value, you may want to use BASE64 encoding. * cookie 被创建后, 给 value 指定一个值. 如果使用二进制的值, 采用 BASE64 的编码方式. * * &lt;p&gt; * With Version 0 cookies, values should not contain white space, brackets, * parentheses, equals signs, commas, double quotes, slashes, question * marks, at signs, colons, and semicolons. Empty values may not behave the * same way on all browsers. * * @param newValue * a &lt;code&gt;String&lt;/code&gt; specifying the new value * @see #getValue * @see Cookie */ public void setValue(String newValue) { value = newValue; } /** * Returns the value of the cookie. * * @return a &lt;code&gt;String&lt;/code&gt; containing the cookie&#39;s present value * @see #setValue * @see Cookie */ public String getValue() { return value; } /** * Returns the version of the protocol this cookie complies with. Version 1 * complies with RFC 2109, and version 0 complies with the original cookie * specification drafted by Netscape. Cookies provided by a browser use and * identify the browser&#39;s cookie version. * * @return 0 if the cookie complies with the original Netscape specification; * 1 if the cookie complies with RFC 2109 被 RFC 6265 淘汰 * @see #setVersion */ public int getVersion() { return version; } /** * Sets the version of the cookie protocol this cookie complies with. * Version 0 complies with the original Netscape cookie specification. * version 0 遵守原始的 netscape cookie 说明 * Version 1 complies with RFC 2109. * version 1 遵守 RFC 2109 规范 * &lt;p&gt; * Since RFC 2109 is still somewhat new, consider version 1 as experimental; * do not use it yet on production sites. * * @param v * 0 if the cookie should comply with the original Netscape * specification; 1 if the cookie should comply with RFC 2109 * @see #getVersion */ public void setVersion(int v) { version = v; } /** * Overrides the standard &lt;code&gt;java.lang.Object.clone&lt;/code&gt; method to * return a copy of this cookie. */ @Override public Object clone() { try { return super.clone(); } catch (CloneNotSupportedException e) { throw new RuntimeException(e); } } /** * Sets the flag that controls if this cookie will be hidden from scripts on * the client side. * * true 不能被 js document.cookie 操作 * * @param httpOnly The new value of the flag * * @since Servlet 3.0 */ public void setHttpOnly(boolean httpOnly) { this.httpOnly = httpOnly; } /** * Gets the flag that controls if this cookie will be hidden from scripts on * the client side. * * @return &lt;code&gt;true&lt;/code&gt; if the cookie is hidden from scripts, else * &lt;code&gt;false&lt;/code&gt; * @since Servlet 3.0 */ public boolean isHttpOnly() { return httpOnly; } } class CookieNameValidator { // 拿到 properties 文件的方法 ResourceBundle private static final String LSTRING_FILE = &#34;javax.servlet.http.LocalStrings&#34;; protected static final ResourceBundle lStrings = ResourceBundle.getBundle(LSTRING_FILE); protected final BitSet allowed; protected CookieNameValidator(String separators) { allowed = new BitSet(128); allowed.set(0x20, 0x7f); // any CHAR except CTLs or separators for (int i = 0; i &lt; separators.length(); i&#43;&#43;) { char ch = separators.charAt(i); allowed.clear(ch); } } void validate(String name) { // cookie name 不允许为 null 或者长度为 0 if (name == null || name.length() == 0) { throw new IllegalArgumentException(lStrings.getString(&#34;err.cookie_name_blank&#34;)); } if (!isToken(name)) { String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;); throw new IllegalArgumentException(MessageFormat.format(errMsg, name)); } } private boolean isToken(String possibleToken) { int len = possibleToken.length(); for (int i = 0; i &lt; len; i&#43;&#43;) { char c = possibleToken.charAt(i); if (!allowed.get(c)) { return false; } } return true; } } class RFC6265Validator extends CookieNameValidator { private static final String RFC2616_SEPARATORS = &#34;()&lt;&gt;@,;:\\\&#34;/[]?={} \t&#34;; RFC6265Validator() { super(RFC2616_SEPARATORS); } } class RFC2109Validator extends RFC6265Validator { RFC2109Validator(boolean allowSlash) { // special treatment to allow for FWD_SLASH_IS_SEPARATOR property if (allowSlash) { allowed.set(&#39;/&#39;); } } @Override void validate(String name) { super.validate(name); // cookie name 不允许 $ 开头 if (name.charAt(0) == &#39;$&#39;) { String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;); throw new IllegalArgumentException(MessageFormat.format(errMsg, name)); } } } " /><link rel="canonical" href="http://localhost:1313/blog/tomcat-http-cookie/" itemprop="url" />
+
+<meta property="og:title" content="tomcat-http-cookie" />
+<meta property="og:description" content="
+
+
+package javax.servlet.http;
+
+import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.text.MessageFormat;
+import java.util.BitSet;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+/**
+ * Creates a cookie, a small amount of information sent by a servlet to a Web
+ * browser, saved by the browser, and later sent back to the server.
+ * 创建一个 cookie， servlet 发给浏览器的一个小信息，被浏览器保存。之后再发送给服务器。
+ * 
+ *  A cookie&#39;s value can uniquely identify a client, so cookies are commonly used for
+ * session management.
+ * 一个 cookie 的值可以单独的标记出一个客户端，所以 cookies 一般被用来 session 管理。因为
+ * http 是一个 stateless 的协议。
+ * 
+ * &lt;p&gt;
+ * A cookie has a name, a single value, and optional attributes such as a
+ * comment, path and domain qualifiers, a maximum age, and a version number.
+ * 一个 cookie 有一个 name，一个单独的 value，还有一些可选的属性，比如 注释，路径，域标记
+ * 最大存活时间和一个版本号。
+ * document.cookie 可以得到 httponly = false 的 cookie
+ *  
+ * 
+ * Some Web browsers have bugs in how they handle the optional attributes, so
+ * use them sparingly to improve the interoperability of your servlets.
+ * 一些 web browsers 在处怎样处理可选的属性有 bugs。提高 servlets 的互操作性，请慎用。
+ * &lt;p&gt;
+ * The servlet sends cookies to the browser by using the
+ * {@link HttpServletResponse#addCookie} method, which adds fields to HTTP
+ * response headers to send cookies to the browser, one at a time. The browser
+ * is expected to support 20 cookies for each Web server, 300 cookies total, and
+ * may limit cookie size to 4 KB each.
+ * servlet 用 HttpServletResponse#addCookie 向 http 的相应头添加 field, 之后发送给浏览器.
+ * 浏览器支持每一个 web server 保存 20 个 cookie. 每一个 cookie 的 size 可能被限制为 4 
+ * 
+ * &lt;p&gt;
+ * The browser returns cookies to the servlet by adding fields to HTTP request
+ * headers. 
+ * 浏览器通过向 http 请求头添加 cookies 的方式返回给服务器. 
+ * 
+ * Cookies can be retrieved from a request by using the
+ * {@link HttpServletRequest#getCookies} method. Several cookies might have the
+ * same name but different path attributes.
+ * 服务器通过 HttpServletRequest#getCookies 从请求中提取 cookies.
+ * 一些 cookie 可能有相同的 name 但是有不同的 path attribute.
+ * 
+ * &lt;p&gt;
+ * Cookies affect the caching of the Web pages that use them. HTTP 1.0 does not
+ * cache pages that use cookies created with this class. This class does not
+ * support the cache control defined with HTTP 1.1.
+ * &lt;p&gt;
+ * This class supports both the RFC 2109 and the RFC 6265 specifications.
+ * 
+ * By default, cookies are created using RFC 6265.
+ * 默认的, cookie 生成方式采用 RFC 6265. 本质所有的 Cookie 都是按规范生成的.
+ */
+public class Cookie implements Cloneable, Serializable {
+
+    // 校验 Cookie name
+    private static final CookieNameValidator validation;
+
+    static {
+        boolean strictServletCompliance; // 严格的 servlet
+        boolean strictNaming;
+        boolean allowSlash;
+        String propStrictNaming;
+        String propFwdSlashIsSeparator;
+
+        if (System.getSecurityManager() == null) {
+            strictServletCompliance = Boolean.getBoolean(
+                    &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;);
+            propStrictNaming = System.getProperty(
+                    &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;);
+            propFwdSlashIsSeparator = System.getProperty(
+                    &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;);
+        } else {
+            strictServletCompliance = AccessController.doPrivileged(
+                    new PrivilegedAction&lt;Boolean&gt;() {
+                        @Override
+                        public Boolean run() {
+                            return Boolean.valueOf(System.getProperty(
+                                    &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;));
+                        }
+                    }
+                ).booleanValue();
+            propStrictNaming = AccessController.doPrivileged(
+                    new PrivilegedAction&lt;String&gt;() {
+                        @Override
+                        public String run() {
+                            return System.getProperty(
+                                    &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;);
+                        }
+                    }
+                );
+            propFwdSlashIsSeparator = AccessController.doPrivileged(
+                    new PrivilegedAction&lt;String&gt;() {
+                        @Override
+                        public String run() {
+                            return System.getProperty(
+                                    &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;);
+                        }
+                    }
+                );
+        }
+
+        if (propStrictNaming == null) {
+            strictNaming = strictServletCompliance;
+        } else {
+            strictNaming = Boolean.parseBoolean(propStrictNaming);
+        }
+
+        if (propFwdSlashIsSeparator == null) {
+            allowSlash = !strictServletCompliance;
+        } else {
+            allowSlash = !Boolean.parseBoolean(propFwdSlashIsSeparator);
+        }
+
+        if (strictNaming) {
+            validation = new RFC2109Validator(allowSlash);
+        } else {
+            validation = new RFC6265Validator();
+        }
+    }
+
+    private static final long serialVersionUID = 1L;
+
+    private final String name; // cookie name 一旦创建不能被修改
+    private String value; // cookie value
+
+    private int version = 0; // ;Version=1 ... means RFC 2109 style
+                             // 默认的是 RFC 6265
+
+    //
+    // Attributes encoded in the header&#39;s cookie fields.
+    //
+    private String comment; // ;Comment=VALUE ... describes cookie&#39;s use
+    private String domain; // ;Domain=VALUE ... domain that sees cookie 可以看到 cookie 的 domain
+    private int maxAge = -1; // ;Max-Age=VALUE ... cookies auto-expire 
+    private String path; // ;Path=VALUE ... URLs that see the cookie 可以看到 cookie 的 urls
+    private boolean secure; // ;Secure ... e.g. use SSL 启用 ssl
+    private boolean httpOnly; // Not in cookie specs, but supported by browsers 不在 cookie 规范里, 但是被浏览器支持
+
+    /**
+     * Constructs a cookie with a specified name and value.
+     * &lt;p&gt;
+     * The name must conform to RFC 2109. cookie name 必须遵循 RFC 2109. 没办法,规范就是牛啊
+     * That means it can contain only ASCII
+     * alphanumeric characters and cannot contain commas, semicolons, or white
+     * space or begin with a $ character. The cookie&#39;s name cannot be changed
+     * after creation.
+     * 这意味着 cookie name 只能包含 ASCII 的字母, 数字, 不能包括逗号, 分号, 空格, 或者以
+     * $ 开头. cookie name 一旦创建不能被修改.
+     * 
+     * &lt;p&gt;
+     * The value can be anything the server chooses to send. Its value is
+     * probably of interest only to the server. The cookie&#39;s value can be
+     * changed after creation with the &lt;code&gt;setValue&lt;/code&gt; method.
+     * server 可以通过 cookie value 发送任何东西.  
+     * &lt;p&gt;
+     * By default, cookies are created according to the Netscape cookie
+     * specification. The version can be changed with the
+     * &lt;code&gt;setVersion&lt;/code&gt; method.
+     *
+     * @param name
+     *            a &lt;code&gt;String&lt;/code&gt; specifying the name of the cookie
+     * @param value
+     *            a &lt;code&gt;String&lt;/code&gt; specifying the value of the cookie
+     * @throws IllegalArgumentException
+     *             if the cookie name contains illegal characters (for example,
+     *             a comma, space, or semicolon) or it is one of the tokens
+     *             reserved for use by the cookie protocol
+     * @see #setValue
+     * @see #setVersion
+     */
+    public Cookie(String name, String value) {
+        // 首先进行 cookie name 的校验
+        validation.validate(name);
+        this.name = name;
+        this.value = value;
+    }
+
+    /**
+     * Specifies a comment that describes a cookie&#39;s purpose. 
+     * 描述这个 cookie 的目的
+     * The comment is useful if the browser presents the cookie to the user. Comments are not
+     * supported by Netscape Version 0 cookies.
+     *
+     * @param purpose
+     *            a &lt;code&gt;String&lt;/code&gt; specifying the comment to display to the
+     *            user
+     * @see #getComment
+     */
+    public void setComment(String purpose) {
+        comment = purpose;
+    }
+
+    /**
+     * Returns the comment describing the purpose of this cookie, or
+     * &lt;code&gt;null&lt;/code&gt; if the cookie has no comment.
+     *
+     * @return a &lt;code&gt;String&lt;/code&gt; containing the comment, or
+     *         &lt;code&gt;null&lt;/code&gt; if none
+     * @see #setComment
+     */
+    public String getComment() {
+        return comment;
+    }
+
+    /**
+     * Specifies the domain within which this cookie should be presented.
+     * 指定这个 cookie 可以出现在那个 domain
+     * &lt;p&gt;
+     * The form of the domain name is specified by RFC 2109. A domain name
+     * begins with a dot (&lt;code&gt;.foo.com&lt;/code&gt;) and means that the cookie is
+     * visible to servers in a specified Domain Name System (DNS) zone (for
+     * example, &lt;code&gt;www.foo.com&lt;/code&gt;, but not &lt;code&gt;a.b.foo.com&lt;/code&gt;). By
+     * default, cookies are only returned to the server that sent them.
+     * 
+     * domain name 的形式说明在 RFC 2109. domain name 以 dot 开头, 这意味着在一个特定的
+     * DNS 这个 cookie 是可见的. 默认的, 那个服务器发送的 cookie 返回给哪个服务器.
+     *
+     * @param pattern
+     *            a &lt;code&gt;String&lt;/code&gt; containing the domain name within which
+     *            this cookie is visible; form is according to RFC 2109
+     * @see #getDomain
+     */
+    public void setDomain(String pattern) {
+        domain = pattern.toLowerCase(Locale.ENGLISH); // IE allegedly needs this
+    }
+
+    /**
+     * Returns the domain name set for this cookie. The form of the domain name
+     * is set by RFC 2109.
+     *
+     * @return a &lt;code&gt;String&lt;/code&gt; containing the domain name
+     * @see #setDomain
+     */
+    public String getDomain() {
+        return domain;
+    }
+
+    /**
+     * Sets the maximum age of the cookie in seconds.
+     * cookie 最大存活的秒数
+     * &lt;p&gt;
+     * A positive value indicates that the cookie will expire after that many
+     * seconds have passed. Note that the value is the &lt;i&gt;maximum&lt;/i&gt; age when
+     * the cookie will expire, not the cookie&#39;s current age.
+     * 一个正数表明 cookie 将在 maximun age 秒数后过期.
+     * &lt;p&gt;
+     * A negative value means that the cookie is not stored persistently and
+     * will be deleted when the Web browser exits. A zero value causes the
+     * cookie to be deleted.
+     * 
+     * 一个负数表示 cookie 不会被永久存储, 浏览器退出时将被删除.
+     * 0  删除这个 cookie
+     *
+     * @param expiry
+     *            an integer specifying the maximum age of the cookie in
+     *            seconds; if negative, means the cookie is not stored; if zero,
+     *            deletes the cookie
+     * @see #getMaxAge
+     */
+    public void setMaxAge(int expiry) {
+        maxAge = expiry;
+    }
+
+    /**
+     * Returns the maximum age of the cookie, specified in seconds, By default,
+     * &lt;code&gt;-1&lt;/code&gt; indicating the cookie will persist until browser
+     * shutdown.
+     *
+     * @return an integer specifying the maximum age of the cookie in seconds; if
+     *         negative, means the cookie persists until browser shutdown
+     * @see #setMaxAge
+     */
+    public int getMaxAge() {
+        return maxAge;
+    }
+
+    /**
+     * Specifies a path for the cookie to which the client should return the
+     * cookie.
+     * 指定一个 path, 表示哪一个 client 应该把这个 cookie 返还给服务器.
+     * 
+     * &lt;p&gt;
+     * The cookie is visible to all the pages in the directory you specify, and
+     * all the pages in that directory&#39;s subdirectories. A cookie&#39;s path must
+     * include the servlet that set the cookie, for example, &lt;i&gt;/catalog&lt;/i&gt;,
+     * which makes the cookie visible to all directories on the server under
+     * &lt;i&gt;/catalog&lt;/i&gt;.
+     * &lt;p&gt;
+     * Consult RFC 2109 (available on the Internet) for more information on
+     * setting path names for cookies.
+     *
+     * @param uri
+     *            a &lt;code&gt;String&lt;/code&gt; specifying a path
+     * @see #getPath
+     */
+    public void setPath(String uri) {
+        path = uri;
+    }
+
+    /**
+     * Returns the path on the server to which the browser returns this cookie.
+     * The cookie is visible to all subpaths on the server.
+     *
+     * @return a &lt;code&gt;String&lt;/code&gt; specifying a path that contains a servlet
+     *         name, for example, &lt;i&gt;/catalog&lt;/i&gt;
+     * @see #setPath
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * Indicates to the browser whether the cookie should only be sent using a
+     * secure protocol, such as HTTPS or SSL.
+     * &lt;p&gt;
+     * The default value is &lt;code&gt;false&lt;/code&gt;.
+     *
+     * @param flag
+     *            if &lt;code&gt;true&lt;/code&gt;, sends the cookie from the browser to the
+     *            server only when using a secure protocol; if
+     *            &lt;code&gt;false&lt;/code&gt;, sent on any protocol
+     * @see #getSecure
+     */
+    public void setSecure(boolean flag) {
+        secure = flag;
+    }
+
+    /**
+     * Returns &lt;code&gt;true&lt;/code&gt; if the browser is sending cookies only over a
+     * secure protocol, or &lt;code&gt;false&lt;/code&gt; if the browser can send cookies
+     * using any protocol.
+     *
+     * @return &lt;code&gt;true&lt;/code&gt; if the browser uses a secure protocol;
+     *         otherwise, &lt;code&gt;true&lt;/code&gt;
+     * @see #setSecure
+     */
+    public boolean getSecure() {
+        return secure;
+    }
+
+    /**
+     * Returns the name of the cookie. The name cannot be changed after
+     * creation.
+     *
+     * @return a &lt;code&gt;String&lt;/code&gt; specifying the cookie&#39;s name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Assigns a new value to a cookie after the cookie is created. If you use a
+     * binary value, you may want to use BASE64 encoding.
+     * cookie 被创建后, 给 value 指定一个值. 如果使用二进制的值, 采用 BASE64 的编码方式.
+     * 
+     * &lt;p&gt;
+     * With Version 0 cookies, values should not contain white space, brackets,
+     * parentheses, equals signs, commas, double quotes, slashes, question
+     * marks, at signs, colons, and semicolons. Empty values may not behave the
+     * same way on all browsers.
+     *
+     * @param newValue
+     *            a &lt;code&gt;String&lt;/code&gt; specifying the new value
+     * @see #getValue
+     * @see Cookie
+     */
+    public void setValue(String newValue) {
+        value = newValue;
+    }
+
+    /**
+     * Returns the value of the cookie.
+     *
+     * @return a &lt;code&gt;String&lt;/code&gt; containing the cookie&#39;s present value
+     * @see #setValue
+     * @see Cookie
+     */
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Returns the version of the protocol this cookie complies with. Version 1
+     * complies with RFC 2109, and version 0 complies with the original cookie
+     * specification drafted by Netscape. Cookies provided by a browser use and
+     * identify the browser&#39;s cookie version.
+     *
+     * @return 0 if the cookie complies with the original Netscape specification;
+     *         1 if the cookie complies with RFC 2109  被 RFC 6265 淘汰
+     * @see #setVersion
+     */
+    public int getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets the version of the cookie protocol this cookie complies with.
+     * Version 0 complies with the original Netscape cookie specification.
+     * version 0 遵守原始的 netscape cookie 说明
+     * Version 1 complies with RFC 2109.
+     * version 1 遵守 RFC 2109 规范
+     * &lt;p&gt;
+     * Since RFC 2109 is still somewhat new, consider version 1 as experimental;
+     * do not use it yet on production sites.
+     *
+     * @param v
+     *            0 if the cookie should comply with the original Netscape
+     *            specification; 1 if the cookie should comply with RFC 2109
+     * @see #getVersion
+     */
+    public void setVersion(int v) {
+        version = v;
+    }
+
+    /**
+     * Overrides the standard &lt;code&gt;java.lang.Object.clone&lt;/code&gt; method to
+     * return a copy of this cookie.
+     */
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets the flag that controls if this cookie will be hidden from scripts on
+     * the client side.
+     * 
+     * true 不能被 js document.cookie 操作
+     *
+     * @param httpOnly  The new value of the flag
+     *
+     * @since Servlet 3.0
+     */
+    public void setHttpOnly(boolean httpOnly) {
+        this.httpOnly = httpOnly;
+    }
+
+    /**
+     * Gets the flag that controls if this cookie will be hidden from scripts on
+     * the client side.
+     *
+     * @return  &lt;code&gt;true&lt;/code&gt; if the cookie is hidden from scripts, else
+     *          &lt;code&gt;false&lt;/code&gt;
+     * @since Servlet 3.0
+     */
+    public boolean isHttpOnly() {
+        return httpOnly;
+    }
+}
+
+
+class CookieNameValidator {
+
+    // 拿到 properties 文件的方法 ResourceBundle
+    private static final String LSTRING_FILE = &#34;javax.servlet.http.LocalStrings&#34;;
+    protected static final ResourceBundle lStrings = ResourceBundle.getBundle(LSTRING_FILE);
+
+    protected final BitSet allowed;
+
+    protected CookieNameValidator(String separators) {
+        allowed = new BitSet(128);
+        allowed.set(0x20, 0x7f); // any CHAR except CTLs or separators
+        for (int i = 0; i &lt; separators.length(); i&#43;&#43;) {
+            char ch = separators.charAt(i);
+            allowed.clear(ch);
+        }
+    }
+
+    void validate(String name) {
+        // cookie name 不允许为 null 或者长度为 0
+        if (name == null || name.length() == 0) {
+            throw new IllegalArgumentException(lStrings.getString(&#34;err.cookie_name_blank&#34;));
+        }
+        if (!isToken(name)) {
+            String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;);
+            throw new IllegalArgumentException(MessageFormat.format(errMsg, name));
+        }
+    }
+
+    private boolean isToken(String possibleToken) {
+        int len = possibleToken.length();
+
+        for (int i = 0; i &lt; len; i&#43;&#43;) {
+            char c = possibleToken.charAt(i);
+            if (!allowed.get(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+class RFC6265Validator extends CookieNameValidator {
+    private static final String RFC2616_SEPARATORS = &#34;()&lt;&gt;@,;:\\\&#34;/[]?={} \t&#34;;
+
+    RFC6265Validator() {
+        super(RFC2616_SEPARATORS);
+    }
+}
+
+class RFC2109Validator extends RFC6265Validator {
+    RFC2109Validator(boolean allowSlash) {
+        // special treatment to allow for FWD_SLASH_IS_SEPARATOR property
+        if (allowSlash) {
+            allowed.set(&#39;/&#39;);
+        }
+    }
+
+    @Override
+    void validate(String name) {
+        super.validate(name);
+        // cookie name 不允许 $ 开头
+        if (name.charAt(0) == &#39;$&#39;) {
+            String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;);
+            throw new IllegalArgumentException(MessageFormat.format(errMsg, name));
+        }
+    }
+}
+  
+    
+    
+  
+
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/blog/tomcat-http-cookie/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2019-11-29T14:29:51+08:00" />
+<meta property="article:modified_time" content="2019-11-29T14:29:51+08:00" />
+
+  <meta itemprop="name" content="tomcat-http-cookie">
+  <meta itemprop="description" content="package javax.servlet.http; import java.io.Serializable; import java.security.AccessController; import java.security.PrivilegedAction; import java.text.MessageFormat; import java.util.BitSet; import java.util.Locale; import java.util.ResourceBundle; /** * Creates a cookie, a small amount of information sent by a servlet to a Web * browser, saved by the browser, and later sent back to the server. * 创建一个 cookie， servlet 发给浏览器的一个小信息，被浏览器保存。之后再发送给服务器。 * * A cookie&#39;s value can uniquely identify a client, so cookies are commonly used for * session management. * 一个 cookie 的值可以单独的标记出一个客户端，所以 cookies 一般被用来 session 管理。因为 * http 是一个 stateless 的协议。 * * &lt;p&gt; * A cookie has a name, a single value, and optional attributes such as a * comment, path and domain qualifiers, a maximum age, and a version number. * 一个 cookie 有一个 name，一个单独的 value，还有一些可选的属性，比如 注释，路径，域标记 * 最大存活时间和一个版本号。 * document.cookie 可以得到 httponly = false 的 cookie * * * Some Web browsers have bugs in how they handle the optional attributes, so * use them sparingly to improve the interoperability of your servlets. * 一些 web browsers 在处怎样处理可选的属性有 bugs。提高 servlets 的互操作性，请慎用。 * &lt;p&gt; * The servlet sends cookies to the browser by using the * {@link HttpServletResponse#addCookie} method, which adds fields to HTTP * response headers to send cookies to the browser, one at a time. The browser * is expected to support 20 cookies for each Web server, 300 cookies total, and * may limit cookie size to 4 KB each. * servlet 用 HttpServletResponse#addCookie 向 http 的相应头添加 field, 之后发送给浏览器. * 浏览器支持每一个 web server 保存 20 个 cookie. 每一个 cookie 的 size 可能被限制为 4 * * &lt;p&gt; * The browser returns cookies to the servlet by adding fields to HTTP request * headers. * 浏览器通过向 http 请求头添加 cookies 的方式返回给服务器. * * Cookies can be retrieved from a request by using the * {@link HttpServletRequest#getCookies} method. Several cookies might have the * same name but different path attributes. * 服务器通过 HttpServletRequest#getCookies 从请求中提取 cookies. * 一些 cookie 可能有相同的 name 但是有不同的 path attribute. * * &lt;p&gt; * Cookies affect the caching of the Web pages that use them. HTTP 1.0 does not * cache pages that use cookies created with this class. This class does not * support the cache control defined with HTTP 1.1. * &lt;p&gt; * This class supports both the RFC 2109 and the RFC 6265 specifications. * * By default, cookies are created using RFC 6265. * 默认的, cookie 生成方式采用 RFC 6265. 本质所有的 Cookie 都是按规范生成的. */ public class Cookie implements Cloneable, Serializable { // 校验 Cookie name private static final CookieNameValidator validation; static { boolean strictServletCompliance; // 严格的 servlet boolean strictNaming; boolean allowSlash; String propStrictNaming; String propFwdSlashIsSeparator; if (System.getSecurityManager() == null) { strictServletCompliance = Boolean.getBoolean( &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;); propStrictNaming = System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;); propFwdSlashIsSeparator = System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;); } else { strictServletCompliance = AccessController.doPrivileged( new PrivilegedAction&lt;Boolean&gt;() { @Override public Boolean run() { return Boolean.valueOf(System.getProperty( &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;)); } } ).booleanValue(); propStrictNaming = AccessController.doPrivileged( new PrivilegedAction&lt;String&gt;() { @Override public String run() { return System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;); } } ); propFwdSlashIsSeparator = AccessController.doPrivileged( new PrivilegedAction&lt;String&gt;() { @Override public String run() { return System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;); } } ); } if (propStrictNaming == null) { strictNaming = strictServletCompliance; } else { strictNaming = Boolean.parseBoolean(propStrictNaming); } if (propFwdSlashIsSeparator == null) { allowSlash = !strictServletCompliance; } else { allowSlash = !Boolean.parseBoolean(propFwdSlashIsSeparator); } if (strictNaming) { validation = new RFC2109Validator(allowSlash); } else { validation = new RFC6265Validator(); } } private static final long serialVersionUID = 1L; private final String name; // cookie name 一旦创建不能被修改 private String value; // cookie value private int version = 0; // ;Version=1 ... means RFC 2109 style // 默认的是 RFC 6265 // // Attributes encoded in the header&#39;s cookie fields. // private String comment; // ;Comment=VALUE ... describes cookie&#39;s use private String domain; // ;Domain=VALUE ... domain that sees cookie 可以看到 cookie 的 domain private int maxAge = -1; // ;Max-Age=VALUE ... cookies auto-expire private String path; // ;Path=VALUE ... URLs that see the cookie 可以看到 cookie 的 urls private boolean secure; // ;Secure ... e.g. use SSL 启用 ssl private boolean httpOnly; // Not in cookie specs, but supported by browsers 不在 cookie 规范里, 但是被浏览器支持 /** * Constructs a cookie with a specified name and value. * &lt;p&gt; * The name must conform to RFC 2109. cookie name 必须遵循 RFC 2109. 没办法,规范就是牛啊 * That means it can contain only ASCII * alphanumeric characters and cannot contain commas, semicolons, or white * space or begin with a $ character. The cookie&#39;s name cannot be changed * after creation. * 这意味着 cookie name 只能包含 ASCII 的字母, 数字, 不能包括逗号, 分号, 空格, 或者以 * $ 开头. cookie name 一旦创建不能被修改. * * &lt;p&gt; * The value can be anything the server chooses to send. Its value is * probably of interest only to the server. The cookie&#39;s value can be * changed after creation with the &lt;code&gt;setValue&lt;/code&gt; method. * server 可以通过 cookie value 发送任何东西. * &lt;p&gt; * By default, cookies are created according to the Netscape cookie * specification. The version can be changed with the * &lt;code&gt;setVersion&lt;/code&gt; method. * * @param name * a &lt;code&gt;String&lt;/code&gt; specifying the name of the cookie * @param value * a &lt;code&gt;String&lt;/code&gt; specifying the value of the cookie * @throws IllegalArgumentException * if the cookie name contains illegal characters (for example, * a comma, space, or semicolon) or it is one of the tokens * reserved for use by the cookie protocol * @see #setValue * @see #setVersion */ public Cookie(String name, String value) { // 首先进行 cookie name 的校验 validation.validate(name); this.name = name; this.value = value; } /** * Specifies a comment that describes a cookie&#39;s purpose. * 描述这个 cookie 的目的 * The comment is useful if the browser presents the cookie to the user. Comments are not * supported by Netscape Version 0 cookies. * * @param purpose * a &lt;code&gt;String&lt;/code&gt; specifying the comment to display to the * user * @see #getComment */ public void setComment(String purpose) { comment = purpose; } /** * Returns the comment describing the purpose of this cookie, or * &lt;code&gt;null&lt;/code&gt; if the cookie has no comment. * * @return a &lt;code&gt;String&lt;/code&gt; containing the comment, or * &lt;code&gt;null&lt;/code&gt; if none * @see #setComment */ public String getComment() { return comment; } /** * Specifies the domain within which this cookie should be presented. * 指定这个 cookie 可以出现在那个 domain * &lt;p&gt; * The form of the domain name is specified by RFC 2109. A domain name * begins with a dot (&lt;code&gt;.foo.com&lt;/code&gt;) and means that the cookie is * visible to servers in a specified Domain Name System (DNS) zone (for * example, &lt;code&gt;www.foo.com&lt;/code&gt;, but not &lt;code&gt;a.b.foo.com&lt;/code&gt;). By * default, cookies are only returned to the server that sent them. * * domain name 的形式说明在 RFC 2109. domain name 以 dot 开头, 这意味着在一个特定的 * DNS 这个 cookie 是可见的. 默认的, 那个服务器发送的 cookie 返回给哪个服务器. * * @param pattern * a &lt;code&gt;String&lt;/code&gt; containing the domain name within which * this cookie is visible; form is according to RFC 2109 * @see #getDomain */ public void setDomain(String pattern) { domain = pattern.toLowerCase(Locale.ENGLISH); // IE allegedly needs this } /** * Returns the domain name set for this cookie. The form of the domain name * is set by RFC 2109. * * @return a &lt;code&gt;String&lt;/code&gt; containing the domain name * @see #setDomain */ public String getDomain() { return domain; } /** * Sets the maximum age of the cookie in seconds. * cookie 最大存活的秒数 * &lt;p&gt; * A positive value indicates that the cookie will expire after that many * seconds have passed. Note that the value is the &lt;i&gt;maximum&lt;/i&gt; age when * the cookie will expire, not the cookie&#39;s current age. * 一个正数表明 cookie 将在 maximun age 秒数后过期. * &lt;p&gt; * A negative value means that the cookie is not stored persistently and * will be deleted when the Web browser exits. A zero value causes the * cookie to be deleted. * * 一个负数表示 cookie 不会被永久存储, 浏览器退出时将被删除. * 0 删除这个 cookie * * @param expiry * an integer specifying the maximum age of the cookie in * seconds; if negative, means the cookie is not stored; if zero, * deletes the cookie * @see #getMaxAge */ public void setMaxAge(int expiry) { maxAge = expiry; } /** * Returns the maximum age of the cookie, specified in seconds, By default, * &lt;code&gt;-1&lt;/code&gt; indicating the cookie will persist until browser * shutdown. * * @return an integer specifying the maximum age of the cookie in seconds; if * negative, means the cookie persists until browser shutdown * @see #setMaxAge */ public int getMaxAge() { return maxAge; } /** * Specifies a path for the cookie to which the client should return the * cookie. * 指定一个 path, 表示哪一个 client 应该把这个 cookie 返还给服务器. * * &lt;p&gt; * The cookie is visible to all the pages in the directory you specify, and * all the pages in that directory&#39;s subdirectories. A cookie&#39;s path must * include the servlet that set the cookie, for example, &lt;i&gt;/catalog&lt;/i&gt;, * which makes the cookie visible to all directories on the server under * &lt;i&gt;/catalog&lt;/i&gt;. * &lt;p&gt; * Consult RFC 2109 (available on the Internet) for more information on * setting path names for cookies. * * @param uri * a &lt;code&gt;String&lt;/code&gt; specifying a path * @see #getPath */ public void setPath(String uri) { path = uri; } /** * Returns the path on the server to which the browser returns this cookie. * The cookie is visible to all subpaths on the server. * * @return a &lt;code&gt;String&lt;/code&gt; specifying a path that contains a servlet * name, for example, &lt;i&gt;/catalog&lt;/i&gt; * @see #setPath */ public String getPath() { return path; } /** * Indicates to the browser whether the cookie should only be sent using a * secure protocol, such as HTTPS or SSL. * &lt;p&gt; * The default value is &lt;code&gt;false&lt;/code&gt;. * * @param flag * if &lt;code&gt;true&lt;/code&gt;, sends the cookie from the browser to the * server only when using a secure protocol; if * &lt;code&gt;false&lt;/code&gt;, sent on any protocol * @see #getSecure */ public void setSecure(boolean flag) { secure = flag; } /** * Returns &lt;code&gt;true&lt;/code&gt; if the browser is sending cookies only over a * secure protocol, or &lt;code&gt;false&lt;/code&gt; if the browser can send cookies * using any protocol. * * @return &lt;code&gt;true&lt;/code&gt; if the browser uses a secure protocol; * otherwise, &lt;code&gt;true&lt;/code&gt; * @see #setSecure */ public boolean getSecure() { return secure; } /** * Returns the name of the cookie. The name cannot be changed after * creation. * * @return a &lt;code&gt;String&lt;/code&gt; specifying the cookie&#39;s name */ public String getName() { return name; } /** * Assigns a new value to a cookie after the cookie is created. If you use a * binary value, you may want to use BASE64 encoding. * cookie 被创建后, 给 value 指定一个值. 如果使用二进制的值, 采用 BASE64 的编码方式. * * &lt;p&gt; * With Version 0 cookies, values should not contain white space, brackets, * parentheses, equals signs, commas, double quotes, slashes, question * marks, at signs, colons, and semicolons. Empty values may not behave the * same way on all browsers. * * @param newValue * a &lt;code&gt;String&lt;/code&gt; specifying the new value * @see #getValue * @see Cookie */ public void setValue(String newValue) { value = newValue; } /** * Returns the value of the cookie. * * @return a &lt;code&gt;String&lt;/code&gt; containing the cookie&#39;s present value * @see #setValue * @see Cookie */ public String getValue() { return value; } /** * Returns the version of the protocol this cookie complies with. Version 1 * complies with RFC 2109, and version 0 complies with the original cookie * specification drafted by Netscape. Cookies provided by a browser use and * identify the browser&#39;s cookie version. * * @return 0 if the cookie complies with the original Netscape specification; * 1 if the cookie complies with RFC 2109 被 RFC 6265 淘汰 * @see #setVersion */ public int getVersion() { return version; } /** * Sets the version of the cookie protocol this cookie complies with. * Version 0 complies with the original Netscape cookie specification. * version 0 遵守原始的 netscape cookie 说明 * Version 1 complies with RFC 2109. * version 1 遵守 RFC 2109 规范 * &lt;p&gt; * Since RFC 2109 is still somewhat new, consider version 1 as experimental; * do not use it yet on production sites. * * @param v * 0 if the cookie should comply with the original Netscape * specification; 1 if the cookie should comply with RFC 2109 * @see #getVersion */ public void setVersion(int v) { version = v; } /** * Overrides the standard &lt;code&gt;java.lang.Object.clone&lt;/code&gt; method to * return a copy of this cookie. */ @Override public Object clone() { try { return super.clone(); } catch (CloneNotSupportedException e) { throw new RuntimeException(e); } } /** * Sets the flag that controls if this cookie will be hidden from scripts on * the client side. * * true 不能被 js document.cookie 操作 * * @param httpOnly The new value of the flag * * @since Servlet 3.0 */ public void setHttpOnly(boolean httpOnly) { this.httpOnly = httpOnly; } /** * Gets the flag that controls if this cookie will be hidden from scripts on * the client side. * * @return &lt;code&gt;true&lt;/code&gt; if the cookie is hidden from scripts, else * &lt;code&gt;false&lt;/code&gt; * @since Servlet 3.0 */ public boolean isHttpOnly() { return httpOnly; } } class CookieNameValidator { // 拿到 properties 文件的方法 ResourceBundle private static final String LSTRING_FILE = &#34;javax.servlet.http.LocalStrings&#34;; protected static final ResourceBundle lStrings = ResourceBundle.getBundle(LSTRING_FILE); protected final BitSet allowed; protected CookieNameValidator(String separators) { allowed = new BitSet(128); allowed.set(0x20, 0x7f); // any CHAR except CTLs or separators for (int i = 0; i &lt; separators.length(); i&#43;&#43;) { char ch = separators.charAt(i); allowed.clear(ch); } } void validate(String name) { // cookie name 不允许为 null 或者长度为 0 if (name == null || name.length() == 0) { throw new IllegalArgumentException(lStrings.getString(&#34;err.cookie_name_blank&#34;)); } if (!isToken(name)) { String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;); throw new IllegalArgumentException(MessageFormat.format(errMsg, name)); } } private boolean isToken(String possibleToken) { int len = possibleToken.length(); for (int i = 0; i &lt; len; i&#43;&#43;) { char c = possibleToken.charAt(i); if (!allowed.get(c)) { return false; } } return true; } } class RFC6265Validator extends CookieNameValidator { private static final String RFC2616_SEPARATORS = &#34;()&lt;&gt;@,;:\\\&#34;/[]?={} \t&#34;; RFC6265Validator() { super(RFC2616_SEPARATORS); } } class RFC2109Validator extends RFC6265Validator { RFC2109Validator(boolean allowSlash) { // special treatment to allow for FWD_SLASH_IS_SEPARATOR property if (allowSlash) { allowed.set(&#39;/&#39;); } } @Override void validate(String name) { super.validate(name); // cookie name 不允许 $ 开头 if (name.charAt(0) == &#39;$&#39;) { String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;); throw new IllegalArgumentException(MessageFormat.format(errMsg, name)); } } }">
+  <meta itemprop="datePublished" content="2019-11-29T14:29:51+08:00">
+  <meta itemprop="dateModified" content="2019-11-29T14:29:51+08:00">
+  <meta itemprop="wordCount" content="2887">
+  <meta itemprop="keywords" content="Tomcat,Http">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="tomcat-http-cookie">
+  <meta name="twitter:description" content="package javax.servlet.http; import java.io.Serializable; import java.security.AccessController; import java.security.PrivilegedAction; import java.text.MessageFormat; import java.util.BitSet; import java.util.Locale; import java.util.ResourceBundle; /** * Creates a cookie, a small amount of information sent by a servlet to a Web * browser, saved by the browser, and later sent back to the server. * 创建一个 cookie， servlet 发给浏览器的一个小信息，被浏览器保存。之后再发送给服务器。 * * A cookie&#39;s value can uniquely identify a client, so cookies are commonly used for * session management. * 一个 cookie 的值可以单独的标记出一个客户端，所以 cookies 一般被用来 session 管理。因为 * http 是一个 stateless 的协议。 * * &lt;p&gt; * A cookie has a name, a single value, and optional attributes such as a * comment, path and domain qualifiers, a maximum age, and a version number. * 一个 cookie 有一个 name，一个单独的 value，还有一些可选的属性，比如 注释，路径，域标记 * 最大存活时间和一个版本号。 * document.cookie 可以得到 httponly = false 的 cookie * * * Some Web browsers have bugs in how they handle the optional attributes, so * use them sparingly to improve the interoperability of your servlets. * 一些 web browsers 在处怎样处理可选的属性有 bugs。提高 servlets 的互操作性，请慎用。 * &lt;p&gt; * The servlet sends cookies to the browser by using the * {@link HttpServletResponse#addCookie} method, which adds fields to HTTP * response headers to send cookies to the browser, one at a time. The browser * is expected to support 20 cookies for each Web server, 300 cookies total, and * may limit cookie size to 4 KB each. * servlet 用 HttpServletResponse#addCookie 向 http 的相应头添加 field, 之后发送给浏览器. * 浏览器支持每一个 web server 保存 20 个 cookie. 每一个 cookie 的 size 可能被限制为 4 * * &lt;p&gt; * The browser returns cookies to the servlet by adding fields to HTTP request * headers. * 浏览器通过向 http 请求头添加 cookies 的方式返回给服务器. * * Cookies can be retrieved from a request by using the * {@link HttpServletRequest#getCookies} method. Several cookies might have the * same name but different path attributes. * 服务器通过 HttpServletRequest#getCookies 从请求中提取 cookies. * 一些 cookie 可能有相同的 name 但是有不同的 path attribute. * * &lt;p&gt; * Cookies affect the caching of the Web pages that use them. HTTP 1.0 does not * cache pages that use cookies created with this class. This class does not * support the cache control defined with HTTP 1.1. * &lt;p&gt; * This class supports both the RFC 2109 and the RFC 6265 specifications. * * By default, cookies are created using RFC 6265. * 默认的, cookie 生成方式采用 RFC 6265. 本质所有的 Cookie 都是按规范生成的. */ public class Cookie implements Cloneable, Serializable { // 校验 Cookie name private static final CookieNameValidator validation; static { boolean strictServletCompliance; // 严格的 servlet boolean strictNaming; boolean allowSlash; String propStrictNaming; String propFwdSlashIsSeparator; if (System.getSecurityManager() == null) { strictServletCompliance = Boolean.getBoolean( &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;); propStrictNaming = System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;); propFwdSlashIsSeparator = System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;); } else { strictServletCompliance = AccessController.doPrivileged( new PrivilegedAction&lt;Boolean&gt;() { @Override public Boolean run() { return Boolean.valueOf(System.getProperty( &#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;)); } } ).booleanValue(); propStrictNaming = AccessController.doPrivileged( new PrivilegedAction&lt;String&gt;() { @Override public String run() { return System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;); } } ); propFwdSlashIsSeparator = AccessController.doPrivileged( new PrivilegedAction&lt;String&gt;() { @Override public String run() { return System.getProperty( &#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;); } } ); } if (propStrictNaming == null) { strictNaming = strictServletCompliance; } else { strictNaming = Boolean.parseBoolean(propStrictNaming); } if (propFwdSlashIsSeparator == null) { allowSlash = !strictServletCompliance; } else { allowSlash = !Boolean.parseBoolean(propFwdSlashIsSeparator); } if (strictNaming) { validation = new RFC2109Validator(allowSlash); } else { validation = new RFC6265Validator(); } } private static final long serialVersionUID = 1L; private final String name; // cookie name 一旦创建不能被修改 private String value; // cookie value private int version = 0; // ;Version=1 ... means RFC 2109 style // 默认的是 RFC 6265 // // Attributes encoded in the header&#39;s cookie fields. // private String comment; // ;Comment=VALUE ... describes cookie&#39;s use private String domain; // ;Domain=VALUE ... domain that sees cookie 可以看到 cookie 的 domain private int maxAge = -1; // ;Max-Age=VALUE ... cookies auto-expire private String path; // ;Path=VALUE ... URLs that see the cookie 可以看到 cookie 的 urls private boolean secure; // ;Secure ... e.g. use SSL 启用 ssl private boolean httpOnly; // Not in cookie specs, but supported by browsers 不在 cookie 规范里, 但是被浏览器支持 /** * Constructs a cookie with a specified name and value. * &lt;p&gt; * The name must conform to RFC 2109. cookie name 必须遵循 RFC 2109. 没办法,规范就是牛啊 * That means it can contain only ASCII * alphanumeric characters and cannot contain commas, semicolons, or white * space or begin with a $ character. The cookie&#39;s name cannot be changed * after creation. * 这意味着 cookie name 只能包含 ASCII 的字母, 数字, 不能包括逗号, 分号, 空格, 或者以 * $ 开头. cookie name 一旦创建不能被修改. * * &lt;p&gt; * The value can be anything the server chooses to send. Its value is * probably of interest only to the server. The cookie&#39;s value can be * changed after creation with the &lt;code&gt;setValue&lt;/code&gt; method. * server 可以通过 cookie value 发送任何东西. * &lt;p&gt; * By default, cookies are created according to the Netscape cookie * specification. The version can be changed with the * &lt;code&gt;setVersion&lt;/code&gt; method. * * @param name * a &lt;code&gt;String&lt;/code&gt; specifying the name of the cookie * @param value * a &lt;code&gt;String&lt;/code&gt; specifying the value of the cookie * @throws IllegalArgumentException * if the cookie name contains illegal characters (for example, * a comma, space, or semicolon) or it is one of the tokens * reserved for use by the cookie protocol * @see #setValue * @see #setVersion */ public Cookie(String name, String value) { // 首先进行 cookie name 的校验 validation.validate(name); this.name = name; this.value = value; } /** * Specifies a comment that describes a cookie&#39;s purpose. * 描述这个 cookie 的目的 * The comment is useful if the browser presents the cookie to the user. Comments are not * supported by Netscape Version 0 cookies. * * @param purpose * a &lt;code&gt;String&lt;/code&gt; specifying the comment to display to the * user * @see #getComment */ public void setComment(String purpose) { comment = purpose; } /** * Returns the comment describing the purpose of this cookie, or * &lt;code&gt;null&lt;/code&gt; if the cookie has no comment. * * @return a &lt;code&gt;String&lt;/code&gt; containing the comment, or * &lt;code&gt;null&lt;/code&gt; if none * @see #setComment */ public String getComment() { return comment; } /** * Specifies the domain within which this cookie should be presented. * 指定这个 cookie 可以出现在那个 domain * &lt;p&gt; * The form of the domain name is specified by RFC 2109. A domain name * begins with a dot (&lt;code&gt;.foo.com&lt;/code&gt;) and means that the cookie is * visible to servers in a specified Domain Name System (DNS) zone (for * example, &lt;code&gt;www.foo.com&lt;/code&gt;, but not &lt;code&gt;a.b.foo.com&lt;/code&gt;). By * default, cookies are only returned to the server that sent them. * * domain name 的形式说明在 RFC 2109. domain name 以 dot 开头, 这意味着在一个特定的 * DNS 这个 cookie 是可见的. 默认的, 那个服务器发送的 cookie 返回给哪个服务器. * * @param pattern * a &lt;code&gt;String&lt;/code&gt; containing the domain name within which * this cookie is visible; form is according to RFC 2109 * @see #getDomain */ public void setDomain(String pattern) { domain = pattern.toLowerCase(Locale.ENGLISH); // IE allegedly needs this } /** * Returns the domain name set for this cookie. The form of the domain name * is set by RFC 2109. * * @return a &lt;code&gt;String&lt;/code&gt; containing the domain name * @see #setDomain */ public String getDomain() { return domain; } /** * Sets the maximum age of the cookie in seconds. * cookie 最大存活的秒数 * &lt;p&gt; * A positive value indicates that the cookie will expire after that many * seconds have passed. Note that the value is the &lt;i&gt;maximum&lt;/i&gt; age when * the cookie will expire, not the cookie&#39;s current age. * 一个正数表明 cookie 将在 maximun age 秒数后过期. * &lt;p&gt; * A negative value means that the cookie is not stored persistently and * will be deleted when the Web browser exits. A zero value causes the * cookie to be deleted. * * 一个负数表示 cookie 不会被永久存储, 浏览器退出时将被删除. * 0 删除这个 cookie * * @param expiry * an integer specifying the maximum age of the cookie in * seconds; if negative, means the cookie is not stored; if zero, * deletes the cookie * @see #getMaxAge */ public void setMaxAge(int expiry) { maxAge = expiry; } /** * Returns the maximum age of the cookie, specified in seconds, By default, * &lt;code&gt;-1&lt;/code&gt; indicating the cookie will persist until browser * shutdown. * * @return an integer specifying the maximum age of the cookie in seconds; if * negative, means the cookie persists until browser shutdown * @see #setMaxAge */ public int getMaxAge() { return maxAge; } /** * Specifies a path for the cookie to which the client should return the * cookie. * 指定一个 path, 表示哪一个 client 应该把这个 cookie 返还给服务器. * * &lt;p&gt; * The cookie is visible to all the pages in the directory you specify, and * all the pages in that directory&#39;s subdirectories. A cookie&#39;s path must * include the servlet that set the cookie, for example, &lt;i&gt;/catalog&lt;/i&gt;, * which makes the cookie visible to all directories on the server under * &lt;i&gt;/catalog&lt;/i&gt;. * &lt;p&gt; * Consult RFC 2109 (available on the Internet) for more information on * setting path names for cookies. * * @param uri * a &lt;code&gt;String&lt;/code&gt; specifying a path * @see #getPath */ public void setPath(String uri) { path = uri; } /** * Returns the path on the server to which the browser returns this cookie. * The cookie is visible to all subpaths on the server. * * @return a &lt;code&gt;String&lt;/code&gt; specifying a path that contains a servlet * name, for example, &lt;i&gt;/catalog&lt;/i&gt; * @see #setPath */ public String getPath() { return path; } /** * Indicates to the browser whether the cookie should only be sent using a * secure protocol, such as HTTPS or SSL. * &lt;p&gt; * The default value is &lt;code&gt;false&lt;/code&gt;. * * @param flag * if &lt;code&gt;true&lt;/code&gt;, sends the cookie from the browser to the * server only when using a secure protocol; if * &lt;code&gt;false&lt;/code&gt;, sent on any protocol * @see #getSecure */ public void setSecure(boolean flag) { secure = flag; } /** * Returns &lt;code&gt;true&lt;/code&gt; if the browser is sending cookies only over a * secure protocol, or &lt;code&gt;false&lt;/code&gt; if the browser can send cookies * using any protocol. * * @return &lt;code&gt;true&lt;/code&gt; if the browser uses a secure protocol; * otherwise, &lt;code&gt;true&lt;/code&gt; * @see #setSecure */ public boolean getSecure() { return secure; } /** * Returns the name of the cookie. The name cannot be changed after * creation. * * @return a &lt;code&gt;String&lt;/code&gt; specifying the cookie&#39;s name */ public String getName() { return name; } /** * Assigns a new value to a cookie after the cookie is created. If you use a * binary value, you may want to use BASE64 encoding. * cookie 被创建后, 给 value 指定一个值. 如果使用二进制的值, 采用 BASE64 的编码方式. * * &lt;p&gt; * With Version 0 cookies, values should not contain white space, brackets, * parentheses, equals signs, commas, double quotes, slashes, question * marks, at signs, colons, and semicolons. Empty values may not behave the * same way on all browsers. * * @param newValue * a &lt;code&gt;String&lt;/code&gt; specifying the new value * @see #getValue * @see Cookie */ public void setValue(String newValue) { value = newValue; } /** * Returns the value of the cookie. * * @return a &lt;code&gt;String&lt;/code&gt; containing the cookie&#39;s present value * @see #setValue * @see Cookie */ public String getValue() { return value; } /** * Returns the version of the protocol this cookie complies with. Version 1 * complies with RFC 2109, and version 0 complies with the original cookie * specification drafted by Netscape. Cookies provided by a browser use and * identify the browser&#39;s cookie version. * * @return 0 if the cookie complies with the original Netscape specification; * 1 if the cookie complies with RFC 2109 被 RFC 6265 淘汰 * @see #setVersion */ public int getVersion() { return version; } /** * Sets the version of the cookie protocol this cookie complies with. * Version 0 complies with the original Netscape cookie specification. * version 0 遵守原始的 netscape cookie 说明 * Version 1 complies with RFC 2109. * version 1 遵守 RFC 2109 规范 * &lt;p&gt; * Since RFC 2109 is still somewhat new, consider version 1 as experimental; * do not use it yet on production sites. * * @param v * 0 if the cookie should comply with the original Netscape * specification; 1 if the cookie should comply with RFC 2109 * @see #getVersion */ public void setVersion(int v) { version = v; } /** * Overrides the standard &lt;code&gt;java.lang.Object.clone&lt;/code&gt; method to * return a copy of this cookie. */ @Override public Object clone() { try { return super.clone(); } catch (CloneNotSupportedException e) { throw new RuntimeException(e); } } /** * Sets the flag that controls if this cookie will be hidden from scripts on * the client side. * * true 不能被 js document.cookie 操作 * * @param httpOnly The new value of the flag * * @since Servlet 3.0 */ public void setHttpOnly(boolean httpOnly) { this.httpOnly = httpOnly; } /** * Gets the flag that controls if this cookie will be hidden from scripts on * the client side. * * @return &lt;code&gt;true&lt;/code&gt; if the cookie is hidden from scripts, else * &lt;code&gt;false&lt;/code&gt; * @since Servlet 3.0 */ public boolean isHttpOnly() { return httpOnly; } } class CookieNameValidator { // 拿到 properties 文件的方法 ResourceBundle private static final String LSTRING_FILE = &#34;javax.servlet.http.LocalStrings&#34;; protected static final ResourceBundle lStrings = ResourceBundle.getBundle(LSTRING_FILE); protected final BitSet allowed; protected CookieNameValidator(String separators) { allowed = new BitSet(128); allowed.set(0x20, 0x7f); // any CHAR except CTLs or separators for (int i = 0; i &lt; separators.length(); i&#43;&#43;) { char ch = separators.charAt(i); allowed.clear(ch); } } void validate(String name) { // cookie name 不允许为 null 或者长度为 0 if (name == null || name.length() == 0) { throw new IllegalArgumentException(lStrings.getString(&#34;err.cookie_name_blank&#34;)); } if (!isToken(name)) { String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;); throw new IllegalArgumentException(MessageFormat.format(errMsg, name)); } } private boolean isToken(String possibleToken) { int len = possibleToken.length(); for (int i = 0; i &lt; len; i&#43;&#43;) { char c = possibleToken.charAt(i); if (!allowed.get(c)) { return false; } } return true; } } class RFC6265Validator extends CookieNameValidator { private static final String RFC2616_SEPARATORS = &#34;()&lt;&gt;@,;:\\\&#34;/[]?={} \t&#34;; RFC6265Validator() { super(RFC2616_SEPARATORS); } } class RFC2109Validator extends RFC6265Validator { RFC2109Validator(boolean allowSlash) { // special treatment to allow for FWD_SLASH_IS_SEPARATOR property if (allowSlash) { allowed.set(&#39;/&#39;); } } @Override void validate(String name) { super.validate(name); // cookie name 不允许 $ 开头 if (name.charAt(0) == &#39;$&#39;) { String errMsg = lStrings.getString(&#34;err.cookie_name_is_token&#34;); throw new IllegalArgumentException(MessageFormat.format(errMsg, name)); } } }">
+
+    <link href="/css/compiled/main.css" rel="stylesheet" />
+
+
+
+  <link href="/css/custom.css" rel="stylesheet" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="Hextra">Hextra</span>
+    </a><a
+            title="Blog"
+            href="/blog"
+            
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block hx-font-medium"
+          >
+            <span class="hx-text-center">Blog</span>
+          </a><a
+            title="Tags"
+            href="/tags"
+            
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block hx-text-gray-600 hover:hx-text-gray-800 dark:hx-text-gray-400 dark:hover:hx-text-gray-200"
+          >
+            <span class="hx-text-center">Tags</span>
+          </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<a
+            title="About"
+            href="/blog/about/"
+            
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block hx-text-gray-600 hover:hx-text-gray-800 dark:hx-text-gray-400 dark:hover:hx-text-gray-200"
+          >
+            <span class="hx-text-center">About</span>
+          </a><button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class="hx-mx-auto hx-flex max-w-full">
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-hidden xl:hx-block">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/about/"
+    
+  >About
+    </a></li>
+      <li class="[word-break:break-word] hx-mt-5 hx-mb-2 hx-px-2 hx-py-1.5 hx-text-sm hx-font-semibold hx-text-gray-900 first:hx-mt-0 dark:hx-text-gray-100">
+        <span class="hx-cursor-default">More</span>
+      </li>
+    <li><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/about"
+    
+  >About</a></li>
+    <li><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="https://gohugo.io/documentation/"
+    target="_blank" rel="noreferrer"
+  >Hugo Docs ↗</a></li>
+    
+    </ul>
+
+    <div class="max-xl:hx-hidden hx-h-0 hx-w-64 hx-shrink-0"></div></div>
+  
+  
+    <div class="md:hx-hidden hx-justify-end hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-justify-items-start hx-grow">
+    <button
+      title="Change language"
+      data-state="closed"
+      class="language-switcher hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 hx-grow"
+      type="button"
+      aria-label="Change language"
+    >
+      <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg><span>English</span></div>
+    </button>
+    <ul
+      class="language-options hx-hidden hx-z-20 hx-max-h-64 hx-overflow-auto hx-rounded-md hx-ring-1 hx-ring-black/5 hx-bg-white hx-py-1 hx-text-sm hx-shadow-lg dark:hx-ring-white/20 dark:hx-bg-neutral-800"
+      style="position: fixed; inset: auto auto 0px 0px; margin: 0px; min-width: 100px;"
+    >
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/blog/tomcat-http-cookie/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >English<span class="hx-absolute hx-inset-y-0 hx-flex hx-items-center ltr:hx-right-3 rtl:hx-left-3"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span></a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/fa/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >فارسی</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/ja/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >日本語</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/zh-cn/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >简体中文</a>
+        </li>
+      </ul>
+  </div><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></div>
+</button>
+</div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4">
+      <div class=" hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400"><a class="hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50" href="https://github.com/buybyte/blog/edit/main/content/blog/blog/tomcat-http-cookie.md" target="_blank" rel="noreferrer">Edit this page on GitHub →</a>
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
+        <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
+          <a href="">Content Placeholder</a>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">tomcat-http-cookie</div>
+  </div>
+
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">tomcat-http-cookie</h1>
+        <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"><span class="hx-mr-1">November 29, 2019</span></div>
+        <div class="content">
+          <div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">package</span><span class="w"> </span><span class="nn">javax.servlet.http</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.io.Serializable</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.security.AccessController</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.security.PrivilegedAction</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.text.MessageFormat</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.BitSet</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Locale</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.ResourceBundle</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Creates a cookie, a small amount of information sent by a servlet to a Web
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * browser, saved by the browser, and later sent back to the server.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 创建一个 cookie， servlet 发给浏览器的一个小信息，被浏览器保存。之后再发送给服务器。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *  A cookie&#39;s value can uniquely identify a client, so cookies are commonly used for
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * session management.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 一个 cookie 的值可以单独的标记出一个客户端，所以 cookies 一般被用来 session 管理。因为
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * http 是一个 stateless 的协议。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * A cookie has a name, a single value, and optional attributes such as a
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * comment, path and domain qualifiers, a maximum age, and a version number.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 一个 cookie 有一个 name，一个单独的 value，还有一些可选的属性，比如 注释，路径，域标记
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 最大存活时间和一个版本号。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * document.cookie 可以得到 httponly = false 的 cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *  
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Some Web browsers have bugs in how they handle the optional attributes, so
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * use them sparingly to improve the interoperability of your servlets.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 一些 web browsers 在处怎样处理可选的属性有 bugs。提高 servlets 的互操作性，请慎用。
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * The servlet sends cookies to the browser by using the
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * {@link HttpServletResponse#addCookie} method, which adds fields to HTTP
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * response headers to send cookies to the browser, one at a time. The browser
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * is expected to support 20 cookies for each Web server, 300 cookies total, and
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * may limit cookie size to 4 KB each.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * servlet 用 HttpServletResponse#addCookie 向 http 的相应头添加 field, 之后发送给浏览器.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 浏览器支持每一个 web server 保存 20 个 cookie. 每一个 cookie 的 size 可能被限制为 4 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * The browser returns cookies to the servlet by adding fields to HTTP request
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * headers. 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 浏览器通过向 http 请求头添加 cookies 的方式返回给服务器. 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Cookies can be retrieved from a request by using the
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * {@link HttpServletRequest#getCookies} method. Several cookies might have the
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * same name but different path attributes.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 服务器通过 HttpServletRequest#getCookies 从请求中提取 cookies.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 一些 cookie 可能有相同的 name 但是有不同的 path attribute.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Cookies affect the caching of the Web pages that use them. HTTP 1.0 does not
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * cache pages that use cookies created with this class. This class does not
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * support the cache control defined with HTTP 1.1.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * This class supports both the RFC 2109 and the RFC 6265 specifications.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * By default, cookies are created using RFC 6265.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 默认的, cookie 生成方式采用 RFC 6265. 本质所有的 Cookie 都是按规范生成的.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Cookie</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Cloneable</span><span class="p">,</span><span class="w"> </span><span class="n">Serializable</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 校验 Cookie name</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CookieNameValidator</span><span class="w"> </span><span class="n">validation</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">strictServletCompliance</span><span class="p">;</span><span class="w"> </span><span class="c1">// 严格的 servlet</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">strictNaming</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">allowSlash</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">propStrictNaming</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">propFwdSlashIsSeparator</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getSecurityManager</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">strictServletCompliance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Boolean</span><span class="p">.</span><span class="na">getBoolean</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="s">&#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">propStrictNaming</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="s">&#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">propFwdSlashIsSeparator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="s">&#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">strictServletCompliance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AccessController</span><span class="p">.</span><span class="na">doPrivileged</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="k">new</span><span class="w"> </span><span class="n">PrivilegedAction</span><span class="o">&lt;</span><span class="n">Boolean</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="kd">public</span><span class="w"> </span><span class="n">Boolean</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="k">return</span><span class="w"> </span><span class="n">Boolean</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                                    </span><span class="s">&#34;org.apache.catalina.STRICT_SERVLET_COMPLIANCE&#34;</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">).</span><span class="na">booleanValue</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">propStrictNaming</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AccessController</span><span class="p">.</span><span class="na">doPrivileged</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="k">new</span><span class="w"> </span><span class="n">PrivilegedAction</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="k">return</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                                    </span><span class="s">&#34;org.apache.tomcat.util.http.ServerCookie.STRICT_NAMING&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">propFwdSlashIsSeparator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AccessController</span><span class="p">.</span><span class="na">doPrivileged</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="k">new</span><span class="w"> </span><span class="n">PrivilegedAction</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="k">return</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">getProperty</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                                    </span><span class="s">&#34;org.apache.tomcat.util.http.ServerCookie.FWD_SLASH_IS_SEPARATOR&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">propStrictNaming</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">strictNaming</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strictServletCompliance</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">strictNaming</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Boolean</span><span class="p">.</span><span class="na">parseBoolean</span><span class="p">(</span><span class="n">propStrictNaming</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">propFwdSlashIsSeparator</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">allowSlash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">strictServletCompliance</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">allowSlash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">Boolean</span><span class="p">.</span><span class="na">parseBoolean</span><span class="p">(</span><span class="n">propFwdSlashIsSeparator</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strictNaming</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">validation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RFC2109Validator</span><span class="p">(</span><span class="n">allowSlash</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">validation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RFC6265Validator</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">serialVersionUID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">1L</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"> </span><span class="c1">// cookie name 一旦创建不能被修改</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w"> </span><span class="c1">// cookie value</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// ;Version=1 ... means RFC 2109 style</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                             </span><span class="c1">// 默认的是 RFC 6265</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">//</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Attributes encoded in the header&#39;s cookie fields.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">//</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">comment</span><span class="p">;</span><span class="w"> </span><span class="c1">// ;Comment=VALUE ... describes cookie&#39;s use</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">domain</span><span class="p">;</span><span class="w"> </span><span class="c1">// ;Domain=VALUE ... domain that sees cookie 可以看到 cookie 的 domain</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">maxAge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// ;Max-Age=VALUE ... cookies auto-expire </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">path</span><span class="p">;</span><span class="w"> </span><span class="c1">// ;Path=VALUE ... URLs that see the cookie 可以看到 cookie 的 urls</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">secure</span><span class="p">;</span><span class="w"> </span><span class="c1">// ;Secure ... e.g. use SSL 启用 ssl</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">httpOnly</span><span class="p">;</span><span class="w"> </span><span class="c1">// Not in cookie specs, but supported by browsers 不在 cookie 规范里, 但是被浏览器支持</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Constructs a cookie with a specified name and value.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The name must conform to RFC 2109. cookie name 必须遵循 RFC 2109. 没办法,规范就是牛啊
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * That means it can contain only ASCII
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * alphanumeric characters and cannot contain commas, semicolons, or white
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * space or begin with a $ character. The cookie&#39;s name cannot be changed
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * after creation.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 这意味着 cookie name 只能包含 ASCII 的字母, 数字, 不能包括逗号, 分号, 空格, 或者以
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * $ 开头. cookie name 一旦创建不能被修改.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The value can be anything the server chooses to send. Its value is
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * probably of interest only to the server. The cookie&#39;s value can be
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * changed after creation with the &lt;code&gt;setValue&lt;/code&gt; method.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * server 可以通过 cookie value 发送任何东西.  
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * By default, cookies are created according to the Netscape cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * specification. The version can be changed with the
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;code&gt;setVersion&lt;/code&gt; method.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param name
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            a &lt;code&gt;String&lt;/code&gt; specifying the name of the cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param value
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            a &lt;code&gt;String&lt;/code&gt; specifying the value of the cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @throws IllegalArgumentException
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *             if the cookie name contains illegal characters (for example,
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *             a comma, space, or semicolon) or it is one of the tokens
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *             reserved for use by the cookie protocol
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setValue
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setVersion
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Cookie</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 首先进行 cookie name 的校验</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">validation</span><span class="p">.</span><span class="na">validate</span><span class="p">(</span><span class="n">name</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Specifies a comment that describes a cookie&#39;s purpose. 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 描述这个 cookie 的目的
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The comment is useful if the browser presents the cookie to the user. Comments are not
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * supported by Netscape Version 0 cookies.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param purpose
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            a &lt;code&gt;String&lt;/code&gt; specifying the comment to display to the
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            user
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getComment
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setComment</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">purpose</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">comment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">purpose</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the comment describing the purpose of this cookie, or
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;code&gt;null&lt;/code&gt; if the cookie has no comment.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return a &lt;code&gt;String&lt;/code&gt; containing the comment, or
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *         &lt;code&gt;null&lt;/code&gt; if none
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setComment
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getComment</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">comment</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Specifies the domain within which this cookie should be presented.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 指定这个 cookie 可以出现在那个 domain
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The form of the domain name is specified by RFC 2109. A domain name
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * begins with a dot (&lt;code&gt;.foo.com&lt;/code&gt;) and means that the cookie is
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * visible to servers in a specified Domain Name System (DNS) zone (for
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * example, &lt;code&gt;www.foo.com&lt;/code&gt;, but not &lt;code&gt;a.b.foo.com&lt;/code&gt;). By
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * default, cookies are only returned to the server that sent them.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * domain name 的形式说明在 RFC 2109. domain name 以 dot 开头, 这意味着在一个特定的
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * DNS 这个 cookie 是可见的. 默认的, 那个服务器发送的 cookie 返回给哪个服务器.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param pattern
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            a &lt;code&gt;String&lt;/code&gt; containing the domain name within which
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            this cookie is visible; form is according to RFC 2109
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getDomain
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setDomain</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">pattern</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pattern</span><span class="p">.</span><span class="na">toLowerCase</span><span class="p">(</span><span class="n">Locale</span><span class="p">.</span><span class="na">ENGLISH</span><span class="p">);</span><span class="w"> </span><span class="c1">// IE allegedly needs this</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the domain name set for this cookie. The form of the domain name
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * is set by RFC 2109.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return a &lt;code&gt;String&lt;/code&gt; containing the domain name
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setDomain
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getDomain</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">domain</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Sets the maximum age of the cookie in seconds.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * cookie 最大存活的秒数
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * A positive value indicates that the cookie will expire after that many
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * seconds have passed. Note that the value is the &lt;i&gt;maximum&lt;/i&gt; age when
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * the cookie will expire, not the cookie&#39;s current age.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 一个正数表明 cookie 将在 maximun age 秒数后过期.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * A negative value means that the cookie is not stored persistently and
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * will be deleted when the Web browser exits. A zero value causes the
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * cookie to be deleted.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 一个负数表示 cookie 不会被永久存储, 浏览器退出时将被删除.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 0  删除这个 cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param expiry
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            an integer specifying the maximum age of the cookie in
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            seconds; if negative, means the cookie is not stored; if zero,
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            deletes the cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getMaxAge
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setMaxAge</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">expiry</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">maxAge</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">expiry</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the maximum age of the cookie, specified in seconds, By default,
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;code&gt;-1&lt;/code&gt; indicating the cookie will persist until browser
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * shutdown.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return an integer specifying the maximum age of the cookie in seconds; if
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *         negative, means the cookie persists until browser shutdown
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setMaxAge
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getMaxAge</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">maxAge</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Specifies a path for the cookie to which the client should return the
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * cookie.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 指定一个 path, 表示哪一个 client 应该把这个 cookie 返还给服务器.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The cookie is visible to all the pages in the directory you specify, and
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * all the pages in that directory&#39;s subdirectories. A cookie&#39;s path must
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * include the servlet that set the cookie, for example, &lt;i&gt;/catalog&lt;/i&gt;,
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * which makes the cookie visible to all directories on the server under
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;i&gt;/catalog&lt;/i&gt;.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Consult RFC 2109 (available on the Internet) for more information on
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * setting path names for cookies.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param uri
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            a &lt;code&gt;String&lt;/code&gt; specifying a path
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getPath
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setPath</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">uri</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uri</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the path on the server to which the browser returns this cookie.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The cookie is visible to all subpaths on the server.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return a &lt;code&gt;String&lt;/code&gt; specifying a path that contains a servlet
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *         name, for example, &lt;i&gt;/catalog&lt;/i&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setPath
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getPath</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">path</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Indicates to the browser whether the cookie should only be sent using a
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * secure protocol, such as HTTPS or SSL.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * The default value is &lt;code&gt;false&lt;/code&gt;.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param flag
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            if &lt;code&gt;true&lt;/code&gt;, sends the cookie from the browser to the
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            server only when using a secure protocol; if
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            &lt;code&gt;false&lt;/code&gt;, sent on any protocol
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getSecure
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setSecure</span><span class="p">(</span><span class="kt">boolean</span><span class="w"> </span><span class="n">flag</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">secure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flag</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns &lt;code&gt;true&lt;/code&gt; if the browser is sending cookies only over a
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * secure protocol, or &lt;code&gt;false&lt;/code&gt; if the browser can send cookies
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * using any protocol.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return &lt;code&gt;true&lt;/code&gt; if the browser uses a secure protocol;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *         otherwise, &lt;code&gt;true&lt;/code&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setSecure
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">getSecure</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">secure</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the name of the cookie. The name cannot be changed after
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * creation.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return a &lt;code&gt;String&lt;/code&gt; specifying the cookie&#39;s name
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getName</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Assigns a new value to a cookie after the cookie is created. If you use a
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * binary value, you may want to use BASE64 encoding.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * cookie 被创建后, 给 value 指定一个值. 如果使用二进制的值, 采用 BASE64 的编码方式.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * With Version 0 cookies, values should not contain white space, brackets,
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * parentheses, equals signs, commas, double quotes, slashes, question
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * marks, at signs, colons, and semicolons. Empty values may not behave the
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * same way on all browsers.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param newValue
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            a &lt;code&gt;String&lt;/code&gt; specifying the new value
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getValue
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see Cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setValue</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">newValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newValue</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the value of the cookie.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return a &lt;code&gt;String&lt;/code&gt; containing the cookie&#39;s present value
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setValue
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see Cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getValue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Returns the version of the protocol this cookie complies with. Version 1
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * complies with RFC 2109, and version 0 complies with the original cookie
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * specification drafted by Netscape. Cookies provided by a browser use and
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * identify the browser&#39;s cookie version.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return 0 if the cookie complies with the original Netscape specification;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *         1 if the cookie complies with RFC 2109  被 RFC 6265 淘汰
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #setVersion
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">version</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Sets the version of the cookie protocol this cookie complies with.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Version 0 complies with the original Netscape cookie specification.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * version 0 遵守原始的 netscape cookie 说明
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Version 1 complies with RFC 2109.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * version 1 遵守 RFC 2109 规范
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * &lt;p&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Since RFC 2109 is still somewhat new, consider version 1 as experimental;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * do not use it yet on production sites.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param v
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            0 if the cookie should comply with the original Netscape
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *            specification; 1 if the cookie should comply with RFC 2109
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @see #getVersion
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setVersion</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Overrides the standard &lt;code&gt;java.lang.Object.clone&lt;/code&gt; method to
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * return a copy of this cookie.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">clone</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kd">super</span><span class="p">.</span><span class="na">clone</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">CloneNotSupportedException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RuntimeException</span><span class="p">(</span><span class="n">e</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Sets the flag that controls if this cookie will be hidden from scripts on
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * the client side.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * true 不能被 js document.cookie 操作
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @param httpOnly  The new value of the flag
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @since Servlet 3.0
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setHttpOnly</span><span class="p">(</span><span class="kt">boolean</span><span class="w"> </span><span class="n">httpOnly</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">httpOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">httpOnly</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * Gets the flag that controls if this cookie will be hidden from scripts on
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * the client side.
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @return  &lt;code&gt;true&lt;/code&gt; if the cookie is hidden from scripts, else
+</span></span></span><span class="line"><span class="cl"><span class="cm">     *          &lt;code&gt;false&lt;/code&gt;
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * @since Servlet 3.0
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isHttpOnly</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">httpOnly</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">class</span> <span class="nc">CookieNameValidator</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 拿到 properties 文件的方法 ResourceBundle</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">LSTRING_FILE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;javax.servlet.http.LocalStrings&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ResourceBundle</span><span class="w"> </span><span class="n">lStrings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ResourceBundle</span><span class="p">.</span><span class="na">getBundle</span><span class="p">(</span><span class="n">LSTRING_FILE</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">BitSet</span><span class="w"> </span><span class="n">allowed</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="nf">CookieNameValidator</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">separators</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">allowed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BitSet</span><span class="p">(</span><span class="n">128</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">allowed</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">0x20</span><span class="p">,</span><span class="w"> </span><span class="n">0x7f</span><span class="p">);</span><span class="w"> </span><span class="c1">// any CHAR except CTLs or separators</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">separators</span><span class="p">.</span><span class="na">length</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="kt">char</span><span class="w"> </span><span class="n">ch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">separators</span><span class="p">.</span><span class="na">charAt</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">allowed</span><span class="p">.</span><span class="na">clear</span><span class="p">(</span><span class="n">ch</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// cookie name 不允许为 null 或者长度为 0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">name</span><span class="p">.</span><span class="na">length</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="n">lStrings</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&#34;err.cookie_name_blank&#34;</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isToken</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">errMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lStrings</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&#34;err.cookie_name_is_token&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="n">MessageFormat</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">errMsg</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isToken</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">possibleToken</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">possibleToken</span><span class="p">.</span><span class="na">length</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">possibleToken</span><span class="p">.</span><span class="na">charAt</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">allowed</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">class</span> <span class="nc">RFC6265Validator</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">CookieNameValidator</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">RFC2616_SEPARATORS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;()&lt;&gt;@,;:\\\&#34;/[]?={} \t&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">RFC6265Validator</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">RFC2616_SEPARATORS</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">class</span> <span class="nc">RFC2109Validator</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">RFC6265Validator</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">RFC2109Validator</span><span class="p">(</span><span class="kt">boolean</span><span class="w"> </span><span class="n">allowSlash</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// special treatment to allow for FWD_SLASH_IS_SEPARATOR property</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">allowSlash</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">allowed</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="sc">&#39;/&#39;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="kd">super</span><span class="p">.</span><span class="na">validate</span><span class="p">(</span><span class="n">name</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// cookie name 不允许 $ 开头</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">.</span><span class="na">charAt</span><span class="p">(</span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">&#39;$&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">errMsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lStrings</span><span class="p">.</span><span class="na">getString</span><span class="p">(</span><span class="s">&#34;err.cookie_name_is_token&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="n">MessageFormat</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="n">errMsg</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+
+        </div>
+    <div class="hx-mt-12 hx-mb-8 hx-block hx-text-xs hx-text-gray-500 ltr:hx-text-right rtl:hx-text-left dark:hx-text-gray-400">Last updated on <time datetime="2019-11-29T14:29:51.000Z">November 29, 2019</time></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/blog/katacoda-what-is-a-container-image/"
+        title="katacoda-what-is-a-container-image"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-pr-4 rtl:hx-pl-4"
+      ><svg class="hx-inline hx-h-5 hx-shrink-0 ltr:hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>katacoda-what-is-a-container-image</a><a
+        href="/blog/katacoda-what-is-a-container/"
+        title="katacoda-what-is-a-container"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-ml-auto ltr:hx-pl-4 ltr:hx-text-right rtl:hx-mr-auto rtl:hx-pr-4 rtl:hx-text-left"
+      >katacoda-what-is-a-container<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div class="hx-mx-auto hx-flex hx-gap-2 hx-py-2 hx-px-4 hx-max-w-screen-xl"><div class="hx-flex hx-justify-items-start ">
+    <button
+      title="Change language"
+      data-state="closed"
+      class="language-switcher hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 hx-grow"
+      type="button"
+      aria-label="Change language"
+    >
+      <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg><span>English</span></div>
+    </button>
+    <ul
+      class="language-options hx-hidden hx-z-20 hx-max-h-64 hx-overflow-auto hx-rounded-md hx-ring-1 hx-ring-black/5 hx-bg-white hx-py-1 hx-text-sm hx-shadow-lg dark:hx-ring-white/20 dark:hx-bg-neutral-800"
+      style="position: fixed; inset: auto auto 0px 0px; margin: 0px; min-width: 100px;"
+    >
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/blog/tomcat-http-cookie/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >English<span class="hx-absolute hx-inset-y-0 hx-flex hx-items-center ltr:hx-right-3 rtl:hx-left-3"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span></a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/fa/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >فارسی</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/ja/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >日本語</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/zh-cn/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >简体中文</a>
+        </li>
+      </ul>
+  </div><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div><hr class="dark:hx-border-neutral-800" /><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div><div
+        class="hx-max-w-screen-xl hx-mx-auto hx-flex hx-justify-center hx-py-12 hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400 md:hx-justify-start"
+      >
+        <div class="hx-flex hx-w-full hx-flex-col hx-items-center sm:hx-items-start"><div class="hx-font-semibold"><a class="hx-flex hx-text-sm hx-items-center hx-gap-1 hx-text-current" target="_blank" rel="noopener noreferrer" title="Hextra GitHub Homepage" href="https://github.com/imfing/hextra">
+    <span>Powered by Hextra<svg height=1em class="hx-inline-block ltr:hx-ml-1 rtl:hx-mr-1 hx-align-[-2.5px]" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="m 105.50024,22.224647 c -9.59169,-5.537563 -21.40871,-5.537563 -31.000093,0 L 39.054693,42.689119 C 29.463353,48.226675 23.55484,58.460531 23.55484,69.535642 v 40.928918 c 0,11.07542 5.908513,21.3092 15.499853,26.84652 l 35.445453,20.46446 c 9.591313,5.53732 21.408404,5.53732 31.000094,0 l 35.44507,-20.46446 c 9.59131,-5.53732 15.49985,-15.7711 15.49985,-26.84652 V 69.535642 c 0,-11.075111 -5.90854,-21.308967 -15.49985,-26.846523 z M 34.112797,85.737639 c -1.384445,2.397827 -1.384445,5.352099 0,7.749927 l 24.781554,42.922974 c 1.38437,2.39783 3.942853,3.87496 6.711592,3.87496 h 49.563107 c 2.76905,0 5.3273,-1.47713 6.71144,-3.87496 l 24.78194,-42.922974 c 1.38414,-2.397828 1.38414,-5.3521 0,-7.749927 L 121.88049,42.814746 c -1.38414,-2.397828 -3.94239,-3.874964 -6.71144,-3.874964 H 65.605944 c -2.768739,0 -5.327223,1.477059 -6.711592,3.874964 z" style="stroke-width:0.774993" /></svg></span>
+  </a></div><div class="hx-mt-6 hx-text-xs">© 2025 Hextra Project.</div></div>
+      </div></footer>
+    
+    <script defer src="/js/main.js" integrity=""></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.js" integrity=""></script>
+  </body>
+</html>

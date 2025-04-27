@@ -1,0 +1,305 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Dns</title>
+    <link>http://localhost:1313/tags/dns/</link>
+    <description>Recent content in Dns on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 11 Sep 2021 16:21:12 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/dns/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>What-happens-type-url-into-browser-and-press-enter</title>
+      <link>http://localhost:1313/blog/what-happens-type-url-into-browser-and-press-enter/</link>
+      <pubDate>Sat, 11 Sep 2021 16:21:12 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/what-happens-type-url-into-browser-and-press-enter/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;dns query&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dns-query&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dns-query&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;get the ip of the target domain&lt;/p&gt;
+&lt;h3&gt;browser cache&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;browser-cache&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#browser-cache&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;firefox(about:networking#dns)
+&lt;img src=&#34;https://raw.githubusercontent.com/buybyte/pictures/main/img/firefox_dns_cache.png&#34; alt=&#34;firefox_dns_cache&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h3&gt;/etc/hosts&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;etchosts&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#etchosts&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;h3&gt;os cache&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;os-cache&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#os-cache&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;macos 查看 dns 请求日志 sudo log stream &amp;ndash;predicate &amp;lsquo;process == &amp;ldquo;mDNSResponder&amp;rdquo;&amp;rsquo; &amp;ndash;info&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;dns resolver&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dns-resolver&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dns-resolver&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;/etc/resolv.conf&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;arp -a 查看有没有 dns 服务器的 mac 地址&lt;/li&gt;
+&lt;li&gt;ARP request for the nameserver&lt;/li&gt;
+&lt;li&gt;send dns query to get the ip of the domain&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;arp 获取 gateway 的 mac 地址&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;arp-获取-gateway-的-mac-地址&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#arp-%e8%8e%b7%e5%8f%96-gateway-%e7%9a%84-mac-%e5%9c%b0%e5%9d%80&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;向 gateway 发送 ip packet&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;向-gateway-发送-ip-packet&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e5%90%91-gateway-%e5%8f%91%e9%80%81-ip-packet&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h2&gt;References&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;references&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#references&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.science.smith.edu/~nhowe/262/oldlabs/keyboard.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;keyborad-interrput&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.zhihu.com/question/560616439/answer/2722866208&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Chrome 是怎么判断地址栏输入的东西是不是网址? 这就是第一步😂-omnibox&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;about:networking#dns&#34; &gt;firefox dns&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.fortinet.com/resources/cyberglossary/what-is-arp&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ARP&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+    <item>
+      <title>network-dns</title>
+      <link>http://localhost:1313/blog/network-dns/</link>
+      <pubDate>Thu, 23 Apr 2020 10:27:04 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/network-dns/</guid>
+      <description>
+        
+        
+        &lt;blockquote&gt;
+  &lt;p&gt;怎样学习一个新的东西，也可以按照一定的套路的。这个东西解决什么问题？这个东西怎样解决问题？
+还有没有其他方法？&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;三步走分析一下 DNS&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;三步走分析一下-dns&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e4%b8%89%e6%ad%a5%e8%b5%b0%e5%88%86%e6%9e%90%e4%b8%80%e4%b8%8b-dns&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;解决什么问题&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;解决什么问题&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e8%a7%a3%e5%86%b3%e4%bb%80%e4%b9%88%e9%97%ae%e9%a2%98&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;根据域名找到 IP。为啥要找到域名对应的 IP 呢？答案很简单，因为 &lt;code&gt;TCP/IP&lt;/code&gt; 协议栈需要。
+很常见的一个问题就是浏览器得到一个 web page 的流程是啥样的。&lt;/p&gt;
+&lt;h3&gt;什么方式解决问题&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;什么方式解决问题&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e4%bb%80%e4%b9%88%e6%96%b9%e5%bc%8f%e8%a7%a3%e5%86%b3%e9%97%ae%e9%a2%98&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;怎样组织&lt;code&gt;域名(domain name)&lt;/code&gt;？这是域名系统的首要问题。底层的组织架构，决定了域名解析的流程。有点经济基础决定上层建筑的意思。域名少的时候可以直接放在一个文件里。对，这个文件在类 unix 系统里就是 &lt;code&gt;/etc/hosts&lt;/code&gt; 的文件。但是域名超级多怎么办？分类、组成层次结构。就像 Linux 的文件系统的组织方式一样。组织成一个树状结构。DNS 的查询问题，那就可以视为树的遍历问题。&lt;/p&gt;
+&lt;h4&gt;top level domain&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;top-level-domain&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#top-level-domain&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;code&gt;com&lt;/code&gt;、&lt;code&gt;org&lt;/code&gt;、 &lt;code&gt;cn&lt;/code&gt; 等等就是所谓的&lt;a href=&#34;http://data.iana.org/TLD/tlds-alpha-by-domain.txt&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;顶级域名&lt;/a&gt;。也就是一级域名。那么问题就来了，这些顶级域名存放在哪呢？存放到 &lt;a href=&#34;https://www.cloudflare.com/learning/dns/glossary/dns-root-server/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;root server&lt;/a&gt;。换一种理解方法就是，这些 root server 就是顶级域名的 metadata。这些 &lt;a href=&#34;https://www.iana.org/domains/root/servers&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;root server IP&lt;/a&gt; 是固定的。实现 DNS 这个功能的软件内置这些 root server 的 ip。这一点很重要。&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;rpm -ql &lt;span class=&#34;nb&#34;&gt;bind&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; grep named.ca
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/usr/share/doc/bind-9.11.4/sample/var/named/named.ca
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/var/named/named.ca&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;centos 上安装 &lt;code&gt;bind9&lt;/code&gt; 这个文件包含所有的 root servers 的 ip&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;second level domain&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;second-level-domain&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#second-level-domain&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;以 &lt;code&gt;www.google.com.&lt;/code&gt; 为例 &lt;code&gt;google&lt;/code&gt; 就是二级域名。其他的依此类推。&lt;/p&gt;
+&lt;h4&gt;DNS 层级树&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dns-层级树&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dns-%e5%b1%82%e7%ba%a7%e6%a0%91&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/dns-hierarchy.svg&#34; alt=&#34;DNS 层级树&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;可以看到整个 DNS 的入口就是 root。也就是记录顶级域名在哪些服务器上的信息。这是 &lt;code&gt;root&lt;/code&gt; 也就是不需要解析这些记录顶级域名的服务器。直接固定了这些 &lt;a href=&#34;https://www.iana.org/domains/root/servers&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;root server 的 IP&lt;/a&gt; 地址。实现 DNS 功能的软件，直接内置这些固定的 IP。DNS 查询第一步就是向这些 root server 查询顶级域名对应哪些 nameserver，也就是顶级域名对应的 IP。其实 DNS也就是个分布式层级数据库。注册域名也就是向数据库添加一条记录。但是不是免费注册的。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;DNS Zone&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dns-zone&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dns-zone&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/dns-zone.svg&#34; alt=&#34;DNS Zone&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;可以看到整个 DNS 层级树，每一个节点对应一个 Zone。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;uncached DNS lookup&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;uncached-dns-lookup&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#uncached-dns-lookup&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/network-dns.svg&#34; alt=&#34;dns-look-up&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;图中 &lt;code&gt;OS stub resovler&lt;/code&gt; 就是负责 DNS 解析的进程，发起 DNS 递归查询请求。
+&lt;code&gt;local dns server&lt;/code&gt; 发起迭代查询，查询域名对应的 IP。之后返给 &lt;code&gt;OS stub resovler&lt;/code&gt;(name servers that provide the complete answers to user queries)。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;这个进程向 &lt;code&gt;local dns server&lt;/code&gt; 发起递归查询。也就是只需要等 &lt;code&gt;local dns server&lt;/code&gt; 查询结果就行。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;local dns server&lt;/code&gt; 发起迭代查询。因为 &lt;code&gt;local dns server&lt;/code&gt; 有所有 root server 的 IP，选择一个 IP，根据顶级域名属于哪一个 &lt;code&gt;TLD Zone&lt;/code&gt;， 发起迭代查询。&lt;/li&gt;
+&lt;li&gt;可以查询得到记录这个顶级域名的 TLD server 有哪些，以及这些服务器的 IP。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;local dns server&lt;/code&gt; 选择一个 TLD server，发起迭代查询。&lt;/li&gt;
+&lt;li&gt;得到这个域名的权威服务器。&lt;/li&gt;
+&lt;li&gt;选择一个权威服务器，发起迭代查询，查询域名对应的 IP。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;local dns server&lt;/code&gt; 从权威服务器得到域名对应的 IP。&lt;/li&gt;
+&lt;li&gt;返还给 &lt;code&gt;OS stub resovler&lt;/code&gt;。递归查询结束。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Systems normally lookup any name (including domain names) using the hosts file first (if present), followed by DNS.
+However, the nsswitch.conf file (typically in /etc) controls this order (normally hosts: file dns), allowing the order to be changed or the file value to be deleted entirely depending on local needs.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;有没有其他解决方案&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;有没有其他解决方案&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e6%9c%89%e6%b2%a1%e6%9c%89%e5%85%b6%e4%bb%96%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;h2&gt;dig 命令&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dig-命令&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dig-%e5%91%bd%e4%bb%a4&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;dig domainname&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dig-domainname&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dig-domainname&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;pre&gt;&lt;code&gt; ~ dig github.com
+
+; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG 9.10.6 &amp;lt;&amp;lt;&amp;gt;&amp;gt; github.com
+;; global options: &amp;#43;cmd
+;; Got answer:
+;; -&amp;gt;&amp;gt;HEADER&amp;lt;&amp;lt;- opcode: QUERY, status: NOERROR, id: 23033
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;github.com.   IN A
+
+;; ANSWER SECTION:
+github.com.  17 IN A 52.74.223.119  # github.com. 这个域名对应的一个 ip
+
+;; Query time: 14 msec
+;; SERVER: 61.139.2.69#53(61.139.2.69)
+;; WHEN: Thu Apr 23 19:53:17 CST 2020
+;; MSG SIZE  rcvd: 44&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h3&gt;wireshark 抓包验证实际的网络架构&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;wireshark-抓包验证实际的网络架构&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#wireshark-%e6%8a%93%e5%8c%85%e9%aa%8c%e8%af%81%e5%ae%9e%e9%99%85%e7%9a%84%e7%bd%91%e7%bb%9c%e6%9e%b6%e6%9e%84&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;h4&gt;TCP/IP stack&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;tcpip-stack&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tcpip-stack&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/tcp-ip-stack-dns.png&#34; alt=&#34;tcp-ip-stack&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h3&gt;dig +trace domainname&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dig-trace-domainname&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dig-trace-domainname&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;~ dig +trace github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG 9.10.6 &amp;lt;&amp;lt;&amp;gt;&amp;gt; +trace github.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; global options: +cmd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS k.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS e.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS b.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS a.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS m.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS l.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS d.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS f.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS g.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS h.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS j.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS c.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;.   &lt;span class=&#34;m&#34;&gt;81219&lt;/span&gt; IN NS i.root-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; Received &lt;span class=&#34;m&#34;&gt;228&lt;/span&gt; bytes from 61.139.2.69#53&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;61.139.2.69&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; in &lt;span class=&#34;m&#34;&gt;15&lt;/span&gt; ms &lt;span class=&#34;c1&#34;&gt;#local dns server，本地 DNS 拥有完整的 root server ip 列表。内置到本地 DNS 服务器。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS l.gtld-servers.net.  &lt;span class=&#34;c1&#34;&gt;# 记录 com. 这个顶级域名的服务器，generic top level domain server&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS b.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS c.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS d.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS e.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS f.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS g.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS a.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS h.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS i.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS j.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS k.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS m.gtld-servers.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; IN DS &lt;span class=&#34;m&#34;&gt;30909&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;8&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; E2D3C916F6DEEAC73294E8268FB5885044A833FC5459588F4A9184CF C41A5766
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;com.   &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; IN RRSIG DS &lt;span class=&#34;m&#34;&gt;8&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;20200506050000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;20200423040000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;48903&lt;/span&gt; . Enqd4bffSJHlv8mqHcAptS9+fHo3cg6vCIQgrOZ3aBfx2nG4CjS27iEG 6u6NsPfcKVrz7RoU2xDtDMNJOcMBJdJe/lGNeo14N69SM0/MV2Z8wZBD HRPd2Y8Z1nyc7EnDbkFzuWV5G6vafaQa4KTQpG6jGOPIQpYESNiinxfy 0QQWUJELvjSOideCPqQcug2P2Pln7BzWiqFSg6I8d1h44349LsXcbr5W zJwZQJKLoDd0ysyGl5Bq3UZgfWYvTJFmmZ/OwKYT4QQ4BE0MtbVwae8X 9yI6d9jENsz+eebEEtxLt6o/LNQb3PdNhUH1PC1pxfHiEiNyYUcvbJdf &lt;span class=&#34;nv&#34;&gt;Flgntg&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;==&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; Received &lt;span class=&#34;m&#34;&gt;1170&lt;/span&gt; bytes from 192.203.230.10#53&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;e.root-servers.net&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; in &lt;span class=&#34;m&#34;&gt;211&lt;/span&gt; ms &lt;span class=&#34;c1&#34;&gt;# 从 e.root-servers.net 这个 root server 查询到的 TLD namesever，也就是存储 com. 这个顶级域名的服务器。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns1.p16.dynect.net. &lt;span class=&#34;c1&#34;&gt;# 记录 github.com. 这个域名的权威服务器&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns3.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns2.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns4.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns-520.awsdns-01.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns-421.awsdns-52.com.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns-1707.awsdns-21.co.uk.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;172800&lt;/span&gt; IN NS ns-1283.awsdns-32.org.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CK0POJMG874LJREF7EFN8430QVIT8BSM.com. &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; IN NSEC3 &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; - CK0Q1GIN43N1ARRC9OSM6QPQR81H5M9A  NS SOA RRSIG DNSKEY NSEC3PARAM
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CK0POJMG874LJREF7EFN8430QVIT8BSM.com. &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; IN RRSIG NSEC3 &lt;span class=&#34;m&#34;&gt;8&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;20200427045033&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;20200420034033&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;39844&lt;/span&gt; com. BDAWMm4AsSRfrBwOXhNN8ihw++J2UkhEk8A6LeSIz1llDs5kt0CcOqTM OK1txlQNr3N0k1RTBW/hkEZ1mxjIHF2GARt/hpO43ILPBVs/vhKAKCKh A96XJG+NzN0t/heB6mFNASKAcmVdfT5a0tVkmmzhGktDp5ECdZAIFRhZ &lt;span class=&#34;nv&#34;&gt;8y6jxsUhGP7ZiN1AfFBi1cWeSth5FW4Btpy9RffVKg5lIA&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;==&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4KB4DFS71LEP8G8P8VT4CCUSQNL4CNCS.com. &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; IN NSEC3 &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; - 4KB4PTQQ5CTA7POCTGM7RUFC8B1RKTEU  NS DS RRSIG
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4KB4DFS71LEP8G8P8VT4CCUSQNL4CNCS.com. &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; IN RRSIG NSEC3 &lt;span class=&#34;m&#34;&gt;8&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;86400&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;20200428061912&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;20200421050912&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;39844&lt;/span&gt; com. PFN1p6XvR4SmD4ucRULmtYIMQkFf/ZrdEWz6bRVtcepYF6QwTC/VOVYM 7PV0tuTTdr1LqkUwQJ7mv23vtKnjFba2Cf7pBOTz9JuCHUC0Qml9cOc6 Cwjhx7haj6h0VEzS+oIY7l2p/af/B36iQCXASVN3Y6s/i+66iXIg905z GqFnAKOgR0R4KJx5KwHIzBkgxr/I/SyCd+HNw+2fr15X0w&lt;span class=&#34;o&#34;&gt;==&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; Received &lt;span class=&#34;m&#34;&gt;824&lt;/span&gt; bytes from 192.26.92.30#53&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;c.gtld-servers.net&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; in &lt;span class=&#34;m&#34;&gt;173&lt;/span&gt; ms &lt;span class=&#34;c1&#34;&gt;# 从 c.gtld-servers.net 这个 TLD nameserver 查询到存储 github.com. 这个域名的权威服务器。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;60&lt;/span&gt; IN A 13.250.177.223 &lt;span class=&#34;c1&#34;&gt;# 得到了 github.com. 这个域名的一个 ip&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns-1707.awsdns-21.co.uk.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns3.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns2.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns-1283.awsdns-32.org.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns-421.awsdns-52.com.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns-520.awsdns-01.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns4.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;github.com.  &lt;span class=&#34;m&#34;&gt;900&lt;/span&gt; IN NS ns1.p16.dynect.net.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; Received &lt;span class=&#34;m&#34;&gt;275&lt;/span&gt; bytes from 204.13.250.16#53&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;ns2.p16.dynect.net&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt; in &lt;span class=&#34;m&#34;&gt;198&lt;/span&gt; ms 从 ns2.p16.dynect.net 这个权威服务器查询到的 github.com. 的 ip 是 13.250.177.223。至此，得到域名对应的 ip。&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;DNS 记录类型&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;dns-记录类型&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#dns-%e8%ae%b0%e5%bd%95%e7%b1%bb%e5%9e%8b&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;h3&gt;CNAME&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;cname&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#cname&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;code&gt;Canonical Name&lt;/code&gt; 域名指向另一个域名。见下图：&lt;/p&gt;
+&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt; dig -t cname music.163.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG 9.10.6 &amp;lt;&amp;lt;&amp;gt;&amp;gt; -t cname music.163.com
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; global options: +cmd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; Got answer:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; -&amp;gt;&amp;gt;HEADER&lt;span class=&#34;s&#34;&gt;&amp;lt;&amp;lt;- opco&lt;/span&gt;de: QUERY, status: NOERROR, id: &lt;span class=&#34;m&#34;&gt;12400&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; flags: qr aa rd ra&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; QUESTION SECTION:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;music.163.com.			IN	CNAME
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; ANSWER SECTION:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;music.163.com.		1	IN	CNAME	music.ntes53.netease.com.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; Query time: &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; msec
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; SERVER: 198.18.0.2#53&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;198.18.0.2&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; WHEN: Fri Oct &lt;span class=&#34;m&#34;&gt;06&lt;/span&gt; 11:41:17 CST &lt;span class=&#34;m&#34;&gt;2023&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;;;&lt;/span&gt; MSG SIZE  rcvd: &lt;span class=&#34;m&#34;&gt;82&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h3&gt;A&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;a&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#a&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;code&gt;address&lt;/code&gt; ip address&lt;/p&gt;
+&lt;h3&gt;NS&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;ns&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#ns&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;code&gt;name server&lt;/code&gt; 保存下一级域名的服务器，只设置成域名。&lt;/p&gt;
+&lt;h3&gt;PTR&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;ptr&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#ptr&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;code&gt;pointer record&lt;/code&gt;，根据 ip 查询域名。类似 ARP，用 ip 找 MAC 地址。&lt;/p&gt;
+&lt;h3&gt;MX&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;mx&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#mx&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;mail exchange 电子邮件服务器&lt;/p&gt;
+&lt;h3&gt;TXT&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;txt&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#txt&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;a href=&#34;https://allagora.wordpress.com/2022/03/22/use-dns-txt-lookup-to-gain-quick-insights-which-services-companies-are-using/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;可以获取这个网站在使用那些第三方服务&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Reference&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;reference&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#reference&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.ruanyifeng.com/blog/2016/06/dns.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;DNS 入门&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://kilyos.ee.bilkent.edu.tr/~ee538/lecture1.pdf&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Introduction and Layered Network Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.iana.org/domains/root/servers&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;root servers ips&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://root-servers.org/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;all-root-servers&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://tools.ietf.org/html/rfc2929&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;rfc-dns&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cloudflare.com/learning/dns/dns-server-types/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns-server-types&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cloudflare.com/learning/dns/what-is-dns/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;what is dns&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cloudflare.com/learning/dns/what-is-recursive-dns/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;what is recursive dns&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://simpledns.plus/help/dns-record-types&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns record types&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cs.cmu.edu/~pattis/15-1XX/common/handouts/ascii.html&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ascii&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.cloudflare.com/learning/dns/glossary/dns-zone/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns-zone&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bind9.readthedocs.io/en/v9.18.21/chapter3.html#localhost-zone-file&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;zone-file&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://viewdns.info/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;viewdns&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://allagora.wordpress.com/2022/03/22/use-dns-txt-lookup-to-gain-quick-insights-which-services-companies-are-using/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns record txt&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nslookup.io/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;https://www.nslookup.io/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://whois.gandi.net/zh-hans&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;域名信息查询&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.dnsperf.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns延迟测试&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://messwithdns.net/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns实践&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/ogham/dog&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns-client-dog&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mr-karan/doggo&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns-client-doggo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://dnsspeedtest.online/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dns速度测试&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

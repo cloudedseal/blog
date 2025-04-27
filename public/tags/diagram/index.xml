@@ -1,0 +1,43 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Diagram</title>
+    <link>http://localhost:1313/tags/diagram/</link>
+    <description>Recent content in Diagram on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 18 Jun 2021 14:54:23 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/diagram/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>java-keyword-volatile</title>
+      <link>http://localhost:1313/blog/java-keyword-volatile/</link>
+      <pubDate>Fri, 18 Jun 2021 14:54:23 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/java-keyword-volatile/</guid>
+      <description>
+        
+        
+        &lt;h2&gt;可见性问题&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;可见性问题&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e5%8f%af%e8%a7%81%e6%80%a7%e9%97%ae%e9%a2%98&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/java/java-volatile.svg&#34; alt=&#34;thread stack frame&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h2&gt;可见性问题思路&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;可见性问题思路&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e5%8f%af%e8%a7%81%e6%80%a7%e9%97%ae%e9%a2%98%e6%80%9d%e8%b7%af&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/java/thread-visibility.svg&#34; alt=&#34;线程可见性问题思路&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h2&gt;References&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;references&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#references&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://teachcomputerscience.com/von-neumann-harvard-architecture/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;von-neumann-harvard-architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Out-of-order_execution&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;out-of-order-execution(dynamic execution)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Instruction_scheduling&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Instruction_scheduling&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zhuanlan.zhihu.com/p/41872203&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;X86/GCC memory fence的一些见解&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

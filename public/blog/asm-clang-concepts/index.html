@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon shortcut" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+<link fetchpriority="low" href="/site.webmanifest" rel="manifest" />
+<title>asm-clang-concepts – Hextra</title>
+  <meta name="description" content="C 语言里的概念在 X86-64 汇编层面的分析. 汇编风格使用 AT&amp;T 风格. 编译器是 gcc-x86-64-9.1
+指针 A pointer is a programming language object that stores the memory address of another value located in computer memory. A pointer references a location in memory, and obtaining the value stored at that location is known as dereferencing the pointer." /><link rel="canonical" href="http://localhost:1313/blog/asm-clang-concepts/" itemprop="url" />
+
+<meta property="og:title" content="asm-clang-concepts" />
+<meta property="og:description" content="C 语言里的概念在 X86-64 汇编层面的分析. 汇编风格使用 AT&amp;T 风格. 编译器是 gcc-x86-64-9.1
+指针
+  A pointer is a programming language object that stores the memory address of another value located in computer memory.
+A pointer references a location in memory, and obtaining the value stored at that location is known as dereferencing the pointer." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/blog/asm-clang-concepts/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2019-06-25T16:57:59+08:00" />
+<meta property="article:modified_time" content="2019-06-25T16:57:59+08:00" />
+
+  <meta itemprop="name" content="asm-clang-concepts">
+  <meta itemprop="description" content="C 语言里的概念在 X86-64 汇编层面的分析. 汇编风格使用 AT&amp;T 风格. 编译器是 gcc-x86-64-9.1
+指针 A pointer is a programming language object that stores the memory address of another value located in computer memory. A pointer references a location in memory, and obtaining the value stored at that location is known as dereferencing the pointer.">
+  <meta itemprop="datePublished" content="2019-06-25T16:57:59+08:00">
+  <meta itemprop="dateModified" content="2019-06-25T16:57:59+08:00">
+  <meta itemprop="wordCount" content="3965">
+  <meta itemprop="keywords" content="Asm">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="asm-clang-concepts">
+  <meta name="twitter:description" content="C 语言里的概念在 X86-64 汇编层面的分析. 汇编风格使用 AT&amp;T 风格. 编译器是 gcc-x86-64-9.1
+指针 A pointer is a programming language object that stores the memory address of another value located in computer memory. A pointer references a location in memory, and obtaining the value stored at that location is known as dereferencing the pointer.">
+
+    <link href="/css/compiled/main.css" rel="stylesheet" />
+
+
+
+  <link href="/css/custom.css" rel="stylesheet" />
+
+
+  <script>
+     
+    const defaultTheme = 'system';
+
+    const setDarkTheme = () => {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+    const setLightTheme = () => {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+    }
+
+    if ("color-theme" in localStorage) {
+      localStorage.getItem("color-theme") === "dark" ? setDarkTheme() : setLightTheme();
+    } else {
+      defaultTheme === "dark" ? setDarkTheme() : setLightTheme();
+      if (defaultTheme === "system") {
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? setDarkTheme() : setLightTheme();
+      }
+    }
+  </script>
+
+  
+</head>
+<body dir="ltr"><div class="nav-container hx-sticky hx-top-0 hx-z-20 hx-w-full hx-bg-transparent print:hx-hidden">
+  <div class="nav-container-blur hx-pointer-events-none hx-absolute hx-z-[-1] hx-h-full hx-w-full hx-bg-white dark:hx-bg-dark hx-shadow-[0_2px_4px_rgba(0,0,0,.02),0_1px_0_rgba(0,0,0,.06)] contrast-more:hx-shadow-[0_0_0_1px_#000] dark:hx-shadow-[0_-1px_0_rgba(255,255,255,.1)_inset] contrast-more:dark:hx-shadow-[0_0_0_1px_#fff]"></div>
+
+  <nav class="hx-mx-auto hx-flex hx-items-center hx-justify-end hx-gap-2 hx-h-16 hx-px-6 hx-max-w-[90rem]">
+    <a class="hx-flex hx-items-center hover:hx-opacity-75 ltr:hx-mr-auto rtl:hx-ml-auto" href="/">
+        <span class="hx-mr-2 hx-font-extrabold hx-inline hx-select-none" title="Hextra">Hextra</span>
+    </a><a
+            title="Blog"
+            href="/blog"
+            
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block hx-font-medium"
+          >
+            <span class="hx-text-center">Blog</span>
+          </a><a
+            title="Tags"
+            href="/tags"
+            
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block hx-text-gray-600 hover:hx-text-gray-800 dark:hx-text-gray-400 dark:hover:hx-text-gray-200"
+          >
+            <span class="hx-text-center">Tags</span>
+          </a><div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+<a
+            title="About"
+            href="/blog/about/"
+            
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block hx-text-gray-600 hover:hx-text-gray-800 dark:hx-text-gray-400 dark:hover:hx-text-gray-200"
+          >
+            <span class="hx-text-center">About</span>
+          </a><button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden"><svg height=24 fill="none" viewBox="0 0 24 24" stroke="currentColor"><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8H20"></path></g><g><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16H20"></path></g></svg></button>
+  </nav>
+</div>
+
+  <div class="hx-mx-auto hx-flex max-w-full">
+    <div class="mobile-menu-overlay [transition:background-color_1.5s_ease] hx-fixed hx-inset-0 hx-z-10 hx-bg-black/80 dark:hx-bg-black/60 hx-hidden"></div>
+<aside class="sidebar-container hx-flex hx-flex-col print:hx-hidden md:hx-top-16 md:hx-shrink-0 md:hx-w-64 md:hx-self-start max-md:[transform:translate3d(0,-100%,0)] md:hx-hidden xl:hx-block">
+  
+  <div class="hx-px-4 hx-pt-4 md:hx-hidden">
+    <div class="search-wrapper hx-relative md:hx-w-64">
+  <div class="hx-relative hx-flex hx-items-center hx-text-gray-900 contrast-more:hx-text-gray-800 dark:hx-text-gray-300 contrast-more:dark:hx-text-gray-300">
+    <input
+      placeholder="Search..."
+      class="search-input hx-block hx-w-full hx-appearance-none hx-rounded-lg hx-px-3 hx-py-2 hx-transition-colors hx-text-base hx-leading-tight md:hx-text-sm hx-bg-black/[.05] dark:hx-bg-gray-50/10 focus:hx-bg-white dark:focus:hx-bg-dark placeholder:hx-text-gray-500 dark:placeholder:hx-text-gray-400 contrast-more:hx-border contrast-more:hx-border-current"
+      type="search"
+      value=""
+      spellcheck="false"
+    />
+    <kbd
+      class="hx-absolute hx-my-1.5 hx-select-none ltr:hx-right-1.5 rtl:hx-left-1.5 hx-h-5 hx-rounded hx-bg-white hx-px-1.5 hx-font-mono hx-text-[10px] hx-font-medium hx-text-gray-500 hx-border dark:hx-border-gray-100/20 dark:hx-bg-dark/50 contrast-more:hx-border-current contrast-more:hx-text-current contrast-more:dark:hx-border-current hx-items-center hx-gap-1 hx-transition-opacity hx-pointer-events-none hx-hidden sm:hx-flex"
+    >
+      CTRL K
+    </kbd>
+  </div>
+
+  <div>
+    <ul
+      class="search-results hextra-scrollbar hx-hidden hx-border hx-border-gray-200 hx-bg-white hx-text-gray-100 dark:hx-border-neutral-800 dark:hx-bg-neutral-900 hx-absolute hx-top-full hx-z-20 hx-mt-2 hx-overflow-auto hx-overscroll-contain hx-rounded-xl hx-py-2.5 hx-shadow-xl hx-max-h-[min(calc(50vh-11rem-env(safe-area-inset-bottom)),400px)] md:hx-max-h-[min(calc(100vh-5rem-env(safe-area-inset-bottom)),400px)] hx-inset-x-0 ltr:md:hx-left-auto rtl:md:hx-right-auto contrast-more:hx-border contrast-more:hx-border-gray-900 contrast-more:dark:hx-border-gray-50 hx-w-screen hx-min-h-[100px] hx-max-w-[min(calc(100vw-2rem),calc(100%+20rem))]"
+      style="transition: max-height 0.2s ease 0s;"
+    ></ul>
+  </div>
+</div>
+
+  </div>
+  <div class="hextra-scrollbar hx-overflow-y-auto hx-overflow-x-hidden hx-p-4 hx-grow md:hx-h-[calc(100vh-var(--navbar-height)-var(--menu-height))]">
+    <ul class="hx-flex hx-flex-col hx-gap-1 md:hx-hidden">
+      
+      
+          <li class=""><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/about/"
+    
+  >About
+    </a></li>
+      <li class="[word-break:break-word] hx-mt-5 hx-mb-2 hx-px-2 hx-py-1.5 hx-text-sm hx-font-semibold hx-text-gray-900 first:hx-mt-0 dark:hx-text-gray-100">
+        <span class="hx-cursor-default">More</span>
+      </li>
+    <li><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="/about"
+    
+  >About</a></li>
+    <li><a
+    class="hx-flex hx-items-center hx-justify-between hx-gap-2 hx-cursor-pointer hx-rounded hx-px-2 hx-py-1.5 hx-text-sm hx-transition-colors [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [word-break:break-word]
+      hx-text-gray-500 hover:hx-bg-gray-100 hover:hx-text-gray-900 contrast-more:hx-border contrast-more:hx-border-transparent contrast-more:hx-text-gray-900 contrast-more:hover:hx-border-gray-900 dark:hx-text-neutral-400 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 contrast-more:dark:hx-text-gray-50 contrast-more:dark:hover:hx-border-gray-50"
+    href="https://gohugo.io/documentation/"
+    target="_blank" rel="noreferrer"
+  >Hugo Docs ↗</a></li>
+    
+    </ul>
+
+    <div class="max-xl:hx-hidden hx-h-0 hx-w-64 hx-shrink-0"></div></div>
+  
+  
+    <div class="md:hx-hidden hx-justify-end hx-sticky hx-bottom-0 hx-bg-white dark:hx-bg-dark hx-mx-4 hx-py-4 hx-shadow-[0_-12px_16px_#fff] hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800 dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none hx-border-t" data-toggle-animation="show"><div class="hx-flex hx-justify-items-start hx-grow">
+    <button
+      title="Change language"
+      data-state="closed"
+      class="language-switcher hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 hx-grow"
+      type="button"
+      aria-label="Change language"
+    >
+      <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg><span>English</span></div>
+    </button>
+    <ul
+      class="language-options hx-hidden hx-z-20 hx-max-h-64 hx-overflow-auto hx-rounded-md hx-ring-1 hx-ring-black/5 hx-bg-white hx-py-1 hx-text-sm hx-shadow-lg dark:hx-ring-white/20 dark:hx-bg-neutral-800"
+      style="position: fixed; inset: auto auto 0px 0px; margin: 0px; min-width: 100px;"
+    >
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/blog/asm-clang-concepts/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >English<span class="hx-absolute hx-inset-y-0 hx-flex hx-items-center ltr:hx-right-3 rtl:hx-left-3"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span></a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/fa/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >فارسی</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/ja/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >日本語</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/zh-cn/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >简体中文</a>
+        </li>
+      </ul>
+  </div><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></div>
+</button>
+</div></aside>
+    
+<nav class="hextra-toc hx-order-last hx-hidden hx-w-64 hx-shrink-0 xl:hx-block print:hx-hidden hx-px-4" aria-label="table of contents">
+    <div class="hextra-scrollbar hx-sticky hx-top-16 hx-overflow-y-auto hx-pr-4 hx-pt-6 hx-text-sm [hyphens:auto] hx-max-h-[calc(100vh-var(--navbar-height)-env(safe-area-inset-bottom))] ltr:hx--mr-4 rtl:hx--ml-4"><p class="hx-mb-4 hx-font-semibold hx-tracking-tight">On this page</p><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e5%8f%98%e9%87%8f%e5%9c%b0%e5%9d%80">变量地址
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e5%af%84%e5%ad%98%e5%99%a8%e9%97%b4%e6%8e%a5%e5%af%bb%e5%9d%80">寄存器间接寻址
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#movq-operand-combinations">movq operand combinations
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90">代码分析
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#swap">swap
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#main">main
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e6%a0%88%e5%b8%a7%e5%88%86%e6%9e%90">栈帧分析
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e5%80%bc">函数返回值
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e7%bb%93%e8%ae%ba">结论
+        </a>
+      </li></ul><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e6%95%b4%e6%95%b0%e7%b1%bb%e5%9e%8b">整数类型
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#x86-64-registers">x86-64 registers
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#ia32-registers">IA32 registers
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90-1">代码分析
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e7%bb%93%e8%ae%ba-1">结论
+        </a>
+      </li></ul><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#c%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90">C代码分析
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#sumarray">sumArray
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#summatrix">sumMatrix
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#main-1">main
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#asm-%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90">Asm 代码分析
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#sumarray-1">sumArray
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#asm-summatrix">Asm sumMatrix
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#asm-main">Asm main
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#gdb-%e5%88%86%e6%9e%90-array">gdb 分析 array
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#arraysc">arrays.c
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#gdb-arrays">gdb arrays
+        </a>
+      </li></ul><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#code-analysis">Code Analysis
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#c">C
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="ltr:hx-pl-4 rtl:hx-pr-4 hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#asm">Asm
+        </a>
+      </li></ul><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#c-%e4%bb%a3%e7%a0%81">C 代码
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e6%b1%87%e7%bc%96%e4%bb%a3%e7%a0%81">汇编代码
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e6%b1%87%e7%bc%96%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90">汇编代码分析
+        </a>
+      </li></ul><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#c-%e4%bb%a3%e7%a0%81-1">C 代码
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e6%b1%87%e7%bc%96%e5%88%86%e6%9e%90">汇编分析
+        </a>
+      </li></ul><ul>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#c-%e4%bb%a3%e7%a0%81-2">c 代码
+        </a>
+      </li>
+      <li class="hx-my-2 hx-scroll-my-6 hx-scroll-py-6">
+        <a class="hx-font-semibold hx-inline-block hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-300 contrast-more:hx-text-gray-900 contrast-more:hx-underline contrast-more:dark:hx-text-gray-50 hx-w-full hx-break-words" href="#%e6%b1%87%e7%bc%96%e5%88%86%e6%9e%90-1">汇编分析
+        </a>
+      </li></ul><ul></ul>
+      <div class="hx-mt-8 hx-border-t hx-bg-white hx-pt-8 hx-shadow-[0_-12px_16px_white] dark:hx-bg-dark dark:hx-shadow-[0_-12px_16px_#111] hx-sticky hx-bottom-0 hx-flex hx-flex-col hx-items-start hx-gap-2 hx-pb-8 dark:hx-border-neutral-800 contrast-more:hx-border-t contrast-more:hx-border-neutral-400 contrast-more:hx-shadow-none contrast-more:dark:hx-border-neutral-400"><a class="hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50" href="https://github.com/buybyte/blog/edit/main/content/blog/blog/asm-clang-concepts.md" target="_blank" rel="noreferrer">Edit this page on GitHub →</a>
+        <button aria-hidden="true" id="backToTop" onClick="scrollUp();" class="hx-transition-all hx-duration-75 hx-opacity-0 hx-text-xs hx-font-medium hx-text-gray-500 hover:hx-text-gray-900 dark:hx-text-gray-400 dark:hover:hx-text-gray-100 contrast-more:hx-text-gray-800 contrast-more:dark:hx-text-gray-50">
+          <span>Scroll to top</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hx-inline ltr:hx-ml-1 rtl:hx-mr-1 hx-h-3.5 hx-w-3.5 hx-border hx-rounded-full hx-border-gray-500 hover:hx-border-gray-900 dark:hx-border-gray-400 dark:hover:hx-border-gray-100 contrast-more:hx-border-gray-800 contrast-more:dark:hx-border-gray-50">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+
+    <article class="hx-w-full hx-break-words hx-flex hx-min-h-[calc(100vh-var(--navbar-height))] hx-min-w-0 hx-justify-center hx-pb-8 hx-pr-[calc(env(safe-area-inset-right)-1.5rem)]">
+      <main class="hx-w-full hx-min-w-0 hx-max-w-6xl hx-px-6 hx-pt-4 md:hx-px-12">
+        
+  <div class="hx-mt-1.5 hx-flex hx-items-center hx-gap-1 hx-overflow-hidden hx-text-sm hx-text-gray-500 dark:hx-text-gray-400 contrast-more:hx-text-current">
+        <div class="hx-whitespace-nowrap hx-transition-colors hx-min-w-[24px] hx-overflow-hidden hx-text-ellipsis hover:hx-text-gray-900 dark:hover:hx-text-gray-100">
+          <a href="">Content Placeholder</a>
+        </div><svg class="hx-w-3.5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg><div class="hx-whitespace-nowrap hx-transition-colors hx-font-medium hx-text-gray-700 contrast-more:hx-font-bold contrast-more:hx-text-current dark:hx-text-gray-100 contrast-more:dark:hx-text-current">asm-clang-concepts</div>
+  </div>
+
+        <h1 class="hx-mt-2 hx-text-4xl hx-font-bold hx-tracking-tight hx-text-slate-900 dark:hx-text-slate-100">asm-clang-concepts</h1>
+        <div class="hx-mt-4 hx-mb-16 hx-text-gray-500 hx-text-sm hx-flex hx-items-center hx-flex-wrap hx-gap-y-2"><span class="hx-mr-1">June 25, 2019</span></div>
+        <div class="content">
+          <p>C 语言里的概念在 X86-64 汇编层面的分析. 汇编风格使用 AT&amp;T 风格. 编译器是 gcc-x86-64-9.1</p>
+<h1>指针</h1><blockquote>
+  <p>A <code>pointer</code> is a programming language object that stores the memory address of another value located in computer memory.
+A pointer references a location in memory, and obtaining the value stored at that location is known as dereferencing the pointer.</p>
+</blockquote>
+<h2>变量地址<span class="hx-absolute -hx-mt-20" id="变量地址"></span>
+    <a href="#%e5%8f%98%e9%87%8f%e5%9c%b0%e5%9d%80" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><blockquote>
+  <p>The lea (load effective address) instruction is used to put a memory address into the destination.
+leaq  -8(%rbp), %rdx
+-8(%rbp)等价于 mem[R[rbp] -8]. 将 rbp - 8 的值(这个值就是内存地址)复制到 rdx.</p>
+</blockquote>
+<h2>寄存器间接寻址<span class="hx-absolute -hx-mt-20" id="寄存器间接寻址"></span>
+    <a href="#%e5%af%84%e5%ad%98%e5%99%a8%e9%97%b4%e6%8e%a5%e5%af%bb%e5%9d%80" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><blockquote>
+  <p>movq    (%rax), %rdx
+将 rax 的值(X)指向的内存地址处的值复制到 rdx. 此时 rax 的值(X)就是指针, 所谓指针在汇编层面就是将一个内存地址放到寄存器, 利用寄存器间接寻址去获取这个地址的数值. 这就是 C 语言里指针的本质.</p>
+</blockquote>
+<h2>movq operand combinations<span class="hx-absolute -hx-mt-20" id="movq-operand-combinations"></span>
+    <a href="#movq-operand-combinations" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="https://github.com/stardustman/pictures/raw/main/img/address-modes.png" alt="movq operand combinations" loading="lazy" /></p>
+<h2>代码分析<span class="hx-absolute -hx-mt-20" id="代码分析"></span>
+    <a href="#%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>swap<span class="hx-absolute -hx-mt-20" id="swap"></span>
+    <a href="#swap" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">swap</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">pa</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">pb</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="o">*</span><span class="n">pa</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">pa</span> <span class="o">=</span> <span class="o">*</span><span class="n">pb</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">pb</span> <span class="o">=</span> <span class="n">temp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">swap</span><span class="p">(</span><span class="no">int</span><span class="p">*,</span> <span class="no">int</span><span class="p">*):</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rdi</span><span class="p">,</span> <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 将变量 a(10) 的地址(&amp;a)复制到 rbp - 24 地址处, 参数 pa
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rsi</span><span class="p">,</span> <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 将变量 b(100) 的地址(&amp;b)复制到 rbp - 32 地址处, 参数 pb 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 将 rbp - 24 指向的内存地址的数值(也就是变量 a 的地址)复制到 rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">(</span><span class="nv">%rax</span><span class="p">),</span> <span class="nv">%eax</span>    <span class="c1">; 将 rax 指向的内存地址的值 10(也就是变量 a) 复制到 eax, int a 4 Bytes 需要 32 bit 的 eax 即可.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; 将 eax 的值 10 (也就是变量 a) 复制到 rbp - 4 指向的内存地址处, 完成 temp = *pa;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 将 rbp - 32 指向的内存地址的值(也就是变量 b 的地址) 的地址复制到 rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">(</span><span class="nv">%rax</span><span class="p">),</span> <span class="nv">%edx</span>    <span class="c1">; 将 rax 的值指向的内存地址出的值 100(也就是变量 b) 复制到 edx, int b 4 Bytes 需要 32 bit 的 eax 即可.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 将 rbp - 24 指向的内存地址的值(也就是变量 a 的地址)复制到 rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="nv">%edx</span><span class="p">,</span> <span class="p">(</span><span class="nv">%rax</span><span class="p">)</span>    <span class="c1">; 将 edx 的值 100 (也就是变量 b)复制到 rax 指向的地址处(也就是变量 a 的地址), 完成 *pa = *pb
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 将 rbp - 32 指向的内存地址的值(也就是变量 b 的地址)复制到 rax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%edx</span>  <span class="c1">; 将 rbp - 4 指向的内存地址的值 10 复制到 edx
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="nv">%edx</span><span class="p">,</span> <span class="p">(</span><span class="nv">%rax</span><span class="p">)</span>    <span class="c1">; 将 edx 的值 10 复制到 rax 指向的地址处(也就是变量 b 的地址), 完成 *pb = temp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">nop</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>main<span class="hx-absolute -hx-mt-20" id="main"></span>
+    <a href="#main" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nl">main:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span> <span class="c1">; 保存调用者的 rbp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span> <span class="c1">; 开辟 main 函数的栈帧
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">subq</span>    <span class="no">$16</span><span class="p">,</span> <span class="nv">%rsp</span>  <span class="c1">; 分配 main 的栈空间 16 bytes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$10</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 将变量 a 复制到 rbp - 4 指向的地址处.(int a, 4 bytes)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$100</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 将变量 b 复制到 rbp - 8 指向的地址处.(int b, 4 bytes)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">leaq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdx</span> <span class="c1">; 将 rbp - 8 的值复制到 rdx 寄存器(int b 变量的地址)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">leaq</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 将 rbp - 4 的值复制到 rax 寄存器(int a 变量的地址)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="nv">%rsi</span> <span class="c1">; 复制 rdx(第二个参数: 变量 b 的地址) 到 rsi 寄存器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdi</span> <span class="c1">; 复制 rax(第一个参数: 变量 a 的地址) 到 rdi 寄存器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="no">swap</span><span class="p">(</span><span class="no">int</span><span class="p">*,</span> <span class="no">int</span><span class="p">*)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">leave</span>   <span class="c1">; 等价于 1. mov %rbp, %rsp(回收分配的栈空间) 2.pop %rbp(恢复 main 的 rbp)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="https://github.com/stardustman/pictures/raw/main/img/swap-c-asm.png" alt="swap-c-asm" loading="lazy" /></p>
+<h3>栈帧分析<span class="hx-absolute -hx-mt-20" id="栈帧分析"></span>
+    <a href="#%e6%a0%88%e5%b8%a7%e5%88%86%e6%9e%90" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><img src="https://github.com/stardustman/pictures/raw/main/img/swap-pointer.png" alt="main-swap-call-stack" loading="lazy" /></p>
+<blockquote>
+  <p>该图是 swap 执行完 int temp = *pa 后的状态.</p>
+</blockquote>
+<h3>函数返回值<span class="hx-absolute -hx-mt-20" id="函数返回值"></span>
+    <a href="#%e5%87%bd%e6%95%b0%e8%bf%94%e5%9b%9e%e5%80%bc" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><blockquote>
+  <p>the return value for the function should be placed in rax if it is not already there.
+返回值放在 rax 寄存器. 这是 x86-64 的约定. 架构设计决定只有 rax 一个寄存器存放返回值, 这也是高级语言返回值只能是一个的原因.
+C 语言里返回的结构体, 其实也就是结构体第一个字节的地址, 还是一个值.
+C 语言的函数返回值为 void, 在汇编层面也就是不用设置 rax.</p>
+</blockquote>
+<h3>结论<span class="hx-absolute -hx-mt-20" id="结论"></span>
+    <a href="#%e7%bb%93%e8%ae%ba" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><blockquote>
+  <p>指针本质就是寄存器间接寻址. 函数传参其实传的都是数值而已, 本质上都是数值的副本.</p>
+</blockquote>
+<h1>数据类型转化</h1><h2>整数类型<span class="hx-absolute -hx-mt-20" id="整数类型"></span>
+    <a href="#%e6%95%b4%e6%95%b0%e7%b1%bb%e5%9e%8b" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>x86-64 registers<span class="hx-absolute -hx-mt-20" id="x86-64-registers"></span>
+    <a href="#x86-64-registers" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><img src="https://github.com/stardustman/pictures/raw/main/img/x86-64-registers.png" alt="x86-64-registers" loading="lazy" /></p>
+<h3>IA32 registers<span class="hx-absolute -hx-mt-20" id="ia32-registers"></span>
+    <a href="#ia32-registers" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p><img src="https://github.com/stardustman/pictures/raw/main/img/IA32-registers.png" alt="IA32-registers" loading="lazy" /></p>
+<h3>代码分析<span class="hx-absolute -hx-mt-20" id="代码分析-1"></span>
+    <a href="#%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">testTypeConvert</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">i64bit</span> <span class="o">=</span> <span class="mi">1844674407370955199</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i32bit</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">i64bit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">unsigned</span> <span class="kt">short</span> <span class="n">i16bit</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">i32bit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">i8bit</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="p">)</span><span class="n">i16bit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="n">i64bit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">     <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%ld</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="n">i32bit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">     <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="n">i16bit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">     <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="n">i8bit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">testTypeConvert</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movabsq</span> <span class="no">$1844674407370955199</span><span class="p">,</span> <span class="nv">%rax</span> <span class="c1">;‭00011001 10011001 10011001 10011001 10011001 10011001 10011001 10111111‬
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 10011001 10011001 10011001 10111111‬ (2576980415)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movw</span>    <span class="nv">%ax</span><span class="p">,</span> <span class="p">-</span><span class="mi">14</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 10011001 10111111‬(39359)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movzwl</span>  <span class="p">-</span><span class="mi">14</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; 00000000 00000000 10011001 10111111‬ (zero extend)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movb</span>    <span class="nv">%al</span><span class="p">,</span> <span class="p">-</span><span class="mi">15</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 10111111‬(191)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">nop</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>结论<span class="hx-absolute -hx-mt-20" id="结论-1"></span>
+    <a href="#%e7%bb%93%e8%ae%ba-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><p>int 类型的数据转化, 利用不同长度的寄存器. 比如 int 转 char 类型. 直接取 int 的最后 8 位. char 转 int ,对应的寄存器高位补上 3 个字节的 0.</p>
+<h1>array</h1><h2>C代码分析<span class="hx-absolute -hx-mt-20" id="c代码分析"></span>
+    <a href="#c%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>sumArray<span class="hx-absolute -hx-mt-20" id="sumarray"></span>
+    <a href="#sumarray" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="nf">sumArray</span><span class="p">(</span><span class="kt">long</span> <span class="n">a</span><span class="p">[],</span> <span class="kt">long</span> <span class="n">length</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sum</span> <span class="o">+=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">sum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>sumMatrix<span class="hx-absolute -hx-mt-20" id="summatrix"></span>
+    <a href="#summatrix" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">sumMatrix</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="n">M</span><span class="p">][</span><span class="n">N</span><span class="p">]){</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">     <span class="k">for</span><span class="p">(;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">         <span class="k">for</span><span class="p">(;</span><span class="n">j</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">             <span class="n">sum</span> <span class="o">+=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="k">return</span> <span class="n">sum</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>main<span class="hx-absolute -hx-mt-20" id="main-1"></span>
+    <a href="#main-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">sum1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">a</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">11</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">33</span><span class="p">,</span><span class="mi">44</span><span class="p">,</span><span class="mi">55</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">},{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">}};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">sum</span> <span class="o">=</span> <span class="n">sumArray</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sum1</span> <span class="o">=</span> <span class="n">sumMatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>Asm 代码分析<span class="hx-absolute -hx-mt-20" id="asm-代码分析"></span>
+    <a href="#asm-%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>sumArray<span class="hx-absolute -hx-mt-20" id="sumarray-1"></span>
+    <a href="#sumarray-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">sumArray</span><span class="p">(</span><span class="no">long</span><span class="p">*,</span> <span class="no">long</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rdi</span><span class="p">,</span> <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; &amp;a[0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rsi</span><span class="p">,</span> <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; length of a
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">.L3:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">cltq</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">cmpq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; cmpq i, length 其实也就是 i - length
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">jle</span>     <span class="no">.L2</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">cltq</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">leaq</span>    <span class="mi">0</span><span class="p">(,</span><span class="nv">%rax</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span> <span class="nv">%rdx</span> <span class="c1">; rdx = 0 + 8 * i 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>  <span class="c1">; rax = &amp;a[0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="nv">%rax</span>       <span class="c1">; rax = &amp;a[0] + (0 + 8 * i), 地址增加 8 * i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">(</span><span class="nv">%rax</span><span class="p">),</span> <span class="nv">%rax</span>     <span class="c1">; rax = a[i]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="nv">%edx</span>       <span class="c1">; edx = a[i]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span>   <span class="c1">; eax = sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addl</span>    <span class="nv">%edx</span><span class="p">,</span> <span class="nv">%eax</span>       <span class="c1">; eax = a[i] + sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>   
+</span></span><span class="line"><span class="cl">        <span class="no">addl</span>    <span class="no">$1</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>    <span class="c1">; i = i + 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">jmp</span>     <span class="no">.L3</span>
+</span></span><span class="line"><span class="cl"><span class="nl">.L2:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; eax = sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">cltq</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<blockquote>
+  <p>通过 a[i] 访问数组的方法, 与具体的数据类型有关<br>
+movl    -8(%rbp), %eax ; i<br>
+cltq    ; convert long(32 bit) to quad(64 bit)<br>
+leaq    0(,%rax,8), %rdx ; rdx = 0 + 8 * i , 比例寻址. 8 是比例因子,也就是数据类型的字节数,long 8 bytes.<br>
+movq    -24(%rbp), %rax  ; rax = &amp;a[0]<br>
+addq    %rdx, %rax       ; rax = &amp;a[0] + (0 + 8 * i), 地址增加 8 * i<br>
+movq    (%rax), %rax     ; rax = a[i]</p>
+</blockquote>
+<h3>Asm sumMatrix<span class="hx-absolute -hx-mt-20" id="asm-summatrix"></span>
+    <a href="#asm-summatrix" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">sumMatrix</span><span class="p">(</span><span class="no">int</span> <span class="p">(*)</span> <span class="p">[</span><span class="mi">3</span><span class="p">]):</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rdi</span><span class="p">,</span> <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; &amp;matrix[0][0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; sum = 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">;i = 0
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span><span class="c1">;j = 0
+</span></span></span><span class="line"><span class="cl"><span class="c1">; 循环体开始
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">.L9:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">cmpl</span>    <span class="no">$1</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; i - 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">jg</span>      <span class="no">.L6</span> <span class="c1">; i - 1 &gt; 0 ;也就是 i = 2 时跳到 .L6, 退出循环. 否则进入内部循环.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">.L8:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">cmpl</span>    <span class="no">$2</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; cmpl 2, j
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">jg</span>      <span class="no">.L7</span> <span class="c1">; j - 2 &gt; 0 ;也就是 j = 3 时,内部循环结束, 跳到 .L7. 改变 i, 进入下一轮循环
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; eax = i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movslq</span>  <span class="nv">%eax</span><span class="p">,</span> <span class="nv">%rdx</span> <span class="c1">; rdx = i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="nv">%rax</span> <span class="c1">; rax = i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rax</span> <span class="c1">; rax = i + i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="nv">%rax</span> <span class="c1">; rax = i + (i + i)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">salq</span>    <span class="no">$2</span><span class="p">,</span> <span class="nv">%rax</span> <span class="c1">; rax = 2 * 2 * 3 * i rax 算术左移 2 位
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdx</span> <span class="c1">; rdx = 12 * i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; rax = &amp;matrix[0][0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdx</span> <span class="c1">; rdx = &amp;matrix[0][0] + 12 * i
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; eax = j
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">cltq</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">(</span><span class="nv">%rdx</span><span class="p">,</span><span class="nv">%rax</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; 4 * rax + rdx = &amp;matrix[0][0] + 12 * i + 4 * j), 也就是 &amp;matrix[i][j]. eax = matrix[i][j]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; sum = sum + eax
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">addl</span>    <span class="no">$1</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; j = j + 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">jmp</span>     <span class="no">.L8</span>
+</span></span><span class="line"><span class="cl"><span class="nl">.L7:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">addl</span>    <span class="no">$1</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; i = i + 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">jmp</span>     <span class="no">.L9</span>
+</span></span><span class="line"><span class="cl"><span class="nl">.L6:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span> <span class="c1">; eax = sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<blockquote>
+  <p>int matrix[i][j]<br>
+movl    -8(%rbp), %eax ; eax = i<br>
+movslq  %eax, %rdx ; rdx = i<br>
+movq    %rdx, %rax ; rax = i<br>
+addq    %rax, %rax ; rax = i + i<br>
+addq    %rdx, %rax ; rax = i + (i + i)<br>
+salq    $2, %rax ; rax = 2 * 2 * 3 * i rax 算术左移 2 位<br>
+movq    %rax, %rdx ; rdx = 12 * i<br>
+movq    -24(%rbp), %rax ; rax = &amp;matrix[0][0]<br>
+addq    %rax, %rdx ; rdx = &amp;matrix[0][0] + 12 * i<br>
+movl    -12(%rbp), %eax ; eax = j<br>
+cltq<br>
+movl    (%rdx,%rax,4), %eax ; 4 * rax + rdx = 4 * j + &amp;matrix[0][0] + 12 * i ), 也就是 &amp;matrix[i][j]. eax = matrix[i][j]. sizeOf(int) = 4<br>
+在 main 中可知 matrix[0][0],matrix[0][1] &hellip; matrix[1][1],matrix[1][2]顺序排列<br>
+当 i = 0, j = 0 时 4 * 0 + &amp;matrix[0][0] + 12 * 0 = &amp;matrix[0][0]<br>
+当 i = 0, j = 1 时 4 * 1 + &amp;matrix[0][0] + 12 * 0 = &amp;matrix[0][1]<br>
+当 i = 1, j = 0 时 4 * 0 + &amp;matrix[0][0] + 12 * 1, 此时是 &amp;matrix[0][0] + 12,<br>
+二维数组每一行的字节总数是: 3(每一行 3 个 int) * 4(int 数据大小), 此时的地址是 &amp;matrix[1][0]. <br>
+C 语言中二维数组作为函数参数传递时, 一定要给出列的数目, 不需要行数. 因为根据列数和数据类型的大小,就能算出下一行的第一个数据偏移起始位置. 偏移量 = 列数 * sizeOf(Data type)</p>
+</blockquote>
+<h3>Asm main<span class="hx-absolute -hx-mt-20" id="asm-main"></span>
+    <a href="#asm-main" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nl">main:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">subq</span>    <span class="no">$96</span><span class="p">,</span> <span class="nv">%rsp</span> <span class="c1">; 分配栈空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; sum1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$11</span><span class="p">,</span> <span class="p">-</span><span class="mi">64</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; a[0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$22</span><span class="p">,</span> <span class="p">-</span><span class="mi">56</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; a[1]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$33</span><span class="p">,</span> <span class="p">-</span><span class="mi">48</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; a[2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$44</span><span class="p">,</span> <span class="p">-</span><span class="mi">40</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; a[3]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$55</span><span class="p">,</span> <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; a[4]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$1</span><span class="p">,</span> <span class="p">-</span><span class="mi">96</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; matrix[0][0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$2</span><span class="p">,</span> <span class="p">-</span><span class="mi">92</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; matrix[0][1]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$3</span><span class="p">,</span> <span class="p">-</span><span class="mi">88</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; matrix[0][2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$4</span><span class="p">,</span> <span class="p">-</span><span class="mi">84</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; matrix[1][0]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$5</span><span class="p">,</span> <span class="p">-</span><span class="mi">80</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; matrix[1][1]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$6</span><span class="p">,</span> <span class="p">-</span><span class="mi">76</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; matrix[1][2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">; call sumArray
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">leaq</span>    <span class="p">-</span><span class="mi">64</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; a[0] 的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="no">$5</span><span class="p">,</span> <span class="nv">%esi</span> <span class="c1">; length of a, 第二个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdi</span> <span class="c1">; a[0] 的地址作为第一个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="no">sumArray</span><span class="p">(</span><span class="no">long</span><span class="p">*,</span> <span class="no">long</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 返回值复制给 sum
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">; call sumMatrix
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">leaq</span>    <span class="p">-</span><span class="mi">96</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; matrix[0][0] 的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdi</span> <span class="c1">; matrix[0][0] 的地址作为第一个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="no">sumMatrix</span><span class="p">(</span><span class="no">int</span> <span class="p">(*)</span> <span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 返回值复制给 sum1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">leave</span>   
+</span></span><span class="line"><span class="cl">        <span class="no">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<blockquote>
+  <p>由 main 可以看出, 编译器对待数组 a , a 就是数组第一个元素的地址.</p>
+</blockquote>
+<h2>gdb 分析 array<span class="hx-absolute -hx-mt-20" id="gdb-分析-array"></span>
+    <a href="#gdb-%e5%88%86%e6%9e%90-array" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>arrays.c<span class="hx-absolute -hx-mt-20" id="arraysc"></span>
+    <a href="#arraysc" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">a</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">b</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>gdb arrays<span class="hx-absolute -hx-mt-20" id="gdb-arrays"></span>
+    <a href="#gdb-arrays" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">stardust@os:container$ gcc -g arrays.c -o arrays
+</span></span><span class="line"><span class="cl">stardust@os:container$ gdb arrays 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">For help, <span class="nb">type</span> <span class="s2">&#34;help&#34;</span>.
+</span></span><span class="line"><span class="cl">Type <span class="s2">&#34;apropos word&#34;</span> to search <span class="k">for</span> commands related to <span class="s2">&#34;word&#34;</span>...
+</span></span><span class="line"><span class="cl">Reading symbols from arrays...
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> <span class="nb">break</span> main
+</span></span><span class="line"><span class="cl">Breakpoint <span class="m">1</span> at 0x1149: file arrays.c, line 1.
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> run
+</span></span><span class="line"><span class="cl">Starting program: /home/stardust/Desktop/k8s/container/arrays 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Breakpoint 1, main <span class="o">()</span> at arrays.c:1
+</span></span><span class="line"><span class="cl"><span class="m">1</span>       int main<span class="o">(){</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> next
+</span></span><span class="line"><span class="cl"><span class="m">2</span>           int a<span class="o">[]</span> <span class="o">=</span> <span class="o">{</span>1,2,3<span class="o">}</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a
+</span></span><span class="line"><span class="cl"><span class="nv">$1</span> <span class="o">=</span> <span class="o">{</span>32767, 1431654832, 21845<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> next 
+</span></span><span class="line"><span class="cl"><span class="m">3</span>           int b<span class="o">[]</span> <span class="o">=</span> <span class="o">{</span>7,8,9,10<span class="o">}</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print b
+</span></span><span class="line"><span class="cl"><span class="nv">$2</span> <span class="o">=</span> <span class="o">{</span>0, 0, 1431654496, 21845<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> next
+</span></span><span class="line"><span class="cl"><span class="m">4</span>           <span class="k">return</span> 0<span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print b
+</span></span><span class="line"><span class="cl"><span class="nv">$3</span> <span class="o">=</span> <span class="o">{</span>7, 8, 9, 10<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> ptype b <span class="c1"># 数组 b 的类型为 int [4]</span>
+</span></span><span class="line"><span class="cl"><span class="nb">type</span> <span class="o">=</span> int <span class="o">[</span>4<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> ptype a <span class="c1"># 数组 a 的类型为 int [3]</span>
+</span></span><span class="line"><span class="cl"><span class="nb">type</span> <span class="o">=</span> int <span class="o">[</span>3<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a
+</span></span><span class="line"><span class="cl"><span class="nv">$4</span> <span class="o">=</span> <span class="o">{</span>1, 2, 3<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print b
+</span></span><span class="line"><span class="cl"><span class="nv">$5</span> <span class="o">=</span> <span class="o">{</span>7, 8, 9, 10<span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print <span class="p">&amp;</span>a
+</span></span><span class="line"><span class="cl"><span class="nv">$6</span> <span class="o">=</span> <span class="o">(</span>int <span class="o">(</span>*<span class="o">)[</span>3<span class="o">])</span> 0x7fffffffdb14
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print <span class="p">&amp;</span>b
+</span></span><span class="line"><span class="cl"><span class="nv">$7</span> <span class="o">=</span> <span class="o">(</span>int <span class="o">(</span>*<span class="o">)[</span>4<span class="o">])</span> 0x7fffffffdb20
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print sizeof<span class="o">(</span>a<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$8</span> <span class="o">=</span> <span class="m">12</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print sizeof<span class="o">(</span>b<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$9</span> <span class="o">=</span> <span class="m">16</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> x/12xb <span class="p">&amp;</span>a
+</span></span><span class="line"><span class="cl">0x7fffffffdb14: 0x01    0x00    0x00    0x00    0x02    0x00    0x00    0x00
+</span></span><span class="line"><span class="cl">0x7fffffffdb1c: 0x03    0x00    0x00    0x00
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a + <span class="m">1</span> <span class="c1"># 指针运算</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$10</span> <span class="o">=</span> <span class="o">(</span>int *<span class="o">)</span> 0x7fffffffdb18
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a + <span class="m">2</span> <span class="c1"># 指针运算</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$11</span> <span class="o">=</span> <span class="o">(</span>int *<span class="o">)</span> 0x7fffffffdb1c
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print x/4b a + <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> x/4xb a + <span class="m">1</span> <span class="c1"># 查看 a[1]</span>
+</span></span><span class="line"><span class="cl">0x7fffffffdb18: 0x02    0x00    0x00    0x00
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> x/4xb a <span class="c1"># 查看 a[0]</span>
+</span></span><span class="line"><span class="cl">0x7fffffffdb14: 0x01    0x00    0x00    0x00
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a<span class="o">[</span>0<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$12</span> <span class="o">=</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print *<span class="o">(</span>a + 1<span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$13</span> <span class="o">=</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a<span class="o">[</span>1<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$14</span> <span class="o">=</span> <span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> ptype <span class="p">&amp;</span>a <span class="c1"># &amp;a 的类型是指向【 3 个 int 元素的数组 】的指针</span>
+</span></span><span class="line"><span class="cl"><span class="nb">type</span> <span class="o">=</span> int <span class="o">(</span>*<span class="o">)[</span>3<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> ptype <span class="p">&amp;</span>b
+</span></span><span class="line"><span class="cl"><span class="nb">type</span> <span class="o">=</span> int <span class="o">(</span>*<span class="o">)[</span>4<span class="o">]</span> <span class="c1"># &amp;b 的类型是指向【 4 个 int 元素的数组 】的指针</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print a + <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$15</span> <span class="o">=</span> <span class="o">(</span>int *<span class="o">)</span> 0x7fffffffdb18
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print <span class="p">&amp;</span>a + <span class="m">1</span> <span class="c1"># 下一个【 指向 3 个 int 元素的数组的指针 】的地址</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$16</span> <span class="o">=</span> <span class="o">(</span>int <span class="o">(</span>*<span class="o">)[</span>3<span class="o">])</span> 0x7fffffffdb20
+</span></span><span class="line"><span class="cl"><span class="o">(</span>gdb<span class="o">)</span> print <span class="p">&amp;</span>b
+</span></span><span class="line"><span class="cl"><span class="nv">$18</span> <span class="o">=</span> <span class="o">(</span>int <span class="o">(</span>*<span class="o">)[</span>4<span class="o">])</span> 0x7fffffffdb20</span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h1>struct</h1><blockquote>
+  <p>A struct in the C programming language (and many derivatives) is a composite data type (or record) declaration that defines a physically grouped list of variables to be placed under one name in a block of memory, allowing the different variables to be accessed via a single pointer, or the struct declared name which returns the same address.</p>
+</blockquote>
+<h2>Code Analysis<span class="hx-absolute -hx-mt-20" id="code-analysis"></span>
+    <a href="#code-analysis" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><h3>C<span class="hx-absolute -hx-mt-20" id="c"></span>
+    <a href="#c" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">Student</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">score</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">age</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">Student</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">;</span> <span class="err">结构体指针作为参数</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">testStruct</span><span class="p">(</span><span class="n">Student</span><span class="o">*</span> <span class="n">s</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">-&gt;</span><span class="n">id</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">-&gt;</span><span class="n">score</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="o">-&gt;</span><span class="n">age</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">;</span> <span class="err">返回结构体</span>
+</span></span><span class="line"><span class="cl"><span class="n">Student</span> <span class="nf">buildStruct</span><span class="p">(</span><span class="kt">long</span> <span class="n">id</span><span class="p">,</span> <span class="kt">long</span> <span class="n">score</span><span class="p">,</span> <span class="kt">long</span> <span class="n">age</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Student</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="p">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="p">.</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Student</span> <span class="n">s</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Student</span> <span class="n">ss</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="p">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s</span><span class="p">.</span><span class="n">age</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">testStruct</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ss</span> <span class="o">=</span> <span class="n">buildStruct</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">33</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h3>Asm<span class="hx-absolute -hx-mt-20" id="asm"></span>
+    <a href="#asm" class="subheading-anchor" aria-label="Permalink for this section"></a></h3><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">testStruct</span><span class="p">(</span><span class="no">Student</span><span class="p">*):</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rdi</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; s 的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="no">$10</span><span class="p">,</span> <span class="p">(</span><span class="nv">%rax</span><span class="p">)</span> <span class="c1">; s-&gt;id = 10
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="no">$100</span><span class="p">,</span> <span class="mi">8</span><span class="p">(</span><span class="nv">%rax</span><span class="p">)</span> <span class="c1">; s-&gt;score = 100
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="no">$1000</span><span class="p">,</span> <span class="mi">16</span><span class="p">(</span><span class="nv">%rax</span><span class="p">)</span> <span class="c1">; s-&gt;age = 1000
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">nop</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span>
+</span></span><span class="line"><span class="cl"><span class="nf">buildStruct</span><span class="p">(</span><span class="no">long</span><span class="p">,</span> <span class="no">long</span><span class="p">,</span> <span class="no">long</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rdi</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; main 中隐性变量 ss 的地址(rbp(main) - 96)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rsi</span><span class="p">,</span> <span class="p">-</span><span class="mi">16</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; score
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rcx</span><span class="p">,</span> <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; age
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">16</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdx</span> <span class="c1">; id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="p">(</span><span class="nv">%rax</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdx</span>  <span class="c1">; score
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="mi">8</span><span class="p">(</span><span class="nv">%rax</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdx</span> <span class="c1">; age
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="mi">16</span><span class="p">(</span><span class="nv">%rax</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="no">nop</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; main 中隐性变量 ss 的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span>
+</span></span><span class="line"><span class="cl"><span class="nl">main:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">subq</span>    <span class="no">$96</span><span class="p">,</span> <span class="nv">%rsp</span> <span class="c1">; 分配栈空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$1</span><span class="p">,</span> <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$10</span><span class="p">,</span> <span class="p">-</span><span class="mi">24</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; score
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$100</span><span class="p">,</span> <span class="p">-</span><span class="mi">16</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; age
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">leaq</span>    <span class="p">-</span><span class="mi">32</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 结构体起始地址,也就是第一个字节的内存地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdi</span> <span class="c1">; 这个就类似 Java 中的 this 指针了
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="no">testStruct</span><span class="p">(</span><span class="no">Student</span><span class="p">*)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">leaq</span>    <span class="p">-</span><span class="mi">96</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 隐性的变量 ss 起始地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$33</span><span class="p">,</span> <span class="nv">%ecx</span> 
+</span></span><span class="line"><span class="cl">        <span class="no">movl</span>    <span class="no">$22</span><span class="p">,</span> <span class="nv">%edx</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="no">$11</span><span class="p">,</span> <span class="nv">%esi</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="nv">%rdi</span> <span class="c1">; 隐形的参数, 像不像 Java 里的 this 啊. 编译器动的手脚.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="no">buildStruct</span><span class="p">(</span><span class="no">long</span><span class="p">,</span> <span class="no">long</span><span class="p">,</span> <span class="no">long</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">96</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; ss.id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">88</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rdx</span> <span class="c1">; ss.score
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">64</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="no">movq</span>    <span class="nv">%rdx</span><span class="p">,</span> <span class="p">-</span><span class="mi">56</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> 
+</span></span><span class="line"><span class="cl">        <span class="no">movq</span>    <span class="p">-</span><span class="mi">80</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; ss.age
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rax</span><span class="p">,</span> <span class="p">-</span><span class="mi">48</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">leave</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<blockquote>
+  <p>结构体使用的是一块连续的内存地址. 结构体指针也就是结构体第一个字节的地址.</p>
+</blockquote>
+<h1>Variable Shadowing</h1><blockquote>
+  <p>代码块、块级变量</p>
+</blockquote>
+<h2>C 代码<span class="hx-absolute -hx-mt-20" id="c-代码"></span>
+    <a href="#c-%e4%bb%a3%e7%a0%81" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">test_variable_shadow</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 代码块开始
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">{</span> 
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 代码块结束
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">10000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>汇编代码<span class="hx-absolute -hx-mt-20" id="汇编代码"></span>
+    <a href="#%e6%b1%87%e7%bc%96%e4%bb%a3%e7%a0%81" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">test_variable_shadow</span><span class="p">():</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="no">$10</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>   <span class="c1">; int a = 10
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$100</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>  <span class="c1">; int a = 100
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">addl</span>    <span class="no">$1000</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">12</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; int b = a + 1000 代码块里的 a
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">addl</span>    <span class="no">$10000</span><span class="p">,</span> <span class="nv">%eax</span>    
+</span></span><span class="line"><span class="cl">        <span class="no">movl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="p">-</span><span class="mi">16</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; int c = a + 10000
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">nop</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="https://github.com/stardustman/pictures/raw/main/img/c-variable-shadow.png" alt="c-variable-shadow" loading="lazy" /></p>
+<h2>汇编代码分析<span class="hx-absolute -hx-mt-20" id="汇编代码分析"></span>
+    <a href="#%e6%b1%87%e7%bc%96%e4%bb%a3%e7%a0%81%e5%88%86%e6%9e%90" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><p><img src="https://github.com/stardustman/pictures/raw/main/img/variable_shadowing.png" alt="块级变量隐藏" loading="lazy" /></p>
+<h1>funcation pointer</h1><blockquote>
+  <p>A function pointer can be declared as: (return type of function) (*name of pointer) (type of function arguments)</p>
+</blockquote>
+<h2>C 代码<span class="hx-absolute -hx-mt-20" id="c-代码-1"></span>
+    <a href="#c-%e4%bb%a3%e7%a0%81-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="cp">#include&lt;stdio.h&gt; 
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="kt">int</span> <span class="nf">add</span> <span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> 
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span><span class="p">(</span><span class="o">*</span><span class="n">fptr</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">);</span> <span class="c1">// Function pointer 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">fptr</span> <span class="o">=</span> <span class="n">add</span><span class="p">;</span> <span class="c1">// Assign address to function pointer 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">add</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">fptr</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>汇编分析<span class="hx-absolute -hx-mt-20" id="汇编分析"></span>
+    <a href="#%e6%b1%87%e7%bc%96%e5%88%86%e6%9e%90" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nf">add</span><span class="p">(</span><span class="no">int</span><span class="p">,</span> <span class="no">int</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="nv">%edi</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="nv">%esi</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%edx</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">addl</span>    <span class="nv">%edx</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span>
+</span></span><span class="line"><span class="cl"><span class="nl">main:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span> <span class="c1">; 保存调用者的 rbp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span> <span class="c1">; 开辟 main 的栈帧
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">subq</span>    <span class="no">$16</span><span class="p">,</span> <span class="nv">%rsp</span>  <span class="c1">; 分配栈帧空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="no">$add</span><span class="p">(</span><span class="no">int</span><span class="p">,</span> <span class="no">int</span><span class="p">),</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; 将 add(int, int) 第一条指令的地址保存在 rbp - 8 这个位置处
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$3</span><span class="p">,</span> <span class="nv">%esi</span> <span class="c1">; 从右往左保存第一个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$2</span><span class="p">,</span> <span class="nv">%edi</span> <span class="c1">; 从右往左保存第二个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="no">add</span><span class="p">(</span><span class="no">int</span><span class="p">,</span> <span class="no">int</span><span class="p">)</span> <span class="c1">; 正常的 call 调用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movq</span>    <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">),</span> <span class="nv">%rax</span> <span class="c1">; 将 add(int, int) 的地址复制到 rax 寄存器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$3</span><span class="p">,</span> <span class="nv">%esi</span> <span class="c1">; 从右往左保存第一个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$2</span><span class="p">,</span> <span class="nv">%edi</span> <span class="c1">; 从右往左保存第二个参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">call</span>    <span class="p">*</span><span class="nv">%rax</span>    <span class="c1">; 通过函数指针调用函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">leave</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="https://github.com/stardustman/pictures/raw/main/img/function-pointer.png" alt="函数指针" loading="lazy" /></p>
+<h1>enum</h1><blockquote>
+  <p>编译器在背后搞鬼，自动为每一个 enum 常量进行编号。</p>
+</blockquote>
+<h2>c 代码<span class="hx-absolute -hx-mt-20" id="c-代码-2"></span>
+    <a href="#c-%e4%bb%a3%e7%a0%81-2" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">enum</span> <span class="n">day</span><span class="p">{</span> <span class="n">monday</span><span class="p">,</span> <span class="n">tuesday</span><span class="p">,</span> <span class="n">wednesday</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="n">thursday</span><span class="p">,</span> <span class="n">friday</span><span class="p">,</span> <span class="n">saturday</span><span class="p">,</span> <span class="n">sunday</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">enum</span> <span class="n">color</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">RED</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">YELLOW</span><span class="p">,</span> <span class="n">GREEN</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">enum</span> <span class="n">day</span> <span class="n">foo</span> <span class="o">=</span> <span class="n">friday</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">enum</span> <span class="n">color</span> <span class="n">color</span> <span class="o">=</span> <span class="n">GREEN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<h2>汇编分析<span class="hx-absolute -hx-mt-20" id="汇编分析-1"></span>
+    <a href="#%e6%b1%87%e7%bc%96%e5%88%86%e6%9e%90-1" class="subheading-anchor" aria-label="Permalink for this section"></a></h2><div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code">
+
+<div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gas" data-lang="gas"><span class="line"><span class="cl"><span class="nl">main:</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pushq</span>   <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movq</span>    <span class="nv">%rsp</span><span class="p">,</span> <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">movl</span>    <span class="no">$4</span><span class="p">,</span> <span class="p">-</span><span class="mi">4</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; friday 编号为 4，默认从 0 开始编号。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$3</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="nv">%rbp</span><span class="p">)</span> <span class="c1">; GREEN 编号为 3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">movl</span>    <span class="no">$0</span><span class="p">,</span> <span class="nv">%eax</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">popq</span>    <span class="nv">%rbp</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">ret</span></span></span></code></pre></div></div><div class="hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0">
+  <button
+    class="hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50"
+    title="Copy code"
+  >
+    <div class="copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4"></div>
+    <div class="success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4"></div>
+  </button>
+</div>
+</div>
+<p><img src="https://github.com/stardustman/pictures/raw/main/img/c-enum.png" alt=" 枚举" loading="lazy" /></p>
+<h1>references</h1><ol>
+<li><a href="https://en.wikipedia.org/wiki/Pointer_%28computer_programming%29" target="_blank" rel="noopener">pointer</a></li>
+<li><a href="https://stackoverflow.com/questions/29790175/assembly-x86-leave-instruction/29790275" target="_blank" rel="noopener">lea instruction</a></li>
+<li><a href="https://aaronbloomfield.github.io/pdr/book/x86-64bit-ccc-chapter.pdf" target="_blank" rel="noopener">x86 c call convention</a></li>
+<li><a href="https://www.cs.auckland.ac.nz/references/macvax/op-codes/Instructions/movz.html" target="_blank" rel="noopener">opcode-movz</a></li>
+<li><a href="http://faydoc.tripod.com/cpu/movsd.htm" target="_blank" rel="noopener">movsd</a></li>
+<li><a href="https://www.geeksforgeeks.org/pass-2d-array-parameter-c/" target="_blank" rel="noopener">pass-2d-array-parameter-c</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Variable_shadowing" target="_blank" rel="noopener">Variable Shadowing</a></li>
+<li><a href="https://www.thegeekstuff.com/2012/01/advanced-c-pointers" target="_blank" rel="noopener">function pointer</a></li>
+<li><a href="https://www.recurse.com/blog/5-learning-c-with-gdb" target="_blank" rel="noopener">5-learning-c-with-gdb</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/483372519" target="_blank" rel="noopener">用 gdb 学 C 语言</a></li>
+</ol>
+
+        </div>
+    <div class="hx-mt-12 hx-mb-8 hx-block hx-text-xs hx-text-gray-500 ltr:hx-text-right rtl:hx-text-left dark:hx-text-gray-400">Last updated on <time datetime="2019-06-25T16:57:59.000Z">June 25, 2019</time></div><div class="hx-mb-8 hx-flex hx-items-center hx-border-t hx-pt-8 dark:hx-border-neutral-800 contrast-more:hx-border-neutral-400 dark:contrast-more:hx-border-neutral-400 print:hx-hidden"><a
+        href="/blog/asm-how-x86-64-arguments-pass/"
+        title="asm-how-x86-64-arguments-pass"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-pr-4 rtl:hx-pl-4"
+      ><svg class="hx-inline hx-h-5 hx-shrink-0 ltr:hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>asm-how-x86-64-arguments-pass</a><a
+        href="/blog/asm-how-recursion-function-execute/"
+        title="asm-how-recursion-function-execute"
+        class="hx-flex hx-max-w-[50%] hx-items-center hx-gap-1 hx-py-4 hx-text-base hx-font-medium hx-text-gray-600 hx-transition-colors [word-break:break-word] hover:hx-text-primary-600 dark:hx-text-gray-300 md:hx-text-lg ltr:hx-ml-auto ltr:hx-pl-4 ltr:hx-text-right rtl:hx-mr-auto rtl:hx-pr-4 rtl:hx-text-left"
+      >asm-how-recursion-function-execute<svg class="hx-inline hx-h-5 hx-shrink-0 rtl:-hx-rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></a></div></main>
+    </article>
+  </div>
+
+      <footer class="hextra-footer hx-bg-gray-100 hx-pb-[env(safe-area-inset-bottom)] dark:hx-bg-neutral-900 print:hx-bg-transparent"><div class="hx-mx-auto hx-flex hx-gap-2 hx-py-2 hx-px-4 hx-max-w-screen-xl"><div class="hx-flex hx-justify-items-start ">
+    <button
+      title="Change language"
+      data-state="closed"
+      class="language-switcher hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50 hx-grow"
+      type="button"
+      aria-label="Change language"
+    >
+      <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg><span>English</span></div>
+    </button>
+    <ul
+      class="language-options hx-hidden hx-z-20 hx-max-h-64 hx-overflow-auto hx-rounded-md hx-ring-1 hx-ring-black/5 hx-bg-white hx-py-1 hx-text-sm hx-shadow-lg dark:hx-ring-white/20 dark:hx-bg-neutral-800"
+      style="position: fixed; inset: auto auto 0px 0px; margin: 0px; min-width: 100px;"
+    >
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/blog/asm-clang-concepts/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >English<span class="hx-absolute hx-inset-y-0 hx-flex hx-items-center ltr:hx-right-3 rtl:hx-left-3"><svg height=1em width=1em xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span></a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/fa/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >فارسی</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/ja/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >日本語</a>
+        </li>
+      
+        
+        <li class="hx-flex hx-flex-col">
+          <a
+            href="/zh-cn/"
+            class="hx-text-gray-800 dark:hx-text-gray-100 hover:hx-bg-primary-50 hover:hx-text-primary-600 hover:dark:hx-bg-primary-500/10 hover:dark:hx-text-primary-600 hx-relative hx-cursor-pointer hx-whitespace-nowrap hx-py-1.5 hx-transition-colors ltr:hx-pl-3 ltr:hx-pr-9 rtl:hx-pr-3 rtl:hx-pl-9"
+          >简体中文</a>
+        </li>
+      </ul>
+  </div><button
+  title="Change theme"
+  data-theme="light"
+  class="theme-toggle hx-group hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height=12 class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height=12 class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+</button>
+</div><hr class="dark:hx-border-neutral-800" /><div
+      class="hextra-custom-footer hx-max-w-screen-xl hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400"
+    ></div><div
+        class="hx-max-w-screen-xl hx-mx-auto hx-flex hx-justify-center hx-py-12 hx-pl-[max(env(safe-area-inset-left),1.5rem)] hx-pr-[max(env(safe-area-inset-right),1.5rem)] hx-text-gray-600 dark:hx-text-gray-400 md:hx-justify-start"
+      >
+        <div class="hx-flex hx-w-full hx-flex-col hx-items-center sm:hx-items-start"><div class="hx-font-semibold"><a class="hx-flex hx-text-sm hx-items-center hx-gap-1 hx-text-current" target="_blank" rel="noopener noreferrer" title="Hextra GitHub Homepage" href="https://github.com/imfing/hextra">
+    <span>Powered by Hextra<svg height=1em class="hx-inline-block ltr:hx-ml-1 rtl:hx-mr-1 hx-align-[-2.5px]" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="m 105.50024,22.224647 c -9.59169,-5.537563 -21.40871,-5.537563 -31.000093,0 L 39.054693,42.689119 C 29.463353,48.226675 23.55484,58.460531 23.55484,69.535642 v 40.928918 c 0,11.07542 5.908513,21.3092 15.499853,26.84652 l 35.445453,20.46446 c 9.591313,5.53732 21.408404,5.53732 31.000094,0 l 35.44507,-20.46446 c 9.59131,-5.53732 15.49985,-15.7711 15.49985,-26.84652 V 69.535642 c 0,-11.075111 -5.90854,-21.308967 -15.49985,-26.846523 z M 34.112797,85.737639 c -1.384445,2.397827 -1.384445,5.352099 0,7.749927 l 24.781554,42.922974 c 1.38437,2.39783 3.942853,3.87496 6.711592,3.87496 h 49.563107 c 2.76905,0 5.3273,-1.47713 6.71144,-3.87496 l 24.78194,-42.922974 c 1.38414,-2.397828 1.38414,-5.3521 0,-7.749927 L 121.88049,42.814746 c -1.38414,-2.397828 -3.94239,-3.874964 -6.71144,-3.874964 H 65.605944 c -2.768739,0 -5.327223,1.477059 -6.711592,3.874964 z" style="stroke-width:0.774993" /></svg></span>
+  </a></div><div class="hx-mt-6 hx-text-xs">© 2025 Hextra Project.</div></div>
+      </div></footer>
+    
+    <script defer src="/js/main.js" integrity=""></script>
+<script defer src="/lib/flexsearch/flexsearch.bundle.min.0425860527cc9968f9f049421c7a56b39327d475e2e3a8f550416be3a9134327.js" integrity="sha256-BCWGBSfMmWj58ElCHHpWs5Mn1HXi46j1UEFr46kTQyc="></script>
+    <script defer src="/en.search.js" integrity=""></script>
+  </body>
+</html>

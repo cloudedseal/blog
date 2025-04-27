@@ -1,0 +1,164 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Zookeeper</title>
+    <link>http://localhost:1313/tags/zookeeper/</link>
+    <description>Recent content in Zookeeper on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 21 Oct 2023 14:19:13 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/zookeeper/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>Zookeeper Transaction Log</title>
+      <link>http://localhost:1313/blog/zookeeper-transaction-log/</link>
+      <pubDate>Sat, 21 Oct 2023 14:19:13 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/zookeeper-transaction-log/</guid>
+      <description>
+        
+        
+        &lt;blockquote&gt;
+  &lt;p&gt;分析的 zookeeper 代码版本为 3.9.1 。 &lt;br&gt;
+zookeer 的 transaction log 为二进制文件，采用的是大端序。&lt;br&gt;
+zookeeper 数据持久化的功能在  &lt;code&gt;zookeeper/server/persistence&lt;/code&gt; 下。&lt;br&gt;
+解析日志就可以获取 zookeeper 的数据。可以用来实现实时备份到另一个独立的 zookeeper 集群。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1&gt;日志文件命名规则&lt;/h1&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/**
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;    * Creates a valid transaction log file name.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;    *
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;    * @param zxid used as a file name suffix (extension)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;    * @return file name
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;    */&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;public&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;static&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;String&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;makeLogName&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;long&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;zxid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;k&#34;&gt;return&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;FileTxnLog&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;LOG_FILE_PREFIX&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;o&#34;&gt;+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;o&#34;&gt;+&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Long&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;toHexString&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;zxid&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h1&gt;日志文件布局&lt;/h1&gt;&lt;p&gt;由 File Header、TxnList、ZeroPad 三部分构成&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/zookeeper-transaction-log-file-format.svg&#34; alt=&#34;zk-transaction-log-file-format&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h1&gt;&lt;code&gt;log.500000004&lt;/code&gt; 文件分析&lt;/h1&gt;&lt;p&gt;分析的日志文件 &lt;a href=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/log.500000004&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;log.500000004&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;二进制文件查看&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;二进制文件查看&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e4%ba%8c%e8%bf%9b%e5%88%b6%e6%96%87%e4%bb%b6%e6%9f%a5%e7%9c%8b&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;div class=&#34;hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code&#34;&gt;
+
+&lt;div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;xxd log.500000004.new&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;head -n &lt;span class=&#34;m&#34;&gt;50&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000000: 5a4b 4c47 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0002&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ZKLG............
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000010: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; eaa1 0b2a &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0030&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0300&lt;/span&gt; c755  .......*...0...U
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000020: cf61 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0005&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0004&lt;/span&gt;  .a..............
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000030: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 018b &lt;span class=&#34;m&#34;&gt;1815&lt;/span&gt; 73ab ffff fff6 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7530&lt;/span&gt;  ......s.......u0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000040: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0002&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 000a a5c7 &lt;span class=&#34;m&#34;&gt;7377&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ..........swB...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000050: 005f 8e12 2a00 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 5f03 00c7 55cf &lt;span class=&#34;m&#34;&gt;6100&lt;/span&gt;  ._..*..._...U.a.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000060: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0100&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0001&lt;/span&gt;  ................
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000070: 8b18 159e &lt;span class=&#34;m&#34;&gt;3300&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0100&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 0b2f 612f  ....3......../a/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000080: &lt;span class=&#34;m&#34;&gt;7374&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6172&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6475&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7374&lt;/span&gt; ffff ffff &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0001&lt;/span&gt;  stardust........
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000090: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 001f &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0005&lt;/span&gt; 776f 726c &lt;span class=&#34;m&#34;&gt;6400&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ........world...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000000a0: &lt;span class=&#34;m&#34;&gt;0661&lt;/span&gt; 6e79 6f6e &lt;span class=&#34;m&#34;&gt;6500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 000d &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0002&lt;/span&gt;  .anyone.........
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000000b0: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 000c &lt;span class=&#34;m&#34;&gt;6113&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4355&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0007&lt;/span&gt; 0a0e  ....a.CUB.......
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000000c0: &lt;span class=&#34;m&#34;&gt;4000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 4c03 00c7 55cf &lt;span class=&#34;m&#34;&gt;6100&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  @...L...U.a.....
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000000d0: &lt;span class=&#34;m&#34;&gt;0200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0600&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0001&lt;/span&gt; 8b18 15e5  ................
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000000e0: b800 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 0b2f 612f &lt;span class=&#34;m&#34;&gt;7374&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6172&lt;/span&gt;  ........./a/star
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000000f0: &lt;span class=&#34;m&#34;&gt;6475&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7374&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0009&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7468&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6553&lt;/span&gt; 686f &lt;span class=&#34;m&#34;&gt;6775&lt;/span&gt;  dust....theShogu
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000100: 6e00 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0100&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 0c14 &lt;span class=&#34;m&#34;&gt;8609&lt;/span&gt;  n...............
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000110: d442 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; e9ee 12d7 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0058&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0300&lt;/span&gt;  .B...........X..
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000120: c755 cf61 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0003&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0005&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  .U.a............
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000130: &lt;span class=&#34;m&#34;&gt;0007&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 018b &lt;span class=&#34;m&#34;&gt;1816&lt;/span&gt; 66ef &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0005&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ........f.......
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000140: 000b 2f61 2f73 &lt;span class=&#34;m&#34;&gt;7461&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7264&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7573&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;7400&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ../a/stardust...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000150: &lt;span class=&#34;m&#34;&gt;1574&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6865&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;3133&lt;/span&gt; 4c6f &lt;span class=&#34;m&#34;&gt;6164&lt;/span&gt; 734f &lt;span class=&#34;m&#34;&gt;6654&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6865&lt;/span&gt;  .the13LoadsOfThe
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000160: &lt;span class=&#34;m&#34;&gt;5368&lt;/span&gt; 6f67 756e &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0002&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0002&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  Shogun..........
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000170: 000c 39b4 35f7 &lt;span class=&#34;m&#34;&gt;4200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 001a cb0a c700  ..9.5.B.........
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000180: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 3b03 00c7 55cf &lt;span class=&#34;m&#34;&gt;6100&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt;  ..&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;...U.a.......
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000190: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0800&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0001&lt;/span&gt; 8b18 167c ed00  .............&lt;span class=&#34;p&#34;&gt;|&lt;/span&gt;..
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000001a0: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 0b2f 612f &lt;span class=&#34;m&#34;&gt;7374&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6172&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;6475&lt;/span&gt;  ......./a/stardu
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000001b0: &lt;span class=&#34;m&#34;&gt;7374&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0002&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 000b 676d 37e4 &lt;span class=&#34;m&#34;&gt;4200&lt;/span&gt;  st........gm7.B.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000001c0: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 00ef 370a d300 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;3003&lt;/span&gt; 00c7 55cf  ....7.....0...U.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000001d0: &lt;span class=&#34;m&#34;&gt;6100&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0500&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0900&lt;/span&gt;  a...............
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000001e0: &lt;span class=&#34;m&#34;&gt;0001&lt;/span&gt; 8b18 16f9 d4ff ffff f500 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ................
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;000001f0: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0200&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; 0b67 6d37 e442 &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  .......gm7.B....
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000200: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ................
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000210: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ................
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;00000220: &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0000&lt;/span&gt;  ................&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&#34;hextra-code-copy-btn-container hx-opacity-0 hx-transition group-hover/code:hx-opacity-100 hx-flex hx-gap-1 hx-absolute hx-m-[11px] hx-right-0 hx-top-0&#34;&gt;
+  &lt;button
+    class=&#34;hextra-code-copy-btn hx-group/copybtn hx-transition-all active:hx-opacity-50 hx-bg-primary-700/5 hx-border hx-border-black/5 hx-text-gray-600 hover:hx-text-gray-900 hx-rounded-md hx-p-1.5 dark:hx-bg-primary-300/10 dark:hx-border-white/10 dark:hx-text-gray-400 dark:hover:hx-text-gray-50&#34;
+    title=&#34;Copy code&#34;
+  &gt;
+    &lt;div class=&#34;copy-icon group-[.copied]/copybtn:hx-hidden hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+    &lt;div class=&#34;success-icon hx-hidden group-[.copied]/copybtn:hx-block hx-pointer-events-none hx-h-4 hx-w-4&#34;&gt;&lt;/div&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h2&gt;log 二进制文件图解&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;log-二进制文件图解&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#log-%e4%ba%8c%e8%bf%9b%e5%88%b6%e6%96%87%e4%bb%b6%e5%9b%be%e8%a7%a3&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/zookeeper-log.500000004.jpg&#34; alt=&#34;log.50000004.jpg&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h3&gt;log.&lt;code&gt;500000004&lt;/code&gt; 怎么来的？&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;log500000004-怎么来的&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#log500000004-%e6%80%8e%e4%b9%88%e6%9d%a5%e7%9a%84&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;可以看到 txn log 文件，写入的第一个 transaction 的 &lt;code&gt;zxid&lt;/code&gt; 就是 &lt;code&gt;0x0000000500000004&lt;/code&gt;。这个就是 log.&lt;code&gt;500000004&lt;/code&gt; 的由来。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;什么是 &lt;code&gt;zxid&lt;/code&gt;？&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;什么是-zxid&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e4%bb%80%e4%b9%88%e6%98%af-zxid&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/zookeeper-zxid-format.svg&#34; alt=&#34;zookeeper-zxid&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h3&gt;文件结构&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;文件结构&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#%e6%96%87%e4%bb%b6%e7%bb%93%e6%9e%84&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;第一行 FileHeader。&lt;/li&gt;
+&lt;li&gt;第二行开始是 transaction log, 每一个 transaction log 用 0x42 作为 EOF。可以知道 &lt;code&gt;log.500000004&lt;/code&gt;有 6 个 transaction。&lt;/li&gt;
+&lt;li&gt;剩余的是 Zero Pad。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;transaction(txn) 类型&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;transactiontxn-类型&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#transactiontxn-%e7%b1%bb%e5%9e%8b&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;blockquote&gt;
+  &lt;p&gt;仅分析 &lt;code&gt;log.500000004&lt;/code&gt;中的 6 个。还有其他类型的 txn。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;&lt;strong&gt;transaction 代码位置&lt;/strong&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;transaction-代码位置&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#transaction-%e4%bb%a3%e7%a0%81%e4%bd%8d%e7%bd%ae&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;p&gt;zookeeper-jute 中 org.apache.zookeeper.txn 下, 这个是 jute compiler 生成的一系列类。&lt;/p&gt;
+&lt;h4&gt;&lt;strong&gt;create session txn&lt;/strong&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;create-session-txn&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#create-session-txn&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;blockquote&gt;
+  &lt;p&gt;第 1 个 txn 的 type= 0xfffffff6=-10&lt;br&gt;
+&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/ZooDefs.java#L98&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;OpCode=-10&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;&lt;strong&gt;create txn&lt;/strong&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;create-txn&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#create-txn&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;blockquote&gt;
+  &lt;p&gt;第 2 个 txn 的 type= 0x00000001=1&lt;br&gt;
+&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/ZooDefs.java#L40&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;OpCode=1&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;&lt;strong&gt;set data txn&lt;/strong&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;set-data-txn&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#set-data-txn&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;blockquote&gt;
+  &lt;p&gt;第 3、4 个 txn 的 type= 0x00000005=5&lt;br&gt;
+&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/ZooDefs.java#L40&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;OpCode=5&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;&lt;strong&gt;delete txn&lt;/strong&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;delete-txn&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#delete-txn&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;blockquote&gt;
+  &lt;p&gt;第 5 个 txn 的 type= 0x00000002=2&lt;br&gt;
+&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/ZooDefs.java#L42&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;OpCode=2&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4&gt;&lt;strong&gt;close session txn&lt;/strong&gt;&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;close-session-txn&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#close-session-txn&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h4&gt;&lt;blockquote&gt;
+  &lt;p&gt;第 6 个 txn 的 type= 0xfffffff5=-11&lt;br&gt;
+&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/ZooDefs.java#L100&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;OpCode=-11&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1&gt;References&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/apache/zookeeper/tree/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;zookeeper/server/persistence&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/ZooDefs.java#L36&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;ZooDefs#OpCode&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/FileTxnLog.java#L57&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;FileTxnLog.java&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/apache/zookeeper/blob/release-3.9.1/zookeeper-server/src/main/java/org/apache/zookeeper/server/persistence/Util.java#L84&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Util#makeLogName&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://raw.githubusercontent.com/stardustman/pictures/main/img/log.500000004&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;log.500000004&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/alenca/zklogtool/tree/master/zklogtool&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;zklogtool&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/sharkdp/hexyl/releases&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;hexyl-二进制分析工具&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://zookeeper.apache.org/doc/r3.4.8/zookeeperAdmin.html#sc_zkCommands:~:text=The%20Log%20Directory%20contains,written%20to%20that%20log.&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;dataLogDir&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>

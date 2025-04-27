@@ -1,0 +1,39 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hextra – Sequence-Number</title>
+    <link>http://localhost:1313/tags/sequence-number/</link>
+    <description>Recent content in Sequence-Number on Hextra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 30 Nov 2020 10:54:57 +0800</lastBuildDate>
+    
+	  <atom:link href="http://localhost:1313/tags/sequence-number/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+      
+        
+      
+    
+    
+    <item>
+      <title>acknowledgement-timeout-retry-sequence-number</title>
+      <link>http://localhost:1313/blog/acknowledgement-timeout-retry-sequence-number/</link>
+      <pubDate>Mon, 30 Nov 2020 10:54:57 +0800</pubDate>
+      
+      <guid>http://localhost:1313/blog/acknowledgement-timeout-retry-sequence-number/</guid>
+      <description>
+        
+        
+        &lt;h3&gt;TCP 要解决的问题&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;tcp-要解决的问题&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#tcp-%e8%a6%81%e8%a7%a3%e5%86%b3%e7%9a%84%e9%97%ae%e9%a2%98&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;&lt;img src=&#34;https://github.com/stardustman/pictures/raw/main/img/notions_tcp.svg&#34; alt=&#34;notions_tcp&#34; loading=&#34;lazy&#34; /&gt;&lt;/p&gt;
+&lt;h2&gt;references&lt;span class=&#34;hx-absolute -hx-mt-20&#34; id=&#34;references&#34;&gt;&lt;/span&gt;
+    &lt;a href=&#34;#references&#34; class=&#34;subheading-anchor&#34; aria-label=&#34;Permalink for this section&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.geeksforgeeks.org/tcp-congestion-control/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;tcp-congestion-control&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://web.cs.wpi.edu/~rek/Undergrad_Nets/B06/TCP_Congestion_Control.ppt&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;tcp-congestion-control-ppt&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+      </description>
+    </item>
+    
+  </channel>
+</rss>
