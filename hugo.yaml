@@ -154,7 +154,7 @@ params:
     list:
       displayTags: true
       # date | lastmod | publishDate | title | weight
-      sortBy: title
+      sortBy: publishDate
       sortOrder: desc # or "asc"
     
     article:
