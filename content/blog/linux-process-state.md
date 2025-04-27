@@ -23,7 +23,7 @@ tags: ["process","state","state machine"]
 
 ### d_state.c code
 
-```c
+```c {filename="d_state.c"}
 #include <unistd.h>
 
 int main(){
@@ -44,7 +44,7 @@ int main(){
 
 ### d_state.c code
 
-```c
+```c {filename="d_state.c"}
 #include <unistd.h>
 
 int main(){
@@ -64,7 +64,7 @@ int main(){
 
 ### zombie.c code
 
-```c
+```c {filename="zombie.c"}
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
