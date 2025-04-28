@@ -5,10 +5,12 @@ draft: false
 tags: ["binary","linux"]
 ---
 
-# virtual memory
+# virtual memory 是啥？
 
-> 本质是硬件支持。OS + 硬件 共同为程序提供 virtual memory。
-> virtual memory ===== MMU =====> physical memory
+1. 本质是硬件支持。
+2. virtual memory ===== MMU =====> physical memory
+3. OS + 硬件 共同为进程提供 virtual memory 功能。所有程序的内存布局一致。
+4. 为了安全。
 
 # virtual memory address space layout
 
