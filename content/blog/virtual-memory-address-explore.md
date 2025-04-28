@@ -5,6 +5,11 @@ draft: false
 tags: ["binary","linux"]
 ---
 
+# virtual memory
+
+> 本质是硬件支持。OS + 硬件 共同为程序提供 virtual memory。
+> virtual memory ===== MMU =====> physical memory
+
 # virtual memory address space layout
 
 ![virtual-memory-address-space](https://raw.githubusercontent.com/stardustman/pictures/main/img/virtual-memory-address-space.jpg)
