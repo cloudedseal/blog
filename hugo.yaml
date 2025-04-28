@@ -1,5 +1,5 @@
 # Configuration
-baseURL: "https://buybyte.github.io/"
+baseURL: "https://cloudedseal.github.io/"
 title: "keep writing"
 
 enableRobotsTXT: true
@@ -148,7 +148,7 @@ params:
 
   editURL:
     enable: true
-    base: "https://github.com/buybyte/blog/edit/main/content/blog"
+    base: "https://github.com/cloudedseal/blog/edit/main/content/"
 
   blog:
     list:
