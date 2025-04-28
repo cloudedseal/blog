@@ -254,10 +254,10 @@ if (pred != head &&
 1. pred != head 为 true 表示取消节点不是等待队列中第一个节点
 2. ((ws = pred.waitStatus) == Node.SIGNAL || (ws <= 0 && compareAndSetWaitStatus(pred, ws, Node.SIGNAL))) 为 true
    1. (ws = pred.waitStatus) == Node.SIGNAL 为 true, 前驱节点的 waitStatus 为 -1
-   2. (ws <= 0 && compareAndSetWaitStatus(pred, ws, Node.SIGNAL))
+   2. (ws <= 0 && compareAndSetWaitStatus(pred, ws, Node.SIGNAL)) 为 true
       1. ws <= 0 为 true, 前驱节点的 waitStatus 为 0, 那就 compareAndSetWaitStatus 前驱节点的 waitStatus 为 -1
       2. compareAndSetWaitStatus 返回为 true, 设置前驱节点的的 waitStatus 为 -1 成功
-3. pred.thread != null 前驱节点有等待的线程
+3. pred.thread != null 为 true 前驱节点有等待的线程
 
 
 #### shouldParkAfterFailedAcquire 分析
