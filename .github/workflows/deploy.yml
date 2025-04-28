@@ -31,6 +31,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          external_repository: buybyte/buybyte.github.io
+          external_repository: cloudedseal/cloudedseal.github.io
           publish_branch: master  # default: gh-pages
           publish_dir: ./public
