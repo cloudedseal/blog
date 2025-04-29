@@ -4,7 +4,7 @@ date: 2024-05-30T15:29:57+08:00
 draft: false
 ---
 
-# hello world
+## hello world
 
 ```c
 #include <stdio.h>
@@ -15,7 +15,7 @@ int main() {
 
 > gcc --save-temps  -o hello hello.c
 
-# **What is ELF?**
+## **What is ELF?**
 ELF (Executable and Linkable Format) is a **standardized binary format** for storing compiled programs, libraries, and other binaries on Unix-like systems (e.g., Linux). It defines how machine code, data, symbols, relocation information, and metadata are organized in files like:
 - Executables (`./hello`)
 - Object files (`hello.o`)
@@ -24,13 +24,14 @@ ELF (Executable and Linkable Format) is a **standardized binary format** for sto
 
 ---
 
-# **ELF File Structure**
+## **ELF File Structure**
+
 An ELF file has two primary views:
-## **Linking View (Sections)**
+### **Linking View (Sections)**
    - Used during `compilation/linking` to combine object files.
    - Contains **section headers** describing discrete parts of the file.
 
-## **Execution View (Segments)**
+### **Execution View (Segments)**
    - Used at `runtime` to load the program into memory.
    - Contains **program headers** mapping sections to memory segments.
 
@@ -65,6 +66,7 @@ An ELF file has two primary views:
 ---
 
 ## **Key ELf Concepts**
+
 ### **ELF Header**
 Use `readelf -h hello` to see:
 ```bash
@@ -145,9 +147,9 @@ Program Headers:
    12     .init_array .fini_array .dynamic .got 
 ```
 
-## segment LOAD 理解
+### segment LOAD 理解
 
-### **Explanation of the Two Lines in the `LOAD` Segment**
+#### **Explanation of the Two Lines in the `LOAD` Segment**
 Here’s a breakdown of the two lines from the `LOAD` segment in your `readelf -l hello` output:
 
 ```
@@ -157,22 +159,22 @@ LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
 
 ---
 
-### **Line-by-Line Breakdown**
+#### **Line-by-Line Breakdown**
 
 | Field         | Value                          | Meaning                                                                 |
 |---------------|--------------------------------|-------------------------------------------------------------------------|
-| **Type**      | `LOAD`                         | This segment is loaded into memory during execution.                    |
+| **Type**      | `LOAD`                         | This segment is `loaded` into memory during execution.                    |
 | **Offset**    | `0x0000000000000000`          | Start of this segment in the file (offset 0 bytes from the file start). |
-| **VirtAddr**  | `0x0000000000000000`          | Virtual memory address where this segment is mapped (position-independent; resolved at runtime). |
-| **PhysAddr**  | `0x0000000000000000`          | Physical memory address (ignored for executables; used in firmware).   |
-| **FileSiz**   | `0x0000000000000628` (1576 bytes) | Size of the segment in the file.                                       |
-| **MemSiz**    | `0x0000000000000628` (1576 bytes) | Size of the segment in memory (same as `FileSiz`; no zero-filled padding). |
+| **VirtAddr**  | `0x0000000000000000`          | `Virtual memory address` where this segment is mapped (position-independent; resolved at runtime). |
+| **PhysAddr**  | `0x0000000000000000`          | `Physical memory address` (ignored for executables; used in firmware).   |
+| **FileSiz**   | `0x0000000000000628` (1576 bytes) | `Size` of the segment in the file.                                       |
+| **MemSiz**    | `0x0000000000000628` (1576 bytes) | `Size` of the segment in memory (same as `FileSiz`; no zero-filled padding). |
 | **Flags**     | `R`                            | Segment is **read-only**.                                             |
-| **Align**     | `0x1000` (4096 bytes)          | Alignment requirement (must be page-aligned in memory).                |
+| **Align**     | `0x1000` (4096 bytes)          | Alignment requirement (must be `page-aligned` in memory).                |
 
 ---
 
-### **Purpose of This Segment**
+#### **Purpose of This Segment**
 This `LOAD` segment maps **read-only metadata** into memory, including:
 - **`.interp`**: Path to the dynamic linker (`/lib64/ld-linux-x86-64.so.2`).
 - **`.note.gnu.build-id`**: Unique identifier for debugging.
@@ -183,7 +185,7 @@ It is critical for **dynamic linking** and **runtime symbol resolution**.
 
 ---
 
-### **Why Are `VirtAddr` and `PhysAddr` Zero?**
+#### **Why Are `VirtAddr` and `PhysAddr` Zero?**
 - **Position-Independent Executable (PIE)**:  
   The binary is compiled as `DYN` (shared object style), allowing the OS to load it at a **randomized base address** (ASLR).  
   - At runtime, the OS chooses a base address (e.g., `0x555555554000`), and all segments are mapped relative to this base.  
@@ -191,7 +193,7 @@ It is critical for **dynamic linking** and **runtime symbol resolution**.
 
 ---
 
-### **Security Implications**
+#### **Security Implications**
 - **No Write or Execute Permissions**:  
   The `R` flag ensures this segment is **read-only**, protecting metadata from tampering.
 - **Alignment (`0x1000`)**:  
@@ -199,7 +201,7 @@ It is critical for **dynamic linking** and **runtime symbol resolution**.
 
 ---
 
-### **Example Mapping in Memory**
+#### **Example Mapping in Memory**
 At runtime, the OS maps this segment as follows:
 ```
 Virtual Address Range      Permissions   Purpose
@@ -209,12 +211,12 @@ Virtual Address Range      Permissions   Purpose
 
 ---
 
-### **Key Takeaways**
+#### **Key Takeaways**
 1. **Metadata Storage**: Contains essential runtime data for dynamic linking.
 2. **ASLR Compatibility**: Position-independent addressing enhances security.
 3. **Read-Only Protection**: Prevents accidental or malicious modification of critical data.
 
---
+---
 
 ### **Sections**
 Use `readelf -S hello` to list sections:
@@ -259,14 +261,14 @@ The shell calls `execve("./hello", ...)`, which triggers the kernel to load the 
 
 ### **Kernel Loads Segments into Memory**
 Using the **program headers**, the kernel:
-- Maps `.text` (code) to executable memory.
-- Maps `.data` and `.bss` to writable memory.
+- Maps `.text` (code) to `executable memory`.
+- Maps `.data` and `.bss` to `writable memory`.
 - Sets up the **stack** and environment variables.
-- If there’s a `INTERP` segment, loads the dynamic linker (e.g., `/lib64/ld-linux-x86-64.so.2`).
+- If there’s a `INTERP` segment, loads the `dynamic linker` (e.g., `/lib64/ld-linux-x86-64.so.2`).
 
 ### **Dynamic Linking (if needed)**
 If the program uses shared libraries:
-- The kernel transfers control to the dynamic linker.
+- The kernel `transfers control` to the dynamic linker.
 - The linker resolves dependencies (e.g., `libc.so.6`), loads libraries, and relocates addresses.
 
 ### **Start Execution**
@@ -275,12 +277,12 @@ If the program uses shared libraries:
 
 ---
 
-### **Example: Full Flow for `hello`**
+## **Example: Full Flow for `hello`**
 
 ```bash
 $ gcc -o hello hello.c  # Compiles to ELF executable
 ```
-####  **File Type**:  
+###  **File Type**:  
    ```bash
     file hello
         hello: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=ce69e228b62365b698bac3bf837cb1c5668a8079, for GNU/Linux 3.2.0, not stripped
@@ -290,12 +292,12 @@ $ gcc -o hello hello.c  # Compiles to ELF executable
         libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007cdea5a00000)
         /lib64/ld-linux-x86-64.so.2 (0x00007cdea5db7000)
    ```
-#### **Entry Point**:  
+### **Entry Point**:  
    ```bash
    $ readelf -h hello | grep "Entry point"
         Entry point address:               0x1060
    ```
-#### **Execution Steps**:
+### **Execution Steps**:
    - Kernel maps the `.text` segment to `0x401000`.
    - Starts executing `_start` (`assembler` boilerplate).
    - Calls `__libc_start_main()` (glibc initialization).
