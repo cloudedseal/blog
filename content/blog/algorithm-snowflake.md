@@ -6,6 +6,8 @@ draft: false
 
 # 分布式 ID
 
+> 多个数据中心(一级)，多个节点(一级)，同一个时间点（一级），同时生成 ID(一级)。其实就是数字生成规则而已。没啥了不起的。
+
 snowflake 算法使用一个 64bits 的正整数作为 ID。64bits 正整数 layout 如下：
 
 ![snowflake-i64-layout](https://raw.githubusercontent.com/stardustman/pictures/main/img/snowflake.jpg)
