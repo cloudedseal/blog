@@ -282,8 +282,13 @@ $ gcc -o hello hello.c  # Compiles to ELF executable
 ```
 ####  **File Type**:  
    ```bash
-   $ file hello
-hello: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=ce69e228b62365b698bac3bf837cb1c5668a8079, for GNU/Linux 3.2.0, not stripped
+    file hello
+        hello: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=ce69e228b62365b698bac3bf837cb1c5668a8079, for GNU/Linux 3.2.0, not stripped
+
+    ldd hello
+        linux-vdso.so.1 (0x00007fffdd6be000)
+        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007cdea5a00000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007cdea5db7000)
    ```
 #### **Entry Point**:  
    ```bash
