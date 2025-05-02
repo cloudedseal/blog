@@ -1,7 +1,8 @@
-
+---
 date: '2025-04-30T10:48:42+08:00'
 draft: false
 title: 'Master Elf Sections'
+---
 
 > 分析环境 mint21
 ## ELF (linking view) 分析
