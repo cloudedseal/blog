@@ -568,6 +568,21 @@ Breakpoint 3, print_message () at demo.c:32
 #0  print_message () at demo.c:32
 #1  0x0000000000401244 in main () at demo.c:43
 
+(gdb) break counter
+Breakpoint 4 at 0x40115e: file demo.c, line 16.
+(gdb) continue 
+Continuing.
+Hello from .rodata!
+
+Breakpoint 4, counter () at demo.c:16
+16	    count++;
+(gdb) info stack 
+#0  counter () at demo.c:16
+#1  0x0000000000401257 in main () at demo.c:46
+(gdb) x/xg 0x404008
+0x404008 <printf@got.plt>:	0x00007ffff7c600f0
+
+
 ```
 
 
