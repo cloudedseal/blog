@@ -597,6 +597,7 @@ Breakpoint 4, counter () at demo.c:16
 ## Reference
 
 1. [dynamic-linker](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+2. [彻底理解连接器系列](https://github.com/xfenglu/everycodershouldknow#%E5%85%AD%E5%BD%BB%E5%BA%95%E7%90%86%E8%A7%A3%E9%93%BE%E6%8E%A5%E5%99%A8%E7%B3%BB%E5%88%97)
 
 
 
