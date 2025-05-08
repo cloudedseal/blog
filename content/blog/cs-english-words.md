@@ -305,5 +305,7 @@ tags: ["words"]
 ## x
 
 ## y
+1. yield
+   If you yield something that you have control of or responsibility for, you allow someone else to have control or responsibility for it 自愿让出
 
 ## z
