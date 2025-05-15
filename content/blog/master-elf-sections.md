@@ -9,6 +9,7 @@ title: 'Master Elf Sections'
 1. 一个 ELF 文件有多种 view。
 2. 从 linking 视角来理解 sections 到底是如何工作的。
 3. 源代码的各个不同的部分编译后都被放到了哪个 section。
+4. 本文主要分析  rodata text data bss 这 4 个 section。
 
 ## 示例代码
 
@@ -1139,7 +1140,7 @@ Finalizing...
 - **`__abi_tag`** adds 4 bytes to `.rodata`.
 - **Null terminators** add 7 bytes (1 per string).
 
-## data、rodata、text
+## data、bss、rodata、text
 
 > data、rodata、text 在 demo 中位置关系
 
