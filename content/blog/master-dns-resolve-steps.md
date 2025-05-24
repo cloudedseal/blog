@@ -223,15 +223,15 @@ search localdomain
      - **AAAA record query** (IPv6 address) for `baidu.com`.
 
 
-#### **Uplink DNS Servers** 上游的 DNS 服务器
+#### **upstream DNS servers** 上游的 DNS 服务器
 
-> Uplink DNS Servers is external DNS servers that local DNS resolver `forwards` queries to for resolution
+> upstream DNS servers is external DNS servers that local DNS resolver `forwards` queries to for resolution
 
 - The actual upstream DNS servers (e.g., your ISP's DNS or `1.1.1.1`) 
   1. `/etc/systemd/resolved.conf` (static configuration).
   2. Dynamically via `DHCP` or `VPN managers` (e.g., NetworkManager).
 
-#### 查看 Uplink DNS 解析器信息
+#### 查看 upstream DNS 解析器信息
 
 ```bash
 resolvectl status
@@ -246,6 +246,8 @@ Current DNS Server: 172.16.222.2
        DNS Servers: 172.16.222.2
         DNS Domain: localdomain
 ```
+
+> 注意 resolv.conf mode: stub
 
 
 ### **Receive DNS Responses**
@@ -292,6 +294,7 @@ Current DNS Server: 172.16.222.2
 3. [gai.conf](https://man7.org/linux/man-pages/man5/gai.conf.5.html)
 4. [resolv.conf](https://man7.org/linux/man-pages/man5/resolv.conf.5.html)
 5. [resolvectl](https://www.man7.org/linux/man-pages/man1/resolvectl.1.html)
+6. [Systemd-resolved](https://wiki.archlinux.org/title/Systemd-resolved)
 
 
 
