@@ -15,27 +15,27 @@ title: 'Master Dns Resolve Steps'
 sudo strace -f -o ping.log  -e trace=execve,access,openat,socket,connect,newfstatat,sendmmsg,recvfrom,sendto,recvmsg,write  ping -c 1 baidu.com
 ```
 
-### **Start the `ping` Process**
+### 1. **Start the `ping` Process**
    ```bash
    execve("/usr/bin/ping", ["ping", "-c", "1", "baidu.com"], 0x7ffce9f3de88 /* 26 vars */) = 0
    ```
    - The `ping` command begins execution.
 
-### **Load Required Libraries**
+### 2. **Load Required Libraries**
    ```bash
    openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
    openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libidn2.so.0", O_RDONLY|O_CLOEXEC) = 3
    ```
    - Libraries like `libc` (C standard library) and `libidn2` (Internationalized Domain Names) are loaded for DNS resolution and string handling. 处理国际化, 非英文字母的域名
 
-### **Check for `nscd` (Name Service Cache Daemon)** 检查缓存
+### 3. **Check for `nscd` (Name Service Cache Daemon)** 检查缓存
    ```bash
    connect(5, {sa_family=AF_UNIX, sun_path="/var/run/nscd/socket"}, 110) = -1 ENOENT (No such file or directory)
    ```
    - The system tries to use `nscd` for cached DNS lookups but fails because `/var/run/nscd/socket` does not exist. This means caching is disabled or `nscd` is not running. 
    - 查看 `nscd` DNS 缓存, 这个服务默认没有安装
 
-### **Read `/etc/nsswitch.conf`** 获取 DNS 解析服务顺序
+### 4. **Read `/etc/nsswitch.conf`** 获取 DNS 解析服务顺序
    ```bash
    openat(AT_FDCWD, "/etc/nsswitch.conf", O_RDONLY|O_CLOEXEC) = 5
    ```
@@ -135,7 +135,7 @@ netgroup: nis
    - If found, it skips DNS. No match is found here.
    - 在这个文件里寻找目标域名的 IP, 找到之后返回
 
-### **Read `/etc/resolv.conf`**
+### 5. **Read `/etc/resolv.conf`**
 
 ```bash
 openat(AT_FDCWD, "/etc/resolv.conf", O_RDONLY|O_CLOEXEC) = 5
@@ -211,7 +211,7 @@ search localdomain
   - Avoids needing to type full FQDNs (Fully Qualified Domain Names) in local networks.
 
 
-### **Query DNS via `systemd-resolved`**
+### 6. **Query DNS via `systemd-resolved`**
    ```bash
    socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
    connect(5, {sa_family=AF_INET, sin_port=htons(53), sin_addr=inet_addr("127.0.0.53")}, 16) = 0
@@ -250,7 +250,7 @@ Current DNS Server: 172.16.222.2
 > 注意 resolv.conf mode: stub
 
 
-### **Receive DNS Responses**
+### 7. **Receive DNS Responses**
    ```bash
    recvfrom(5, "\266L\201\200\0\1\0\2\0\0\0\1\5baidu\3com\0\0\1\0\1\300\f\0\1\0...", 2048, 0, ...) = 70
    recvfrom(5, "\261e\201\200\0\1\0\0\0\1\0\1\5baidu\3com\0\0\34\0\1\300\f\0\6\0...", 65536, 0, ...) = 81
@@ -260,7 +260,7 @@ Current DNS Server: 172.16.222.2
      - **AAAA record**: `2400:cb00:2048:1::681b:8093` (IPv6 address, but not shown in `strace` output).
    - The `ping` command uses the IPv4 address `39.156.66.10` for the ICMP echo request.
 
-### **Final Output**
+### 8. **Final Output**
    ```bash
    write(1, "PING baidu.com (39.156.66.10) 56"..., 52) = 52
    ```
