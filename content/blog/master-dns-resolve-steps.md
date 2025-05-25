@@ -9,7 +9,7 @@ title: 'Master Dns Resolve Steps'
 ## linux 上 DNS 解析流程
 
 - 以 ping -c 1 baidu.com 为例
-- [ping strace 日志](https://github.com/cloudedseal/underlayer/blob/main/dns-resolve-expore/ping.log.9762)，分析 ping 如何拿到 baidu.com 的 IP, 向目标 IP 发送 IMCP
+- [ping strace 日志](https://github.com/cloudedseal/underlayer/blob/main/dns-resolve-expore/ping.log.9762)，分析 ping 如何拿到 baidu.com 的 IP, 向目标 IP 发送 ICMP
 
 ```bash
 sudo strace -f -o ping.log  -e trace=execve,access,openat,socket,connect,newfstatat,sendmmsg,recvfrom,sendto,recvmsg,write  ping -c 1 baidu.com
