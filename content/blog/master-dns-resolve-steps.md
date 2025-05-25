@@ -193,6 +193,11 @@ search localdomain
   - The resolver listens on this address to handle queries from applications.
 - **Why Not a Public DNS Server?**
   - Applications `don't communicate directly` with public DNS servers (e.g., `8.8.8.8`). Instead, they send queries to `127.0.0.53`, and `systemd-resolved` forwards them to upstream DNS servers configured elsewhere.
+- **连接测试**
+  ```bash
+    nc -zv 127.0.0.53 53
+    Connection to 127.0.0.53 53 port [tcp/domain] succeeded!
+  ```
 
 ##### 2. **`options edns0 trust-ad`**
 - **`edns0`**:
