@@ -27,7 +27,7 @@ tags: ["ipc"]
 | 6 SIGIOT     | Dump           | Equivalent to SIGABRT                                         | No    |
 | 7 SIGBUS     | Dump           | Bus error                                                     | No    |
 | 8 SIGFPE     | Dump           | Floating-point exception                                      | Yes   |
-| 9 `SIGKILL`  | Terminate      | Forced-process termination                                    | Yes   |
+| 9 **SIGKILL**  | Terminate      | Forced-process termination                                    | Yes   |
 | 10 SIGUSR1   | Terminate      | Available to processes                                        | Yes   |
 | 11 SIGSEGV   | Dump           | Invalid memory reference                                      | Yes   |
 | 12 SIGUSR2   | Terminate      | Available to processes                                        | Yes   |
@@ -37,7 +37,7 @@ tags: ["ipc"]
 | 16 SIGSTKFLT | Terminate      | Coprocessor stack error                                       | No    |
 | 17 SIGCHLD   | Ignore         | Child process stopped or terminated or got a signal if traced | Yes   |
 | 18 SIGCONT   | Continue       | Resume execution, if stopped                                  | Yes   |
-| 19 `SIGSTOP` | Stop           | Stop process execution, Ctrl-Z                                | Yes   |
+| 19 **SIGSTOP** | Stop           | Stop process execution, Ctrl-Z                                | Yes   |
 | 20 SIGTSTP   | Stop           | Stop process issued from tty                                  | Yes   |
 | 21 SIGTTIN   | Stop           | Background process requires input                             | Yes   |
 | 22 SIGTTOU   | Stop           | Background process requires output                            | Yes   |
