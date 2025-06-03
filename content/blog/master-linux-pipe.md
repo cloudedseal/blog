@@ -8,7 +8,7 @@ title: 'Master Linux Pipe'
 
 > A file descriptor, or FD, is a positive integer that refers to an input/output source.  指向 I/O 源,不关心具体的源是什么, 这就是抽象
 
-所谓 I/O redirection 不过是对制定的 FD 复制而已
+所谓 I/O redirection 不过是对指定的 FD 复制而已
 
 
 
@@ -18,7 +18,7 @@ title: 'Master Linux Pipe'
 
 **complete lifecycle of a shell pipeline** (`cat /etc/passwd | wc -l`) executed via `sh`.
 
-- ✅ `pipe2()` (pipe creation, kernel managed buffer)  
+- ✅ `pipe2()` (pipe creation, kernel managed buffer, pipe[0] read pipe[1] write)  
 - ✅ `clone()` (Linux process creation, replaces `fork()`)  
 - ✅ `dup2()` (redirects stdin/stdout)  
 - ✅ `execve()` (runs `cat` and `wc -l`)  
