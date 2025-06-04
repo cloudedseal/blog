@@ -34,7 +34,9 @@ tags: ["words"]
     > If you acquire something, you `buy or obtain` it `for yourself`, or someone gives it to you.
 13. await
     > 及物动词，后跟无生命的事物，消息，等待特定的东西。conditionObject 的 await 等待满足特定的条件
-    > They are awaiting the outcome of the investigation. 
+    > They are awaiting the outcome of the investigation.
+14. alignment
+    > The alignment of something is its position in `relation to something else` or to its `correct` position. 相对于某物的位置或者当前的位置
    
 
 ## b
@@ -148,6 +150,8 @@ tags: ["words"]
    > If you describe something as immense, you mean that it is extremely large or great.
 8. interfere
    > If you say that someone interferes in a situation, you mean they `get involved in` it although it does not concern them and their involvement is not wanted. 干涉
+9. inbound
+   > An inbound `flight` is one that is arriving from another place. 入站的。反之 outbound。
 
 
 ## j
