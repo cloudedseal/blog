@@ -1,0 +1,41 @@
+---
+date: '2025-05-29T15:44:41+08:00'
+draft: false
+title: 'Linux Io Model'
+---
+
+## 用户空间获取数据前提是什么?
+
+1. 数据准备阶段
+   - 内核准备数据，这就引出了问题，内核还没准备好数据，等(sleep)还是不等？
+     - 比如内核 `sock` 的 [sk_receive_queue](https://elixir.bootlin.com/linux/v6.15/source/include/net/sock.h#L252) 没有数据
+   - 内核没准备好数据，进程进入 sleep 状态 -> `阻塞 IO`
+   - 内核没准备好数据，进程不进入 sleep 状态 -> `非阻塞 IO`
+2. 数据拷贝阶段
+   - 数据从内核空间复制到用户空间，这就引出了问题，谁来负责复制? 
+     - 比如内核 `sock` 的 [sk_receive_queue](https://elixir.bootlin.com/linux/v6.15/source/include/net/sock.h#L252) 的数据由谁来复制到用户空间
+   - 由`用户线程`的内核态来负责 -> `同步 IO`
+   - 由`内核线程`负责 -> `异步 IO`
+3. 根据以上两大阶段理解 block/non-block sync/async
+
+## I/O 模型
+
+### Blocking I/O
+
+### Non-blocking I/O
+
+### I/O Multiplexing
+
+### Signal-Driven I/O
+
+### Asynchronous I/O
+
+
+
+
+
+
+## References
+
+1. [内核角度看 I/O 模型-强烈推荐](https://mp.weixin.qq.com/s?__biz=Mzg2MzU3Mjc3Ng==&mid=2247483737&idx=1&sn=7ef3afbb54289c6e839eed724bb8a9d6&chksm=ce77c71ef9004e08e3d164561e3a2708fc210c05408fa41f7fe338d8e85f39c1ad57519b614e&scene=178&cur_album_id=2559805446807928833&search_click_id=#rd)
+2. [syscall 分类](https://mohitmishra786.github.io/chessman/2025/03/31/Technical-Guide-to-System-Calls-Implementation-and-Signal-Handling-in-Modern-Operating-Systems.html)
