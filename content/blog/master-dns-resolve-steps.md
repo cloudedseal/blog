@@ -259,6 +259,7 @@ Current DNS Server: 172.16.222.2
 ```
 
 > 注意 resolv.conf mode: stub
+> Current DNS Server 就是上游的 DNS 服务器
 
 
 ### 7. **Receive DNS Responses**
