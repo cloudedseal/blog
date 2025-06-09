@@ -11,6 +11,7 @@ title: 'Master Dns Resolve Steps'
 ## 本文总结
 1. `/etc/nsswitch.conf` 的 `hosts` 配置本机 DNS 服务查询的顺序, 即 `/etc/hosts` 文件等
 2. `systemd-resolved` 就是传说中的 DNS `stub` dns resolver
+3. 由 stub dns resolver 发起的查询就是传说中的`递归查询`
 
 ## linux 上 DNS 解析流程
 
