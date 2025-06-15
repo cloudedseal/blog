@@ -7,7 +7,6 @@ draft: false
 > A user-space scheduler manages tasks or "threads" entirely within an application, without relying on the operating system (OS) scheduler. This is different from kernel-level scheduling, where the OS manages threads.
 > 什么是用户态调度？可以简单理解为自定义一堆任务, 由用户决定怎样执行这些任务。不涉及操作系统的进程/线程调度。
 
-# 举例理解
 
 ## Task 自定义的任务
 
