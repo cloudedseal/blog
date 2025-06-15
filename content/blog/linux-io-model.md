@@ -21,15 +21,35 @@ title: 'Linux Io Model'
 ## I/O 模型
 
 ### Blocking I/O
+> 阻塞
+
+1. 用户调用阻塞的 `read` 后，没有数据进程就放弃 CPU，进入阻塞状态(sleep)
 
 ### Non-blocking I/O
+> 非阻塞
+
+1. 用户自己去调用非阻塞的 `read` 轮询
+
 
 ### I/O Multiplexing
+> 同步非阻塞
+
+1. [select](https://man7.org/linux/man-pages/man2/select.2.html) 内核轮询，返回结果。用户再遍历获取哪些 IO ready。
+2. [epoll](https://man7.org/linux/man-pages/man2/epoll_wait.2.html)
 
 ### Signal-Driven I/O
 
+> 信号驱动 SIGIO 只有一种状态
+
+```bash
+ kill -l | grep SIGIO
+26) SIGVTALRM	27) SIGPROF	28) SIGWINCH	29) SIGIO	30) SIGPWR
+
+```
+
 ### Asynchronous I/O
 
+> 异步
 
 
 
