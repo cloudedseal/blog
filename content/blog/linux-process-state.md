@@ -94,7 +94,7 @@ int main() {
 ## system calls changing process state on Linux
 
 
-### `fork()` 复制状态机器
+### `fork()` 复制状态机器(快照)
 • Purpose: Creates a new child process by duplicating the parent process.
 
 • State Change: The child starts in the ready/runnable state (waiting for CPU time).
