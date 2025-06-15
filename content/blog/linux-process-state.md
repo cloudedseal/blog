@@ -5,23 +5,23 @@ draft: false
 tags: ["process","state","state machine"]
 ---
 
-# 进程状态机
+## 进程状态机
 
 最近在看南京大学[蒋炎岩](https://ics.nju.edu.cn/~jyy/)老师的 2025 操作系统课程。里面有一句话, 计算机中的一切程序可以视为 `state machine`。很有启发。进程有初始状态, CPU 这个无情的执行指令的机器执行一条指令后，程序的状态就发生了变化。
 
 ![linux-process-state-machine-userspace](https://raw.githubusercontent.com/buybyte/pictures/main/img/linux-process-state-machine-userspace.drawio.svg)
 
-# process state
+## process state
 
-## Running/Runnable(R)
+### Running/Runnable(R)
 
 万事俱备，只需要被 `scheduler` 调度到 CPU 上去运行。
 
-## Interruptable Sleep(S)
+### Interruptable Sleep(S)
 
 处于这个状态的不会被 `scheduler` 调度到 CPU 上去运行。
 
-### d_state.c code
+#### d_state.c code
 
 ```c {filename="d_state.c"}
 #include <unistd.h>
@@ -34,15 +34,15 @@ int main(){
 2. ./d_state
 3. ps aux | grep d_state
 
-## Uninterruptible Sleep(D)
+### Uninterruptible Sleep(D)
 
 可能是 `Disk Sleep` 的原因。状态用 `D` 表示。
 
-## Stopped(T)
+### Stopped(T)
 
 如使用 `SIGSTOP` 信号，暂停的进程。
 
-### d_state.c code
+#### d_state.c code
 
 ```c {filename="d_state.c"}
 #include <unistd.h>
@@ -58,11 +58,11 @@ int main(){
 5. ps aux | grep d_state
 
 
-## Zombie(Z)
+### Zombie(Z)
 
 进程已经执行了 `exit`, `exit code` 还没有被`父进程` `wait/waitpid` 读取。也就是进程的 `PCB` 还没有从 kernel 的 `process table` 中清除。
 
-### zombie.c code
+#### zombie.c code
 
 ```c {filename="zombie.c"}
 #include <stdio.h>
@@ -91,10 +91,10 @@ int main() {
 2. ./zombie
 3. ps aux | grep zombie
 
-# system calls changing process state on Linux
+## system calls changing process state on Linux
 
 
-## `fork()`
+### `fork()` 复制状态机器
 • Purpose: Creates a new child process by duplicating the parent process.
 
 • State Change: The child starts in the ready/runnable state (waiting for CPU time).
@@ -113,7 +113,7 @@ int main() {
 
 
 
-## `execve()`
+### `execve()` 复位状态机
 • Purpose: Replaces the current process's memory space with a new program.
 
 • State Change: The process remains in the `running state` but executes new code.
@@ -131,7 +131,7 @@ int main() {
 • Example: Running programs like `ls` or `grep` from a shell.
 
 
-## `exit()` / `_exit()`
+### `exit()` / `_exit()` 销毁状态机
 • Purpose: Terminates the current process.
 
 • State Change: Moves the process to `zombie` (until the parent calls `wait()`).
@@ -147,7 +147,7 @@ int main() {
 • Example: Clean termination after program completion.
 
 
-## `wait()` / `waitpid()`
+### `wait()` / `waitpid()` 等待子进程退出
 • Purpose: Suspends the parent until a child changes state (exits or stops).
 
 • State Change: Parent enters sleeping state until child exits.
@@ -164,7 +164,7 @@ int main() {
 
 
 
-## `kill()` / `raise()`
+### `kill()` / `raise()` 发送信号
 • Purpose: Sends signals to processes (e.g., `SIGTERM`, `SIGSTOP`).
 
 • State Change: 
@@ -186,7 +186,7 @@ int main() {
 • Example: Terminating a frozen process via `kill -9 PID`.
 
 
-## `pause()`
+### `pause()` 暂停进程，直到收到信号
 • Purpose: Suspends the process until a signal is received.
 
 • State Change: Process enters **`interruptable sleeping`** state.
@@ -198,7 +198,7 @@ int main() {
 • Example: Waiting indefinitely for user input or signals.
 
 
-## `nanosleep()`
+### `nanosleep()` 暂停进程一段时间
 • Purpose: Pauses execution for a specified time.
 
 • State Change: Process enters **`interruptible sleep`**.
@@ -214,7 +214,7 @@ int main() {
 • Example: High-precision delays in real-time applications.
 
 
-## `ptrace()`
+### `ptrace()` 允许进程控制另一个进程
 • Purpose: Allows a process to control another (debugging, tracing).
 
 • State Change: Traced process enters **`stopped`** state on signals.
@@ -230,7 +230,7 @@ int main() {
 • Example: Debuggers like `gdb` using breakpoints.
 
 
-## `clone()`
+### `clone()`
 • Purpose: Creates a child process or thread with configurable behavior.
 
 • State Change: New process/thread starts in ready state.
@@ -248,7 +248,7 @@ int main() {
 • Example: Implementing threads (used by `pthread` library).
 
 
-## `sched_yield()`
+### `sched_yield()` 主动放弃 CPU
 • Purpose: Voluntarily yields the CPU to other processes/threads.
 
 • State Change: Process moves from running to `ready` state.
@@ -260,7 +260,7 @@ int main() {
 • Example: Cooperative multitasking in real-time apps.
 
 
-## `exit_group()`
+### `exit_group()` 销毁进程中所有线程
 • Purpose: Terminates all threads in a process.
 
 • State Change: All threads enter zombie state.
@@ -274,7 +274,7 @@ int main() {
 • Example: Terminating multi-threaded applications.
 
 
-# Key Signals Affecting Process State
+## Key Signals Affecting Process State
 • `SIGSTOP`: Forcefully stops a process.
 
 • `SIGCONT`: Resumes a stopped process.
@@ -284,7 +284,7 @@ int main() {
 • `SIGKILL`: Forcefully kills a process.
 
 
-# Summary Table
+## Summary Table
 | System Call     | Purpose                          | Key State Change               |
 |-----------------|----------------------------------|---------------------------------|
 | `fork()`        | Create child process             | Child → Runnable               |
