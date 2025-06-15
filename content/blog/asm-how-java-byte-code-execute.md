@@ -5,12 +5,12 @@ draft: false
 tags: ["asm","java","bytecode"]
 ---
 
-# jvm
+## jvm
 
 > jvm 是一个栈式(stack-based)虚拟计算机。啥意思，就是大多数的 opcode 的操作数在 operand stack 上，执行的结果也放在 oprand stack 上。<br>
 > 有的 opcode 的操作数在 local variable table，如 `iinc`。
 
-# 分析的代码
+## 分析的代码
 
 ```java
 package stardustman.github.io;
@@ -26,17 +26,17 @@ public class BoxingUnboxingExample {
 }
 ```
 
-# jclasslib 查看字节码
+## jclasslib 查看字节码
 
 ![BoxingUnboxingExample](https://raw.githubusercontent.com/stardustman/pictures/main/img/BoxingUnboxingExample.jpg)
 
-# 字节码执行过程
+## 字节码执行过程
 
 ![jvm-byte-code-execute](https://raw.githubusercontent.com/stardustman/pictures/main/img/jvm%20-byte-code-execute.svg)
 
 
 
-# References
+## References
 
 1. [postfix-expression](https://www.geeksforgeeks.org/evaluation-of-postfix-expression/)
 2. [jclasslib](https://github.com/ingokegel/jclasslib/releases)
