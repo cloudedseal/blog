@@ -7,7 +7,7 @@ tags: ["syscall","glibc","asm"]
 
 > 实验平台: x86_64 GNU/Linux mint22.1
 
-# 使用 `glibc` 的函数
+## 使用 `glibc` 的函数
 
 write1.c
 
@@ -23,7 +23,7 @@ int main()
 1. gcc -o write1 write1.c
 2. 使用 `ltrace ./write1` 查看调用了 write 库函数
 
-# 不使用 glibc 的函数
+## 不使用 glibc 的函数
 
 write2.c
 
@@ -62,19 +62,19 @@ int main()
 1. gcc -o write2 write2.c
 2. 使用 `ltrace ./write2` 查看没有调用 write 库函数
 
-# How glibc Wraps System Calls​​
+## How glibc Wraps System Calls​​
 
-## ​System Call Number​​
+### ​System Call Number​​
 
 Each system call (e.g., write, read) is assigned a `unique number` (e.g., __NR_write). 要使用哪一个 syscall
 
-## Argument Setup​​ 
+### Argument Setup​​ 
 The wrapper loads the system call number and arguments into specific registers (architecture-dependent). 设置 syscall 的参数
 
-## ​Kernel Transition​​ 
+### ​Kernel Transition​​ 
 The wrapper uses an instruction like syscall (x86-64) to switch to kernel mode. 进入 kernel mode
 
-## Result Handling​​
+### Result Handling​​
 After the kernel finishes, the wrapper checks for errors, sets errno if needed, and returns the result. 处理返回值
 
 
@@ -85,6 +85,6 @@ After the kernel finishes, the wrapper checks for errors, sets errno if needed, 
 
 
 
-# References
+## References
 1. [https://man7.org/linux/man-pages/man1/ltrace.1.html](https://man7.org/linux/man-pages/man1/ltrace.1.html)
 
