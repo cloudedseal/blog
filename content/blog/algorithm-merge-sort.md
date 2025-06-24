@@ -531,9 +531,9 @@ Disassembly of section .fini:
 ![merge-sort-stack-frame-analysi](https://github.com/stardustman/pictures/raw/main/img/merge-sort-stack-frame-analysis.svg)
 
 > 栈帧图分析
-> mergeSort_L 对应的是左半侧的 merge。mid 为红色
-> mergeSort_R 对应的是右半侧的 merge。mid 为蓝色
-> merge 对应的是最下层的浅绿色，绿色，深绿色
+1. mergeSort_L 对应的是左半侧的 merge。mid 为红色
+2. mergeSort_R 对应的是右半侧的 merge。mid 为蓝色
+3. merge 对应的是最下层的浅绿色，绿色，深绿色
 
 
 ### array 归并顺序图解分析
