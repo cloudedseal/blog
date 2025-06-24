@@ -4,11 +4,12 @@ date: 2025-01-03T10:53:57+08:00
 draft: false
 ---
 
-# NULL device 是啥？
+## NULL device 是啥？
 
 The null device is a special file that `discards` all data written to it, but reports that the `write operation succeeded`.
+> 一个特殊的文件，丢弃所有写入的内容，但是返回写成功。
 
-# 用在何处？
+## 用在何处？
 
 > java 执行外部的命令, 但是不需要外部命令的执行结果. 直接丢弃 stdout, stderr.
 
