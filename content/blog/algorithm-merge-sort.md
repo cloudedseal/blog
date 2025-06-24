@@ -6,6 +6,10 @@ tags: ["algorithm","sort"]
 
 ## merge sort
 
+1. 思路和二分查找类似。都是一半一半的解决。
+2. 先 merge 左一半，再 merge 右一半。左右两部分处理逻辑一致。
+3. 最终左右两部分，merge 后就是排序最终结果。
+
 ### merge sort C code
 
 ```clang
@@ -46,9 +50,9 @@ void merge(int* array, int start, int mid, int end){
 void mergeSort(int* array, int start, int end){
     if(start < end){
         int mid = (start + end) / 2;
-        mergeSort(array, start, mid); // mergeSort_L(array, start, mid);
-        mergeSort(array, mid+1, end); // mergeSort_R(array, mid+1, end);
-        merge(array, start, mid, end);
+        mergeSort(array, start, mid); // mergeSort_L(array, start, mid); 先 merge 左一半
+        mergeSort(array, mid+1, end); // mergeSort_R(array, mid+1, end); 再 merge 右一半
+        merge(array, start, mid, end); // 最终左右两部分，merge 后就是排序最终结果。
     }
 }
 
