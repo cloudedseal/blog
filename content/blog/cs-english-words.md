@@ -185,6 +185,8 @@ tags: ["words"]
 5. offset
    > If one thing is offset by another, the effect of the first thing is reduced by the second, so that any advantage or disadvantage is cancelled out. 抵消
    > Refers to the distance between a base address (starting memory location) and a specific address
+6. object
+   > An object is anything that has a fixed shape or form, that you can `touch or see`, and that is `not alive`. 可触或可见的非生命体
   
 
 ## p
