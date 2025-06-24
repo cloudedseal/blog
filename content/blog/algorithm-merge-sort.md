@@ -12,7 +12,7 @@ tags: ["algorithm","sort"]
 
 ### merge sort C code
 
-```clang
+```c {hl_lines=[37,38,39,40],linenostart=1,fileName="merge_sort.c"}
 #include <stdio.h>
 void merge(int* array, int start, int mid, int end){
     // start = 0
@@ -543,6 +543,8 @@ Disassembly of section .fini:
 > 可以看到对于 array 来说，确实是一半一半 `merge` 的, 这就是分治。
 
 ### strace 分析
+1. merge_sort.c 是一个用户空间 app。所有排序的逻辑，均为用户空间代码。
+2. `printf` 最终调用 `write` 系统调用输出
 
 ```
 root@aliyun:~# strace ./mergesort 
