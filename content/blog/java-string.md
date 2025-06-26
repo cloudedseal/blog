@@ -86,6 +86,7 @@ public String(byte bytes[], Charset charset) {
    5. Code Point: [1F467](https://symbl.cc/en/1F467-girl-emoji/) `girl-emoji` 位于 `SP` 使用 2 个编码单元，长度为 2
    6. Code Point: [200D](https://symbl.cc/en/200D/) `Zero Width Joiner`位于 `BMP` 使用 1 个编码单元，长度为 1
    7. Code Point: [1F466](https://symbl.cc/en/1F466-boy-emoji/) `boy-emoji` 位于 `SP` 使用 2 个编码单元，长度为 2
+   8. 当这 7 个码点连续出现，就是新的 emoji family 了
 
 
 ## 📌 **Java APIs Affected by UTF-16 Internals**
