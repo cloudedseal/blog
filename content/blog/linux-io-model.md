@@ -4,6 +4,8 @@ draft: false
 title: 'Linux Io Model'
 ---
 
+> IO 的同步、异步、阻塞、非阻塞取决于相关 syscall 的实现。
+
 ## 用户空间获取数据前提是什么?
 
 1. 数据准备阶段
