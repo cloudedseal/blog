@@ -4,10 +4,8 @@ draft: false
 title: 'Master Dns Resolve Steps'
 ---
 
-> 分析环境 mint21
-
-## 本文目标
-- 弄懂在本机向外部的(上游的) DNS server 发出查询之前, 在本机的查询步骤是什么？
+> 弄懂在本机向外部的(上游的) DNS server 发出查询之前, 也就是没有找到目标域名的 ip，必须进行一次查询。在本机的查询次序是什么？
+  
 ## 本文总结
 1. `/etc/nsswitch.conf` 的 `hosts` 配置本机 DNS 服务查询的顺序, 即 `/etc/hosts` 文件等
 2. `systemd-resolved` 就是传说中的 DNS `stub` dns resolver
