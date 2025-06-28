@@ -1,7 +1,7 @@
 ---
 date: '2025-05-29T15:44:41+08:00'
 draft: false
-title: 'Linux Io Model'
+title: 'Linux IO Model'
 ---
 
 > IO 的同步、异步、阻塞、非阻塞取决于相关 syscall 的实现。
@@ -9,7 +9,7 @@ title: 'Linux Io Model'
 ## 用户空间获取数据前提是什么?
 
 1. 数据准备阶段
-   - 内核准备数据，这就引出了问题，内核还没准备好数据，等(sleep)还是不等？
+   - 内核准备数据，这就引出了问题，内核还没准备好数据，等(进程进入 sleep 状态)还是不等？
      - 比如内核 `sock` 的 [sk_receive_queue](https://elixir.bootlin.com/linux/v6.15/source/include/net/sock.h#L252) 没有数据
    - 内核没准备好数据，进程进入 sleep 状态 -> `阻塞 IO`
    - 内核没准备好数据，进程不进入 sleep 状态 -> `非阻塞 IO`
