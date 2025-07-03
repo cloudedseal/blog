@@ -23,7 +23,7 @@ Java thread scheduling is **primarily managed by the operating system (OS) sched
 ### **java 可以影响 Thread 行为**
 While the **`OS scheduler`** has `ultimate authority`, Java applications can **influence thread behavior** through:
 
-#### **Thread Priority**
+#### **1. Thread Priority**
 
 > 设置线程的优先级
 
@@ -31,24 +31,24 @@ While the **`OS scheduler`** has `ultimate authority`, Java applications can **i
   - **Effect**: Higher-priority threads may get more CPU time, but this is **not guaranteed**. OS policies (e.g., Linux's Completely Fair Scheduler) may ignore or reinterpret Java priorities.
   - **Example**: A thread with `Thread.MAX_PRIORITY` might run more frequently than one with `Thread.MIN_PRIORITY`, but the OS decides.
 
-#### **Thread Yielding and Sleeping**
+#### **2. Thread Yielding and Sleeping**
 
 > 放弃 CPU 的控制权/休眠
 
 - `Thread.yield()`: Hints to the OS scheduler that the current thread is willing to yield its CPU time. The scheduler may choose another thread of the same priority to run.
 - `Thread.sleep(long millis)`: Pauses the thread for a specified time, allowing other threads to execute. This indirectly affects scheduling by reducing contention.
 
-#### **Synchronization and Blocking**
+#### **3. Synchronization and Blocking**
 - Synchronized blocks, locks (`synchronized`, `ReentrantLock`), and I/O operations (e.g., file/network I/O) can cause threads to block, triggering context switches managed by the OS.
 - Contention for shared resources (e.g., locks) can lead to thread starvation or deadlocks, which the application must manage.
 
-#### **Thread States and Lifecycle**
+#### **4. Thread States and Lifecycle**
 - Application code controls thread states (e.g., `start()`, `join()`, `interrupt()`). For example:
   - `start()`: start the thread
   - `join()`: Causes one thread to wait for another's completion.
   - `interrupt()`: Signals a thread to stop, which the application must handle (e.g., via `InterruptedException`).
 
-#### **Executor Framework and Thread Pools**
+#### **5. Executor Framework and Thread Pools**
 - High-level concurrency utilities (`java.util.concurrent`) abstract thread management. 
 - Applications can configure thread pools (e.g., `ThreadPoolExecutor`) to control how tasks are scheduled, but the actual execution still depends on the OS scheduler.
 
@@ -62,7 +62,7 @@ While the **`OS scheduler`** has `ultimate authority`, Java applications can **i
 | Blocking/Synchronization | OS (context switches)               | ✅ (`synchronized`, I/O operations)   |
 | Thread Creation/Lifecycle| OS (via JVM)                        | ✅ (`start()`, `join()`, `interrupt()`)|
 
-In short, **the OS scheduler ultimately controls thread execution**, but application code can influence behavior through Java's threading APIs, synchronization, and resource management. For fine-grained control, low-level OS tools or real-time systems are required.
+In short, **the OS scheduler ultimately controls thread execution**, but application code can `influence behavior` through Java's threading APIs, synchronization, and resource management. For fine-grained control, low-level OS tools or real-time systems are required.
 
 
 
@@ -86,7 +86,8 @@ In short, **the OS scheduler ultimately controls thread execution**, but applica
 
 
 ## AQS 和 OS 关系
-The **AbstractQueuedSynchronizer (AQS)** is a foundational class in Java's `java.util.concurrent` package that provides a framework for building **synchronizers** like locks (`ReentrantLock`), barriers (`CyclicBarrier`), latches (`CountDownLatch`), and semaphores (`Semaphore`). While the **OS scheduler** still governs thread execution, AQS introduces mechanisms to **manage thread blocking/waking** and **fairness policies**, which directly influence thread behavior and scheduling.
+The **AbstractQueuedSynchronizer (AQS)** is a foundational class in Java's `java.util.concurrent` package that provides a framework for building **synchronizers** like locks (`ReentrantLock`), barriers (`CyclicBarrier`), latches (`CountDownLatch`), and semaphores (`Semaphore`). 
+While the **OS scheduler** still governs thread execution, AQS introduces mechanisms to **manage thread blocking/waking** and **fairness policies**, which directly `influence` thread behavior and scheduling.
 
 
 
@@ -139,10 +140,11 @@ AQS-based synchronizers (like `ReentrantLock`) are generally more efficient and 
   `LockSupport.park()` and `unpark()` are implemented using OS-specific primitives:
   - On Linux: Uses `futex` (fast userspace mutex).
   - On Windows: Uses `WaitOnAddress` or `Condition Variables`.
-  - These mechanisms allow threads to `sleep/wakeup` efficiently, managed by the OS scheduler.
+  - These mechanisms allow threads to `sleep/wakeup` efficiently, `managed by the OS scheduler`.
 
 - **Context Switching**:  
-  When a thread is parked, the OS scheduler `removes` it from the `runnable queue`. When unparked, it is `re-added` to the queue, triggering a context switch if necessary.
+  When a thread is parked, the OS scheduler `removes` it from the `runnable queue`. 
+  When unparked, it is `re-added` to the queue, triggering a context switch if necessary.
 
 
 ### **Example: `ReentrantLock` and AQS**
@@ -158,7 +160,7 @@ try {
 - If the lock is unavailable, `lock()` calls `AQS.acquire()`, which:
   1. Attempts to acquire the state (e.g., sets `state = 1` for the first lock).
   2. Fails → Adds the thread to the AQS queue.
-  3. Parks the thread (OS scheduler skips it).
+  3. Parks the thread (OS scheduler skips it). 线程放弃 CPU，去休眠
 - When `unlock()` is called:
   1. Releases the state (e.g., sets `state = 0`).
   2. Unparks the next waiting thread in the queue.
@@ -269,7 +271,7 @@ The **core ideas** behind user-space optimizations for Java intrinsic locks (`sy
 
 
 ### **User-Space Lock 优化原则**
-#### 1. **Avoid Kernel Transitions (Fast Paths)** 
+#### 1. **Avoid Kernel Transitions (Fast Paths)** 避免进入内核模式，尽量在用户空间获取锁
    - **Goal**: Reduce or eliminate transitions to the OS kernel (e.g., `futex` waits, mutex operations) for uncontended locks.
    - **How**:
      - Use **atomic instructions** (e.g., Compare-and-Swap, or CAS) in user space for lock acquisition.
@@ -283,14 +285,14 @@ The **core ideas** behind user-space optimizations for Java intrinsic locks (`sy
      - Apply optimizations like **biased locking** or **adaptive spinning** based on runtime data.
    - **Example**: Biased locks are revoked only when contention occurs, saving overhead in single-threaded cases.
 
-#### 3. **Reduce Lock Granularity Overhead**
+#### 3. **Reduce Lock Granularity Overhead** 减小锁的粒度和获取锁的次数
    - **Goal**: Minimize the number of lock operations and their critical sections.
    - **How**:
      - Merge adjacent or closely spaced `synchronized` blocks (**lock coarsening**).
      - Eliminate locks entirely for thread-local objects (**lock elision** via escape analysis).
    - **Trade-off**: Balance between reducing overhead and avoiding overly large critical sections that increase contention.
 
-#### 4. **Exploit Common Concurrency Patterns**
+#### 4. **Exploit Common Concurrency Patterns** 获取锁的条件假设
    - **Goal**: Optimize for typical usage patterns in Java applications.
    - **How**:
      - Assume locks are often **uncontended** (e.g., lightweight locking).
@@ -344,7 +346,7 @@ The **core ideas** behind user-space optimizations for Java intrinsic locks (`sy
    - **Why It Helps**: Avoids the cost of parking/unparking threads for short waits.
 
 
-### **为什么优化会有用?**
+### **userspace 为什么优化会有用?**
 1. **Most Locks Are Uncontended**:
    - Studies show `~90% of locks are uncontended` in real-world applications. `Lightweight locking` and `biased locking` optimize this common case. 锁大多数时候没有竞争
 
