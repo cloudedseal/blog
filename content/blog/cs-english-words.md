@@ -307,6 +307,8 @@ tags: ["words"]
    > To virtualize means to take something of `one form` and make it appear to be `another form`. 这不就是 transformer 🤣
 
 ## w
+1. wait
+   > When you wait for something or someone, you spend some time doing very little, because you `cannot act until` that thing happens or that person arrives 在等待的事情或者人到达之前无法行动，这就是等待
 
 ## x
 
