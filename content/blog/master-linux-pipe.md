@@ -90,23 +90,23 @@ grep -E 'pipe2|clone|dup2|execve' pipe.log
 
 #### 进程 ID
 
-- **Parent Shell (sh)**: PID `27640`
-- **Child 1 (`cat`)**: PID `27641`
-- **Child 2 (`wc`)**: PID `27642`
+- **Parent Shell (sh)**: PID `27640` shell 进程 ID
+- **Child 1 (`cat`)**: PID `27641`   cat 进程 ID
+- **Child 2 (`wc`)**: PID `27642`    wc 进程 ID
 
 
 ### **数据流向**
-1. **Pipe Setup**:
+1. **Pipe Setup (`shell`)**:
    - `pipe2([3,4])` creates a communication channel:
-     - `3`: **Read** end (used by `wc`)
-     - `4`: **Write** end (used by `cat`)
+     - `3`: **Read** end (used by `wc`) read port(读口)
+     - `4`: **Write** end (used by `cat`) write port(写口)
 
 2. **Child 1 (`cat`)**:
-   - `dup2(4, 1)` → Redirects `cat`'s stdout to the pipe.
+   - `dup2(4, 1)` → Redirects `cat`'s stdout to the pipe 写口.
    - `execve("cat", ...)` → `cat` writes `/etc/passwd` to the pipe.
 
 3. **Child 2 (`wc`)**:
-   - `dup2(3, 0)` → Redirects `wc`'s stdin to the pipe.
+   - `dup2(3, 0)` → Redirects `wc`'s stdin to the pipe 读口.
    - `execve("wc", ...)` → `wc` reads from the pipe and counts lines.
 
 4. **Parent Cleanup**:
@@ -254,7 +254,7 @@ And finally, the parent shell exits:
 
 | PID     | Action                                | Description |
 |---------|----------------------------------------|-------------|
-| 27640   | `pipe2([3, 4], 0)`                    | Creates pipe |
+| 27640   | `pipe2([3, 4], 0)`                    | Creates pipe by shell process |
 | 27640   | `clone(...)`                           | Forks first child (PID 27641) |
 | 27640   | `clone(...)`                           | Forks second child (PID 27642) |
 | 27641   | `dup2(4, 1)`                           | Redirects stdout to pipe write end |
