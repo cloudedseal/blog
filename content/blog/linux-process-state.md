@@ -113,7 +113,7 @@ int main() {
 
 
 
-### `execve()` 复位状态机
+### `execve()` 重置状态机
 • Purpose: Replaces the current process's memory space with a new program.
 
 • State Change: The process remains in the `running state` but executes new code.
