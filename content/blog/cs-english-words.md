@@ -231,6 +231,8 @@ tags: ["words"]
     > A portion of something is `a part of` it.
 20. possession
     > If you are in possession of something, you have it, because you `have obtained` it or because it `belongs to` you. 占有
+21. pivot
+    > The pivot in a situation is the most important thing which everything else is `based on` or `arranged around`. 中枢
 
 ## q
 
