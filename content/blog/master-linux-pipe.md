@@ -78,11 +78,6 @@ strace -f -tt -s 1000 -o pipe.log -e trace=pipe2,clone,execve,dup2,close,wait4 s
 
 > By default, all open file descriptors remain open across an execve call unless explicitly marked with the `FD_CLOEXEC` flag.
 
-#### 进程 ID
-
-- **Parent Shell (sh)**: PID `43141` shell 进程 ID
-- **Child 1 (`cat`)**: PID `43142`   cat 进程 ID
-- **Child 2 (`wc`)**: PID `43143`    wc 进程 ID
 
 
 ### **数据流向**
