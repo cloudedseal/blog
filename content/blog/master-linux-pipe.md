@@ -246,14 +246,14 @@ And finally, the parent shell exits:
 
 | PID     | Action                                | Description |
 |---------|----------------------------------------|-------------|
-| 27640   | `pipe2([3, 4], 0)`                    | Creates pipe by shell process |
-| 27640   | `clone(...)`                           | Forks first child (PID 27641) |
-| 27640   | `clone(...)`                           | Forks second child (PID 27642) |
-| 27641   | `dup2(4, 1)`                           | Redirects stdout to pipe write end |
-| 27642   | `dup2(3, 0)`                           | Redirects stdin to pipe read end |
-| 27641   | `execve("cat", ...)`                   | Replaces child with `cat` |
-| 27642   | `execve("wc", ...)`                    | Replaces child with `wc -l` |
-| 27640   | `wait4()`                               | Waits for both children to finish |
+| 43141   | `pipe2([3, 4], 0)`                    | Creates pipe by shell process |
+| 43141   | `clone(...)`                           | Forks first child (PID 27641) |
+| 43141   | `clone(...)`                           | Forks second child (PID 27642) |
+| 43142   | `dup2(4, 1)`                           | Redirects stdout to pipe write end |
+| 43143   | `dup2(3, 0)`                           | Redirects stdin to pipe read end |
+| 43142   | `execve("cat", ...)`                   | Replaces child with `cat` |
+| 43143   | `execve("wc", ...)`                    | Replaces child with `wc -l` |
+| 43141   | `wait4()`                               | Waits for both children to finish |
 
 
 
