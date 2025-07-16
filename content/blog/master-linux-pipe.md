@@ -31,7 +31,7 @@ strace -f -tt -s 1000 -o pipe.log -e trace=pipe2,clone,execve,dup2,close sh -c '
 27640 13:23:49.446359 close(3)          = 0
 27640 13:23:49.452650 close(3)          = 0
 27640 13:23:49.471471 pipe2([3, 4], 0)  = 0 #sh 准备 pipe[read,write]
-27640 13:23:49.472226 clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x77cc40b30a10) = 27641 # 新创建的进程将执行 cat
+27640 13:23:49.472226 clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x77cc40b30a10) = 27641 # sh 新创建的进程将执行 cat
 27640 13:23:49.474244 close(4)          = 0
 27641 13:23:49.474851 close(3)          = 0
 27641 13:23:49.475308 dup2(4, 1)        = 1 # 将 stdout 指向 pipe 的 write 端
@@ -39,10 +39,10 @@ strace -f -tt -s 1000 -o pipe.log -e trace=pipe2,clone,execve,dup2,close sh -c '
 27641 13:23:49.476204 execve("/usr/bin/cat", ["cat", "/etc/passwd"], 0x6292fba9d0f8 /* 65 vars */ <unfinished ...>
 27640 13:23:49.477420 clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD <unfinished ...>
 27641 13:23:49.477659 <... execve resumed>) = 0
-27640 13:23:49.478608 <... clone resumed>, child_tidptr=0x77cc40b30a10) = 27642 # 新创建的进程将执行 wc
+27640 13:23:49.478608 <... clone resumed>, child_tidptr=0x77cc40b30a10) = 27642 # sh 新创建的进程将执行 wc
 27640 13:23:49.479006 close(3)          = 0
 27640 13:23:49.480741 close(-1 <unfinished ...>
-27642 13:23:49.480811 dup2(3, 0)        = 0 将 stdin 指向 pipe 的 read 端
+27642 13:23:49.480811 dup2(3, 0)        = 0 # 将 stdin 指向 pipe 的 read 端
 27640 13:23:49.481370 <... close resumed>) = -1 EBADF (Bad file descriptor)
 27642 13:23:49.482849 close(3)          = 0
 27642 13:23:49.483297 execve("/usr/bin/wc", ["wc", "-l"], 0x6292fba9d128 /* 65 vars */) = 0
