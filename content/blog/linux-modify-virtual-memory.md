@@ -46,7 +46,7 @@ int main(void)
 
 1. gcc -o loop loop.c
    
-### 使用 dd 修改
+### 使用 dd 修改 /proc/pid/mem
 
 ```bash
 
