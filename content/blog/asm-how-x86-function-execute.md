@@ -105,7 +105,7 @@ swap(int, int):
 
 > When a jump instruction executes (in the last step of the machine cycle), it puts a new address into the PC. Now the fetch at the top of the next machine cycle fetches the instruction at that new address. Instead of executing the instruction that follows the jump instruction in memory, the processor "jumps" to an instruction somewhere else in memory.  
 > jmp 指令把 label 所在的地址, 复制给 pc 寄存器. 这就改变了程序的控制流. 然后程序流程就脱离了原来的执行流. 和 call label 很相似, 对, call 指令作用之一就包括了一个隐式的 jmp label. 
-> 函数调用也就是把控制权交给了被调用者. 但是控制权最后要回到调用函数那里. 只不过 call 指令在函数交出控制权之前还多干了一件事, 就是把此时的 pc 值 push 到了栈里. 
+> call 函数调用也就是把控制权交给了被调用者. 但是控制权最后要回到调用函数那里. 只不过 call 指令在函数交出控制权之前还多干了一件事, 就是把`此时的 pc 值` push 到了栈里. 
 
 # stack management 
 
