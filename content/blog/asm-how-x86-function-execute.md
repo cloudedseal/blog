@@ -283,3 +283,4 @@ movq    %rsp, %rbp ; 新函数的栈基址. 一个新的栈帧 sp 和 bp 指向�
 13. [x86-instruction-list](https://c9x.me/x86/)
 14. [stack-frame-example](https://people.cs.rutgers.edu/~pxk/419/notes/frames.html)
 15. [x64](https://www.crockford.com/x64.html)
+16. [x86-64-abi-20210928.pdf](https://cs61.seas.harvard.edu/site/2022/pdf/x86-64-abi-20210928.pdf)
