@@ -27,3 +27,4 @@ title: 'Linux File Descriptor'
 11. [(source ip, source port, dest ip, dest port) 计算 hash 值](https://elixir.bootlin.com/linux/v6.15/source/net/ipv4/inet_hashtables.c#L32)
 12. [file_operations 实现之 socket_file_ops](https://elixir.bootlin.com/linux/v6.15/source/net/socket.c#L156-L173)
 13. [file_operations 实现之 ext4_file_operations](https://elixir.bootlin.com/linux/v6.15/source/fs/ext4/file.c#L962-L981)
+14. [file_operations 实现之 pipe](https://elixir.bootlin.com/linux/v6.15/source/fs/pipe.c#L1243-L1263)
