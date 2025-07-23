@@ -86,4 +86,5 @@ sudo gdb -p $(pidof loop) -batch -ex "set {char}0x6515df2922a0 = 0x41" -ex "deta
 
 1. [hack-the-virtual-memory-c-strings-proc](https://blog.holbertonschool.com/hack-the-virtual-memory-c-strings-proc/)
 2. [/proc/pid/mem](https://man7.org/linux/man-pages/man5/proc_pid_mem.5.html)
-3. [supportedByQwen](https://chat.qwen.ai/c/71592756-3669-424d-8613-f40a26b7944a)
+3. [modify-virtual-memory](https://jyywiki.cn/OS/2025/lect6.md)
+4. [supportedByQwen](https://chat.qwen.ai/c/71592756-3669-424d-8613-f40a26b7944a)
