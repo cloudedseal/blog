@@ -58,13 +58,13 @@ int main(void)
 echo -ne "\x42" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=1 seek=$((0x5cdeb6ed72a0)) conv=notrunc
 
 # 更改 4 个字节的数据
-echo -ne "\x41\x42\x43\x44" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=4 seek=$((0x5a6be9ed32a0)) conv=notrunc
+echo -ne "\x41\x42\x43\x44" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=4 seek=$((0x5cdeb6ed72a0)) conv=notrunc
 
 # 更改 5 个字节的数据
-echo -ne "\x41\x42\x43\x44\x00" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=5 seek=$((0x5a6be9ed32a0)) conv=notrunc
+echo -ne "\x41\x42\x43\x44\x00" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=5 seek=$((0x5cdeb6ed72a0)) conv=notrunc
 
 
-echo -ne "\x41\x42\x43\x44\x44" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=5 seek=$((0x5a6be9ed32a0)) conv=notrunc
+echo -ne "\x41\x42\x43\x44\x44" | sudo dd of=/proc/$(pidof loop)/mem bs=1 count=5 seek=$((0x5cdeb6ed72a0)) conv=notrunc
 ```
 
 ### 使用 gdb 修改
