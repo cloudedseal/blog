@@ -99,6 +99,8 @@ strace -f -tt -s 1000 -o pipe.log -e trace=pipe2,clone,execve,dup2,close,wait4 s
 
 ### **数据流可视化**
 
+![pipe2](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/pipe2.drawio.svg)
+
 ```
 +-------------------+
 | Parent Shell      |
@@ -227,6 +229,21 @@ Both child processes exit cleanly:
 43142 11:44:13.290401 +++ exited with 0 +++
 
 43143 11:44:13.309383 +++ exited with 0 +++
+```
+
+And finally, the parent shell exits:
+
+```c
+43141 11:44:13.318626 +++ exited with 0 +++
+```
+
+### ✅ Step 7: shell wait subProcess Exit
+
+
+```c
+43141 11:44:13.290534 <... wait4 resumed>[{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 43142 #cat
+
+43141 11:44:13.311084 <... wait4 resumed>[{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 43143 #wc
 ```
 
 And finally, the parent shell exits:
