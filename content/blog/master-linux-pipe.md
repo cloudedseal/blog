@@ -193,6 +193,17 @@ strace -f -tt -s 1000 -o pipe.log -e trace=pipe2,clone,execve,dup2,close,wait4 s
 
 ### ✅ Step 4: Executing Commands
 
+#### execve() 到底做了什么?
+execve() replaces the current process with a new program:
+It replaces the process's code, data, heap, and stack.
+
+But it preserves :
+- Open file descriptors (unless FD_CLOEXEC is set). 子进程提前重定向 fd，execve 后并不失效
+- Signal handlers (unless changed in the new program).
+- Current working directory.
+- Umask.
+- User/group IDs, etc.
+
 #### `cat` Process (PID `43142`)
 ```c
 27641 13:23:49.476204 execve("/usr/bin/cat", ["cat", "/etc/passwd"], ...) = 0
