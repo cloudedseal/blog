@@ -101,6 +101,8 @@ strace -f -tt -s 1000 -o pipe.log -e trace=pipe2,clone,execve,dup2,close,wait4 s
 
 ![pipe2](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/pipe2.drawio.svg)
 
+
+### **syscalls 可视化**
 ```
 +-------------------+
 | Parent Shell      |
