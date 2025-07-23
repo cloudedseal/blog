@@ -6,7 +6,7 @@ title: 'Linux File Descriptor'
 
 ## fd 一个编号,一个指针
 
-指向文件 -> private_data 指向具体的文件
+指向文件 -> private_data 指向具体的文件, OS 内部对象
 
 
 
