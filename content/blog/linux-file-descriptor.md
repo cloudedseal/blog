@@ -8,6 +8,8 @@ title: 'Linux File Descriptor'
 
 指向文件 -> private_data 指向具体的文件, OS 内部对象
 
+1. 最适合字节流，何为字节流，写进去就写进去了，读出来后就再也无法重新读出了。
+
 
 
 
