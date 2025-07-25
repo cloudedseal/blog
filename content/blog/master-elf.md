@@ -4,6 +4,8 @@ date: 2025-04-28T15:29:57+08:00
 draft: false
 ---
 
+> elf 描述进程的初始状态
+
 ## hello world
 
 ```c
