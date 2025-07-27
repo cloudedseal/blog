@@ -20,6 +20,10 @@ title: 'Master Elf Sections Dynamic Link'
 | **`.fini_array`**   | `FINI_ARRAY`   | Array of destructor functions (marked with `__attribute__((destructor))`).   | `readelf -s demo`                      |
 | **`.interp`**       | `PROGBITS`     | Path to the dynamic linker (e.g., `/lib64/ld-linux-x86-64.so.2`).           | `readelf -p .interp demo`               |
 
+## interp /lib64/ld-linux-x86-64.so.2
+
+> 动态链接程序的入口
+
 ## symbol table 符号表分析
 
 The `objdump -t demo` command displays the **symbol table** of the ELF executable `demo`. This table lists `all symbols` (functions, variables, sections, etc.) defined or referenced in the binary. 
