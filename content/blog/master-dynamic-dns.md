@@ -2,6 +2,7 @@
 date: '2025-07-30T17:07:23+08:00'
 draft: false
 title: 'Master Dynamic Dns'
+tags: ["dns", "nsupdate"]
 ---
 
 ## 重要概念
