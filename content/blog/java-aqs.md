@@ -59,7 +59,7 @@ draft: false
 
 # RentrantLock.lock 整体概览
 
-[RentrantLock.lock 流程概览](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/CAS_acquire.png)
+![RentrantLock.lock 流程概览](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/CAS_acquire.png)
 
 ## FairSync.lock 分析
 
