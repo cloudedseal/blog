@@ -129,18 +129,17 @@ draft: false
                 return node; // 返回包装申请锁的线程的 Node 节点
             }
         }
-        enq(node); // 说明队列为空
+        enq(node); // 说明队列为空, enq 返回 node 的前驱节点
         return node; // 返回包装申请锁的线程的 Node 节点
     }
 ```
 
-##### enq 返回 node 的前驱节点
 
 #### addWaiter 图示
 
 > 链表，还是画一画图，理解的更好
 
-![addWaiter-图示](https://raw.githubusercontent.com/c lou de d/pictures/main/img/AQS-addWaiter.drawio.svg)
+![addWaiter-图示](https://raw.githubusercontent.com/clouded/pictures/main/img/AQS-addWaiter.drawio.svg)
 
 1. tail == null, 等待队列里一个等待的线程 Node 也没有
    - enq 入队, 创建一个 Node 节点,作为 head, 再添加要获取锁的节点
