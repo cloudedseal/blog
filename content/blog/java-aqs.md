@@ -9,6 +9,11 @@ draft: false
 > AQS is an abstract class that provides a skeleton for `managing thread contention`, `queuing`, and `state synchronization`.
 > It uses a `FIFO wait(sync) queue` to manage threads waiting for access to a shared resource and an `atomic integer (state)` to track the synchronizer's status (e.g., locked/unlocked, available permits).
 
+1. lock
+2. wait queue 不包括伪头，为啥需要？因为被唤醒的节点是前一个节点唤醒的。
+3. LockSupport#park 等待
+4. LockSupport#unpark 唤醒
+
 # AQS 数据结构
 
 ```java
