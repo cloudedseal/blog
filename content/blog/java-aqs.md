@@ -139,7 +139,7 @@ draft: false
 
 > 链表，还是画一画图，理解的更好
 
-![addWaiter-图示](https://raw.githubusercontent.com/clouded/pictures/main/img/AQS-addWaiter.drawio.svg)
+![addWaiter-图示](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/AQS-addWaiter.drawio.svg)
 
 1. tail == null, 等待队列里一个等待的线程 Node 也没有
    - enq 入队, 创建一个 Node 节点,作为 head, 再添加要获取锁的节点
