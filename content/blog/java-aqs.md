@@ -54,13 +54,13 @@ draft: false
 
 # RentrantLock.lock 整体概览
 
-[RentrantLock.lock 流程概览](https://raw.githubusercontent.com/buybyte/pictures/main/img/CAS_acquire.png)
+[RentrantLock.lock 流程概览](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/CAS_acquire.png)
 
 ## FairSync.lock 分析
 
 ### acquire(1) 分析
 
-```java
+```java {hl_lines=[2,3],linenostart=1,filename="AbstractQueuedSynchronizer.java"}
     public final void acquire(int arg) {
         if (!tryAcquire(arg) &&
             acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
@@ -68,13 +68,13 @@ draft: false
     }
 ```
 
-1. `tryAcquire` 若返回为 true, 表明获取 lock 成功, !tryAcquire 为 false, 获取 lock 流程结束。
+1. `tryAcquire` 若返回为 true, 表明获取 lock 成功, 这就是 Fast Path。!tryAcquire 为 false, 获取 lock 流程结束。
 2. `tryAcquire` 若返回为 false, 表明获取 lock 失败, 为啥失败, 因为有其他线程获取了, 但是还没有释放。
    1. 流程进入 `addWaiter`, 也就是当前线程去排队等待获取 lock。
 
 ### tryAcquire 分析
 
-```java {hl_lines=[17,19],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
+```java {hl_lines=[17,19],linenostart=1,filename="ReentrantLock.java"}
 
         /**
          * Fair version of tryAcquire.  Don't grant access unless
@@ -105,7 +105,7 @@ draft: false
 
 > 线程获取锁失败, 到阻塞队列去排队。这里是 addWaiter(null, 1)
 
-```java
+```java{hl_lines=[12,19],linenostart=1,filename="ReentrantLock.java"}
 
     /**
      * Creates and enqueues node for current thread and given mode.
@@ -135,7 +135,7 @@ draft: false
 
 > 链表，还是画一画图，理解的更好
 
-![addWaiter-图示](https://raw.githubusercontent.com/buybyte/pictures/main/img/AQS-addWaiter.drawio.svg)
+![addWaiter-图示](https://raw.githubusercontent.com/c lou de d/pictures/main/img/AQS-addWaiter.drawio.svg)
 
 1. tail == null, 等待队列里一个等待的线程 Node 也没有
    - enq 入队, 创建一个 Node 节点,作为 head, 再添加要获取锁的节点
@@ -144,7 +144,7 @@ draft: false
 
 ### acquireQueued 分析
 
-```java{hl_lines=[11,16,19],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
+```java{hl_lines=[11,16,19,22,23],linenostart=1,filename="AbstractQueuedSynchronizer.java"}
 
     /**
      * Acquires in exclusive uninterruptible mode for thread already in
@@ -160,14 +160,14 @@ draft: false
             boolean interrupted = false;
             for (;;) { // 注意是循环
                 final Node p = node.predecessor();
-                if (p == head && tryAcquire(arg)) { // 是等待队列的第一个 && tryAcquire , true 表明获取了锁
-                    setHead(node); // 设置成 head, 旧的 head 出队
+                if (p == head && tryAcquire(arg)) { // 【是等待队列的第一个 && tryAcquire】 , true 表明获取了锁
+                    setHead(node); // 本节点设置成 head, 旧的 head 出队
                     p.next = null; // help GC
                     failed = false;
                     return interrupted;
                 }
                 if (shouldParkAfterFailedAcquire(p, node) && // 锁已被其他线程获取, 会走到这里
-                    parkAndCheckInterrupt())
+                    parkAndCheckInterrupt()) // 停止运行，去 sleep
                     interrupted = true;
             }
         } finally {
@@ -182,9 +182,15 @@ draft: false
 1. 当前节点是等待队列第一个 && tryAcquire 成功获取了锁
 2. tryAcquire 抛出了 Error, finally 的 failed 逻辑会执行 cancelAcquire 
 
-##### acquireQueued 两轮循环分析
+##### acquireQueued 线程进入 sleep，两轮循环分析
 
-![acquireQueued 两轮分析](https://raw.githubusercontent.com/buybyte/pictures/main/img/AQS-acquireQueuedPark.drawio.svg)
+![acquireQueued 两轮分析](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/AQS-acquireQueuedPark.drawio.svg)
+
+1. 第 1 轮 for 循环
+   - pred 的 waitStatus = 0, 此时 `shouldParkAfterFailedAcquire` 将 pred 节点的 waitStatus 设置为 -1(Signal) 代表 pred 节点需要唤醒该节点。返回 false 进入第二轮循环。
+2. 第 2 轮 for 循环
+   - pred 的 waitStatus = -1, `shouldParkAfterFailedAcquire` 返回 true。
+   - `parkAndCheckInterrupt` 中调用 `LockSupport.park` 当前线程，停止在此处。获取不到锁，那就去 sleep。
 
 ##### cancelAcquire 分析
 
@@ -309,7 +315,7 @@ if (pred != head &&
 
 > 线程状态进入 waiting 的重要逻辑
 
-```java {hl_lines=[8],linenostart=1,filename="AbstractOwnableSynchronizer.java"}
+```java {hl_lines=[8],linenostart=1,filename="AbstractQueuedSynchronizer.java"}
 
     /**
      * Convenience method to park and then check if interrupted
@@ -326,7 +332,7 @@ if (pred != head &&
 
 ### release 分析
 
-```java
+```java{hl_lines=[15,16],linenostart=1,filename="AbstractQueuedSynchronizer.java"}
 
     /**
      * Releases in exclusive mode.  Implemented by unblocking one or
@@ -401,12 +407,12 @@ if (pred != head &&
                     s = t;
         }
         if (s != null)
-            LockSupport.unpark(s.thread); // 唤醒这个线程
+            LockSupport.unpark(s.thread); // 唤醒这个线程,该线程在 park 处返回，接着执行。
     }
 
 ```
 
-![acquireQueued 被 unpark 唤醒的线程继续执行的逻辑](https://raw.githubusercontent.com/buybyte/pictures/main/img/AQS-acquireQueuedUnpark.drawio.svg)
+![acquireQueued 被 unpark 唤醒的线程继续执行的逻辑](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/AQS-acquireQueuedUnpark.drawio.svg)
 
 
 
