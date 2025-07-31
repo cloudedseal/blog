@@ -186,7 +186,7 @@ draft: false
 1. 当前节点是等待队列第一个 && tryAcquire 成功获取了锁
 2. tryAcquire 抛出了 Error, finally 的 failed 逻辑会执行 cancelAcquire 
 
-##### acquireQueued 线程进入 sleep，两轮循环分析
+##### acquireQueued 两轮循环线程进入 sleep 分析
 
 ![acquireQueued 两轮分析](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/AQS-acquireQueuedPark.drawio.svg)
 
