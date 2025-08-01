@@ -160,11 +160,8 @@ tags: ["dns", "nsupdate"]
 /var/named/named.loopback  
 /var/named/slaves
 
-1. /var/named/named.ca    13 个 rootnameserver 的信息 
-
-
-
-### /var/named/named.ca
+  
+### /var/named/named.ca 13 个 rootnameserver 的 IP 等信息 
 ```bash
 ; <<>> DiG 9.11.3-RedHat-9.11.3-3.fc27 <<>> +bufsize=1200 +norec @a.root-servers.net
 ; (2 servers found)
