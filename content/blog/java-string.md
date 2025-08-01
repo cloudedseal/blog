@@ -20,7 +20,7 @@ javac -encoding <encoding>       Specify character encoding used by source files
 
 常量字符串比如 `emoji` String s = "🤣" 使用的是 [modified UTF-8](https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4.7)
 
-### java 字符串内部表示
+### java 进程字符串内部表示
 
 所有 String 对象、常量字符串内部存储使用的是 `UTF-16`
 
