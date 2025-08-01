@@ -214,6 +214,8 @@ draft: false
 
 ##### acquireQueued 两轮循环线程进入 sleep 分析
 
+> 第一个等待节点添加时需要两轮 for 循环
+
 ![acquireQueued 两轮分析](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/AQS-acquireQueuedPark.drawio.svg)
 
 1. 第 1 轮 for 循环
