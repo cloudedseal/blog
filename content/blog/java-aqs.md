@@ -73,8 +73,8 @@ draft: false
     }
 ```
 
-1. `tryAcquire` 若返回为 true, 表明获取 lock 成功, 这就是 Fast Path。!tryAcquire 为 false, 获取 lock 流程结束。
-2. `tryAcquire` 若返回为 false, 表明获取 lock 失败, 为啥失败, 因为有其他线程获取了, 但是还没有释放。
+1. `tryAcquire` 若返回为 true, 表明获取 lock 成功, !tryAcquire 为 false, 获取 lock 流程结束。这就是 **Fast Path**。
+2. `tryAcquire` 若返回为 false, 表明获取 lock 失败, 为啥失败, 因为有其他线程获取了, 但是还没有释放。这就是 **Slow Path**。
    1. 流程进入 `addWaiter`, 也就是当前线程去排队等待获取 lock。
 
 ### tryAcquire 分析
@@ -122,15 +122,41 @@ draft: false
         Node node = new Node(Thread.currentThread(), mode);
         // Try the fast path of enq; backup to full enq on failure
         Node pred = tail;
-        if (pred != null) { // 说明队列不空
+        if (pred != null) { // 说明队列不空,直接加到队尾
             node.prev = pred; // 设置 node 前驱
-            if (compareAndSetTail(pred, node)) { // AQS 设置新的 tail
+            if (compareAndSetTail(pred, node)) { // AQS 设置该节点为新的 tail
                 pred.next = node; // 设置 pred 后继
                 return node; // 返回包装申请锁的线程的 Node 节点
             }
         }
         enq(node); // 说明队列为空, enq 返回 node 的前驱节点
         return node; // 返回包装申请锁的线程的 Node 节点
+    }
+```
+
+#### enq 入队分析
+
+```java{hl_lines=[10,15],linenostart=1,filename="AbstractQueuedSynchronizer.java"}
+
+    /**
+     * Inserts node into queue, initializing if necessary. See picture above.
+     * @param node the node to insert
+     * @return node's predecessor
+     */
+    private Node enq(final Node node) {
+        for (;;) {
+            Node t = tail;
+            if (t == null) { // Must initialize 队尾为空，说明等待队列一个节点都没有
+                if (compareAndSetHead(new Node())) // 设置等待队列伪队头，其实就是为了给需要唤醒的节点准备前置节点。
+                    tail = head; // 设置队尾
+            } else {
+                node.prev = t; // 设置该节点的前置节点
+                if (compareAndSetTail(t, node)) { // 该节点设置成队尾
+                    t.next = node;
+                    return t;
+                }
+            }
+        }
     }
 ```
 
@@ -184,7 +210,7 @@ draft: false
 ##### acquireQueued for 循环退出两种情况
 
 1. 当前节点是等待队列第一个 && tryAcquire 成功获取了锁
-2. tryAcquire 抛出了 Error, finally 的 failed 逻辑会执行 cancelAcquire 
+2. tryAcquire 抛出了 Error(超出了锁的最大可重入次数😂), finally 的 failed 逻辑会执行 cancelAcquire 
 
 ##### acquireQueued 两轮循环线程进入 sleep 分析
 
@@ -194,7 +220,7 @@ draft: false
    - pred 的 waitStatus = 0, 此时 `shouldParkAfterFailedAcquire` 将 pred 节点的 waitStatus 设置为 -1(Signal) 代表 pred 节点需要唤醒该节点。返回 false 进入第二轮循环。
 2. 第 2 轮 for 循环
    - pred 的 waitStatus = -1, `shouldParkAfterFailedAcquire` 返回 true。
-   - `parkAndCheckInterrupt` 中调用 `LockSupport.park` 当前线程，停止在此处。获取不到锁，那就去 sleep。
+   - `parkAndCheckInterrupt` 中调用 `LockSupport.park` 当前线程，**停止在此处**。获取不到锁，那就去 sleep。
 
 ##### cancelAcquire 分析
 
@@ -317,7 +343,7 @@ if (pred != head &&
 
 #### parkAndCheckInterrupt 分析
 
-> 线程状态进入 waiting 的重要逻辑
+> 线程状态进入 **waiting** 的重要逻辑
 
 ```java {hl_lines=[8],linenostart=1,filename="AbstractQueuedSynchronizer.java"}
 
@@ -394,7 +420,7 @@ if (pred != head &&
          * fails or if status is changed by waiting thread.
          */
         int ws = node.waitStatus;
-        if (ws < 0)
+        if (ws < 0) // Signal = -1
             compareAndSetWaitStatus(node, ws, 0);
 
         /*
