@@ -8,3 +8,4 @@ comment: false
 ---
 
 > The pain you feel when you write is actually the pain of clarifying your thinking.(David Perell)
+> 你说你懂得挺多，不落实成文字，谁知道？
