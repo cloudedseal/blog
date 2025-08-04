@@ -439,7 +439,7 @@ if (pred != head &&
                     s = t;
         }
         if (s != null)
-            LockSupport.unpark(s.thread); // 唤醒这个线程,该线程在 park 处返回，接着执行。
+            LockSupport.unpark(s.thread); // 唤醒这个线程,该线程在 park 处返回，接着执行 acquireQueued 的 for 循环，去获取锁。
     }
 
 ```
