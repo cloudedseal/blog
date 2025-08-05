@@ -10,6 +10,9 @@ title: 'Linux File Descriptor'
 
 1. 最适合字节流，何为字节流，写进去就写进去了，读出来后就再也无法重新读出了。
 
+## 什么是文件？
+实现了 [file_operations](https://elixir.bootlin.com/linux/v6.15/source/include/linux/fs.h#L2129-L2172) 的就是文件
+
 
 
 
