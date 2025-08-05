@@ -16,18 +16,19 @@ raw text --->tokenization ---> token
 https://tiktokenizer.vercel.app/?model=cl100k_base
 
 ## statistic token simulator
-这就是所谓的 prediction
-参数 各个 token 的权重
-模型有大量的知识，存储在上亿的参数之中。这些参数可以视为对超大规模的知识进行的一种有损压缩。超大规模知识的模糊记忆。
-按照统计规律给出所谓的答案
-模型需要中间结果
-概率、统计
-in-context learning
+
+1. 这就是所谓的 prediction
+2. 参数 各个 token 的权重
+3. 模型有大量的知识，存储在上亿的参数之中。这些参数可以视为对超大规模的知识进行的一种有损压缩。超大规模知识的模糊记忆。
+4. 按照统计规律给出所谓的答案
+5. 模型需要中间结果
+6. 概率、统计
+7. in-context learning
 
 # post-training
 
 对话集结构 ---> 一维 token 序列
-![conversation-structure-to-token-sequence](https://raw.githubusercontent.com/buybyte/pictures/main/img/conversation-structure-to-token-sequence.png)
+![conversation-structure-to-token-sequence](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/conversation-structure-to-token-sequence.png)
 
 instruct-gpt
 
