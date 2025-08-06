@@ -22,8 +22,8 @@ draft: false
 4. totalTasks = 30
 5. 提交的任务执行时间较长，也就是提交后相当于占用这个线程。
 
-![threads-tasks-count-visual](![](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/thread-task-number.png))
 
+![threads-tasks-count-visual](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/thread-task-number.png)
 
 ## References
 
