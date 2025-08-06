@@ -18,11 +18,11 @@ draft: false
 
 1. corePoolSize = 4
 2. maxPoolSize = 8
-3. queueCapacity = 10
+3. queueCapacity = 16
 4. totalTasks = 30
 5. 提交的任务执行时间较长，也就是提交后相当于占用这个线程。
 
-![threads-tasks-count-visual](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/threads-tasks-count-visual.png)
+![threads-tasks-count-visual](![](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/thread-task-number.png))
 
 
 ## References
