@@ -14,6 +14,16 @@ draft: false
 
 ![java-线程池参数](https://raw.githubusercontent.com/stardustman/pictures/main/img/java-thread-pool-params.drawio.svg)
 
+## 线程数量和提交任务的关系
+
+1. corePoolSize = 4
+2. maxPoolSize = 8
+3. queueCapacity = 10
+4. totalTasks = 30
+5. 提交的任务执行时间较长，也就是提交后相当于占用这个线程。
+
+![threads-tasks-count-visual](https://raw.githubusercontent.com/cloudedseal/pictures/main/img/threads-tasks-count-visual.png)
+
 
 ## References
 
