@@ -49,7 +49,7 @@ sudo strace -f -o ping.log  -e trace=execve,access,openat,socket,connect,newfsta
    - This file defines the `order of name resolution services` (e.g., `files` for `/etc/hosts`, `dns` for DNS). 
    - 定义了 DNS 解析服务的顺序
 
-#### /etc/nsswitch.conf 内容
+#### 4.1 /etc/nsswitch.conf 内容
 
 ```bash
 # /etc/nsswitch.conf
@@ -79,11 +79,11 @@ netgroup:       nis
 hosts: files mdns4_minimal [NOTFOUND=return] dns myhostname
 ```
 - **Order of resolution-DNS 解析核心逻辑**:
-  1. **`files`**: Check `/etc/hosts` first (static hostname-to-IP mappings).
+  1. **`files`**: Check `/etc/hosts` first (**static** hostname-to-IP mappings). 静态配置
   2. **`mdns4_minimal`**: Use multicast DNS (mDNS) for `.local` names **IPv4-only** (common for local network devices).
      - `[NOTFOUND=return]`: If mDNS returns "not found," stop here and don’t proceed to `dns` or `myhostname`.
-  3. **`dns`**: Use DNS (configured in `/etc/resolv.conf`).
-  4. **`myhostname`**: Resolve the local machine’s hostname to its IP addresses (loopback and network interfaces).
+  3. **`dns`**: Use DNS (configured in `/etc/resolv.conf`). 使用 DNS 
+  4. **`myhostname`**: Resolve the local machine’s hostname to its IP addresses (loopback and network interfaces). 本机 hostname 解析成 IP
 
 - **Implications**:
   - **For regular domains (e.g., `baidu.com`)**: mDNS is skipped (since it’s not `.local`), so DNS is used directly.
@@ -120,15 +120,15 @@ netgroup: nis
 - For `baidu.com` (non-`.local` domain):
   1. Check `/etc/hosts` → No match.
   2. Skip `mdns4_minimal` (not relevant for `baidu.com`).
-  3. Query DNS via `systemd-resolved` (uses `/etc/resolv.conf`).
+  3. Query DNS via `systemd-resolved` (uses `/etc/resolv.conf`). 这就是本机的 **stub dns resolver**
   4. Fallback to `myhostname` only if DNS fails (unlikely).
 
 ##### 2. **`/etc/resolv.conf` Integration**
 - The `dns` source uses settings from `/etc/resolv.conf` (e.g., `nameserver 127.0.0.53` for `systemd-resolved`).
 - `systemd-resolved` acts as a local DNS stub resolver, handling:
-  - DNSSEC validation.
-  - Caching.
-  - Split DNS (for VPNs).
+  - `DNSSEC` validation.
+  - `Caching`.
+  - `Split` DNS (for VPNs).
   
 ---
 
@@ -139,7 +139,7 @@ netgroup: nis
    ```
    - The system checks `/etc/hosts` for a static entry for `baidu.com`. 
    - If found, it skips DNS. No match is found here.
-   - 在这个文件里寻找目标域名的 IP, 找到之后返回
+   - 在这个文件里寻找目标域名的 IP, 找到之后返回。停止查询。
 
 ### 5. **Read `/etc/resolv.conf`**
 
@@ -149,10 +149,10 @@ openat(AT_FDCWD, "/etc/resolv.conf", O_RDONLY|O_CLOEXEC) = 5
 
 > 读取 DNS 解析器配置文件, 真正的配置在 /run/systemd/resolve/stub-resolv.conf
 
-- dynamic DNS configuration file managed by `systemd-resolved`, the local DNS stub resolver. 
+- dynamic DNS configuration file managed by `systemd-resolved`, the **local DNS stub resolver**. 
 - It serves as the system's **primary DNS resolver** configuration, ensuring applications route DNS queries through systemd-resolved for features like `caching`, `DNSSEC validation`, and `split DNS` (e.g., for VPNs).
 
-#### **`systemd-resolved`** local DNS stub resolver
+#### **`systemd-resolved`** （local DNS stub resolver）
 
 ```bash
 systemctl status systemd-resolved.service
@@ -195,10 +195,10 @@ search localdomain
 
 ##### 1. **`nameserver 127.0.0.53`**
 - **Purpose**: All DNS queries from applications are sent to this **local DNS stub resolver**.
-  - `127.0.0.53` is a special `loopback address` used exclusively by `systemd-resolved`.
+  - `127.0.0.53` is a special `loopback address` used exclusively by `systemd-resolved`. 专用的 IP
   - The resolver listens on this address to handle queries from applications.
 - **Why Not a Public DNS Server?**
-  - Applications `don't communicate directly` with public DNS servers (e.g., `8.8.8.8`). Instead, they send queries to `127.0.0.53`, and `systemd-resolved` forwards them to upstream DNS servers configured elsewhere.
+  - Applications `don't communicate directly` with public DNS servers (e.g., `8.8.8.8`). Instead, they send queries to `127.0.0.53`, and `systemd-resolved` forwards them to upstream DNS servers configured elsewhere. 由 `systemd-resolved` 所谓发起递归查询。
 - **连接测试**
   ```bash
     nc -zv 127.0.0.53 53
@@ -207,7 +207,7 @@ search localdomain
 
 ##### 2. **`options edns0 trust-ad`**
 - **`edns0`**:
-  - Enables **EDNS(0)** (Extension Mechanisms for DNS), allowing larger UDP packets (up to 4096 bytes instead of 512 bytes).
+  - Enables **EDNS(0)** (`Extension Mechanisms` for DNS), allowing larger UDP packets (up to 4096 bytes instead of 512 bytes).
   - Required for DNSSEC and modern DNS features like DNS over TLS (DoT).
 - **`trust-ad`**:
   - Tells the resolver to trust the **AD (Authentic Data)** bit in DNS responses.
@@ -217,12 +217,12 @@ search localdomain
 - **Purpose**: Defines the **search domain** for unqualified hostnames (e.g., resolving `myhost` to `myhost.localdomain`).
 - **Behavior**:
   - If you run `ping myhost`, the resolver will attempt:
-    1. `myhost`
-    2. `myhost.localdomain`
+    1. `myhost` 简名
+    2. `myhost.localdomain` 全名
   - Avoids needing to type full FQDNs (Fully Qualified Domain Names) in local networks.
 
 
-### 6. **Query DNS via `systemd-resolved`**
+### 6. **Query DNS(递归查询) via `systemd-resolved`**
    ```bash
    socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
    connect(5, {sa_family=AF_INET, sin_port=htons(53), sin_addr=inet_addr("127.0.0.53")}, 16) = 0
@@ -234,7 +234,7 @@ search localdomain
      - **AAAA record query** (IPv6 address) for `baidu.com`.
 
 
-#### **upstream DNS servers** 上游的 DNS 服务器
+#### **upstream DNS servers** 上游的 DNS 服务器(迭代查询)
 
 > upstream DNS servers is external DNS servers that local DNS resolver `forwards` queries to for resolution
 
@@ -263,10 +263,11 @@ Current DNS Server: 172.16.222.2
 
 
 ### 7. **Receive DNS Responses**
-   ```bash
+
+```bash
    recvfrom(5, "\266L\201\200\0\1\0\2\0\0\0\1\5baidu\3com\0\0\1\0\1\300\f\0\1\0...", 2048, 0, ...) = 70
    recvfrom(5, "\261e\201\200\0\1\0\0\0\1\0\1\5baidu\3com\0\0\34\0\1\300\f\0\6\0...", 65536, 0, ...) = 81
-   ```
+```
    - The DNS resolver returns:
      - **A record**: `39.156.66.10` (IPv4 address for `baidu.com`).
      - **AAAA record**: `2400:cb00:2048:1::681b:8093` (IPv6 address, but not shown in `strace` output).
@@ -286,7 +287,7 @@ Current DNS Server: 172.16.222.2
 2. **`/etc/resolv.conf`**:
    - Specifies DNS servers (e.g., `127.0.0.53` for `systemd-resolved`).
 3. **`systemd-resolved`**:
-   - A local DNS stub resolver that handles queries and caches results.
+   - A local DNS `stub` resolver that handles queries and caches results.
 4. **`/etc/hosts`**:
    - Static hostname-to-IP mappings (bypasses DNS if a match exists).
 
