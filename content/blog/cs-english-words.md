@@ -277,6 +277,8 @@ tags: ["words"]
    > 磁盘的调度算法之 elevator(SCAN/C-SCAN) 从最内部向最外部(反之亦可)的磁道扫描
 12. scatter
     > If you scatter things over an area, you throw or drop them so that they spread all over the area.
+13. submission
+    > The submission of a proposal, report, or other document is the act of formally sending it to `someone`, so that they can consider it or decide about it. 提交
 
 ## t
 
