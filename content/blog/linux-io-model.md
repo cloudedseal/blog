@@ -135,7 +135,9 @@ Async I/O doesn't *remove* waiting; it **relocates who bears the cost of waiting
 ### Asynchronous I/O
 
 > The I/O operation is initiated, and the process continues. The kernel sends a signal when the entire I/O operation is completed.
-> Async I/O = `Decoupling` request submission from result processing, where the duration of thread occupancy is minimized to the time required to handle the result—not the time required for the physical I/O operation.  发起请求
+
+
+> Async I/O = `Decoupling` request submission from result processing, where the duration of thread occupancy is minimized to the time required to handle the result—not the time required for the physical I/O operation.  发起请求, 处理结果
 
 > 异步 io_uring
 
