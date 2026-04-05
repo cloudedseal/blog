@@ -15,7 +15,7 @@ raw text --->tokenization ---> token
 
 https://tiktokenizer.vercel.app/?model=cl100k_base
 
-## statistic token simulator
+## statistic token simulator(预测下一个 token)
 
 1. 这就是所谓的 prediction
 2. 参数 各个 token 的权重
@@ -48,3 +48,4 @@ supervised-fine-tuning
 4. [https://hyperbolic.xyz/](https://hyperbolic.xyz/)
 5. [对话数据集](https://atlas.nomic.ai/map/0ce65783-c3a9-40b5-895d-384933f50081/a7b46301-022f-45d8-bbf4-98107eabdbac)
 6. [互联网数据集](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1)
+7. [open-ai-tokenizer](https://platform.openai.com/tokenizer)
