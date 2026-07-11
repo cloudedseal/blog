@@ -4,14 +4,14 @@ title: 'Ai Agent Invoke Tool Call Mcp'
 tags: ['AI Agent', 'Tool Invocation', 'MCP']
 ---
 
-# MCP 是什么？
+## MCP 是什么？
 
 一个 `Tool` 的 RPC（远程过程调用）层，用于在 AI Agent 中调用外部工具。
 大模型支持 tool calls 就能发现可以使用的 tools，然后让 AI Agent 调用这些 tools 来完成任务。
 
-# mcp `stdio` 示例
+## mcp `stdio` 示例
 
-## 代码示例
+### 代码示例
 ```js
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
@@ -127,8 +127,8 @@ rl.on('line', (line) => {
 });
 
 ```
-## 保存为 `mcp-readfile-server.js`，并确保文件具有可执行权限。
-## 初始化
+### 保存为 `mcp-readfile-server.js`，并确保文件具有可执行权限。
+### 初始化
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node mcp-readfile-server.mjs | jq .
@@ -148,7 +148,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node mcp-rea
 }
 ```
 
-## 查看工具列表
+### 查看工具列表
 
 ```bash
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | node mcp-readfile-server.mjs | jq
@@ -178,7 +178,7 @@ echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | node mcp-rea
 }
 ```
 
-## 调用 read_file 这个工具
+### 调用 read_file 这个工具
 
 ```bash
 Downloads/mcp echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"read_file","arguments":{"filePath":"/etc/hosts"}}}' | node mcp-readfile-server.mjs | jq
@@ -196,9 +196,9 @@ Downloads/mcp echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"nam
 }
 ```
 
-# mcp `http` 示例
+## mcp `http` 示例
 
-## 代码示例
+### 代码示例
 ```js
 #!/usr/bin/env node
 import { createServer } from 'node:http';
@@ -369,7 +369,7 @@ server.listen(PORT, () => {
 node mcp-readfile-http-server.js
 ```
 
-## 访问 http://localhost:3000/ ，浏览器会显示 SSE 连接建立，并返回 sessionId。
+### 访问 http://localhost:3000/ ，浏览器会显示 SSE 连接建立，并返回 sessionId。
 
 ```bash
 curl -N http://localhost:3000/
@@ -377,7 +377,7 @@ event: endpoint
 data: /message?sessionId=f2d05540-3384-401a-8a34-cd64c1ecbf33
 ```
 
-## 初始化
+### 初始化
 
 ```bash
 curl -X POST "http://localhost:3000/message?sessionId=f2d05540-3384-401a-8a34-cd64c1ecbf33" \
@@ -385,7 +385,7 @@ curl -X POST "http://localhost:3000/message?sessionId=f2d05540-3384-401a-8a34-cd
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | jq
 ```
 
-## 查看工具列表
+### 查看工具列表
 
 ```bash
 curl -X POST "http://localhost:3000/message?sessionId=f2d05540-3384-401a-8a34-cd64c1ecbf33" \
@@ -393,7 +393,7 @@ curl -X POST "http://localhost:3000/message?sessionId=f2d05540-3384-401a-8a34-cd
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | jq
 ```
 
-## 调用 read_file工具
+### 调用 read_file工具
 
 ```bash
 curl -X POST "http://localhost:3000/message?sessionId=f2d05540-3384-401a-8a34-cd64c1ecbf33" \
