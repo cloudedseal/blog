@@ -362,8 +362,8 @@ server.listen(PORT, () => {
 
 ```
 
-## 保存为 `mcp-readfile-http-server.js`，并确保文件具有可执行权限。
-## 启动这个 mcp server
+### 保存为 `mcp-readfile-http-server.js`，并确保文件具有可执行权限。
+### 启动这个 mcp server
 
 ```bash
 node mcp-readfile-http-server.js
