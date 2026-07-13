@@ -55,12 +55,10 @@ const messages = [
   new SystemMessage(`你是一个代码助手，可以使用工具读取文件并解释代码。
 
 工作流程：
-1. 用户要求读取文件时，立即调用 read_file 工具
+1. 用户要求读取文件时，立即调用合适的工具
 2. 等待工具返回文件内容
 3. 基于文件内容进行分析和解释
 
-可用工具：
-- read_file: 读取文件内容（使用此工具来获取文件内容）
 `),
   new HumanMessage('请读取 ./src/tool-file-read.mjs 文件内容并解释代码')
 ];
