@@ -2,6 +2,7 @@
 date: '2026-07-13T10:55:28+08:00'
 draft: false
 title: 'Ai Agent React'
+tags: ['AI Agent', 'ReAct', 'Reasoning + Acting', 'Agent Loop']
 ---
 
 ## Reasoning + Acting (ReAct范式) 是什么？
