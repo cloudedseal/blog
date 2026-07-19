@@ -91,7 +91,7 @@ RAG 的作用：RAG 可以将历史对话也作为一种“检索源”，或者
 
 ## RAG 例子
 
-```js {hl_lines=[70,90,109,115,127],linenostart=1,filename="rag-demo.mjs"}
+```js {hl_lines=[70,90,111,117,129],linenostart=1,filename="rag-demo.mjs"}
 import "dotenv/config";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { Document } from "@langchain/core/documents";
